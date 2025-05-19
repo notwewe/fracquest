@@ -182,10 +182,10 @@ export function LoginForm() {
         {isLoading ? "Loading..." : "Login"}
       </button>
 
-      {/* Register link with viewport-relative styling */}
+      {/* Register link with viewport-relative styling - updated to point to role selection */}
       <div className="text-center transform rotate-3">
         <span className="text-[#323232] font-blaka text-[1.2vw]">Don&apos;t have an account? </span>
-        <Link href="/auth/register" className="text-[#ba4c3c] hover:text-[#a04234] font-blaka text-[1.2vw]">
+        <Link href="/auth/select-role-register" className="text-[#ba4c3c] hover:text-[#a04234] font-blaka text-[1.2vw]">
           Register
         </Link>
       </div>
