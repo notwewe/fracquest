@@ -6,29 +6,17 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
-import { RoleSelector } from "./role-selector"
 
 export function RegisterForm() {
   const router = useRouter()
-  const [step, setStep] = useState(1)
-  const [roleId, setRoleId] = useState<number | null>(null)
   const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("")
   const [classCode, setClassCode] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
-
-  const handleRoleSelect = (selectedRoleId: number) => {
-    setRoleId(selectedRoleId)
-    setStep(2)
-  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,191 +32,176 @@ export function RegisterForm() {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             username,
-            role_id: roleId,
+            role_id: 1, // Default to student role
           },
         },
       })
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
 
       if (data.user) {
-        // Create profile immediately to ensure role is saved
+        // Create profile
         const { error: profileError } = await supabase.from("profiles").upsert({
           id: data.user.id,
           username,
-          role_id: roleId,
+          role_id: 1,
           created_at: new Date().toISOString(),
         })
 
-        if (profileError) {
-          console.error("Error creating profile:", profileError)
-          // Continue with registration even if profile creation fails
-        }
+        if (profileError) console.error("Error creating profile:", profileError)
 
-        // If student, create story progress entry
-        if (roleId === 1) {
-          try {
-            const { error: progressError } = await supabase.from("story_progress").insert({
-              student_id: data.user.id,
-              has_seen_intro: false,
-              last_dialogue_index: 0,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            })
+        // Create story progress for student
+        const { error: progressError } = await supabase.from("story_progress").insert({
+          student_id: data.user.id,
+          has_seen_intro: false,
+          last_dialogue_index: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
 
-            if (progressError) {
-              console.error("Error creating story progress:", progressError)
-              // Continue with registration even if progress creation fails
-            } else {
-              console.log("Story progress created successfully")
-            }
-          } catch (storyError) {
-            console.error("Detailed story progress error:", storyError)
-            // Continue with registration even if progress creation fails
+        if (progressError) console.error("Error creating story progress:", progressError)
+
+        // If class code provided, join class
+        if (classCode.trim()) {
+          const { data: classData, error: classError } = await supabase
+            .from("classes")
+            .select("id")
+            .eq("class_code", classCode.trim())
+            .single()
+
+          if (classError) {
+            console.error("Class lookup error:", classError)
+            setError(`Invalid class code: ${classCode}`)
+            setIsLoading(false)
+            return
           }
-        }
 
-        // If student and class code provided, try to join class
-        if (roleId === 1 && classCode.trim()) {
-          try {
-            // Find the class with this code
-            const { data: classData, error: classError } = await supabase
-              .from("classes")
-              .select("id, name")
-              .eq("class_code", classCode.trim())
-              .single()
-
-            if (classError) {
-              console.error("Class lookup error:", classError)
-              setError(`Invalid class code: ${classCode}. Please check and try again.`)
-              setIsLoading(false)
-              return
-            }
-
-            if (!classData) {
-              setError(`No class found with code: ${classCode}`)
-              setIsLoading(false)
-              return
-            }
-
-            // Join class immediately
+          if (classData) {
             const { error: joinError } = await supabase.from("student_classes").insert({
               student_id: data.user.id,
               class_id: classData.id,
             })
 
-            if (joinError) {
-              console.error("Error joining class:", joinError)
-              // Continue with registration even if class joining fails
-            }
-          } catch (err) {
-            console.error("Error processing class code:", err)
-            // Continue with registration even if class joining fails
+            if (joinError) console.error("Error joining class:", joinError)
           }
         }
 
-        setSuccess("Registration successful! Please check your email to verify your account.")
+        // Redirect to login
         setTimeout(() => {
           router.push("/auth/login")
-        }, 3000)
+        }, 2000)
       }
     } catch (error: any) {
-      setError(error.message || "An error occurred during registration")
+      setError(error.message || "Registration failed")
     } finally {
       setIsLoading(false)
     }
   }
 
-  if (step === 1) {
-    return <RoleSelector onRoleSelect={handleRoleSelect} />
-  }
-
   return (
-    <div className="space-y-4">
+    <div className="relative w-full">
       {error && (
-        <Alert variant="destructive" className="transform -rotate-3 bg-red-200 border-red-500">
-          <AlertDescription className="text-black text-sm sm:text-base">{error}</AlertDescription>
-        </Alert>
+        <div className="absolute -top-12 left-0 right-0 bg-red-200 border border-red-500 text-red-700 px-3 py-2 rounded text-sm">
+          {error}
+        </div>
       )}
 
-      {success && (
-        <Alert className="transform -rotate-3 bg-green-200 border-green-500">
-          <AlertDescription className="text-black text-sm sm:text-base">{success}</AlertDescription>
-        </Alert>
-      )}
+      <form onSubmit={handleRegister} className="relative">
+        {/* Skip the "Register" header as it's already in the background */}
 
-      <form onSubmit={handleRegister} className="space-y-4">
-        <div className="space-y-2">
-          <Input
-            id="username"
-            placeholder="Username"
+        {/* Username input - positioned to overlay the first input box */}
+        <div className="relative mb-[2hv] mt-[70px]">
+          <label
+            htmlFor="username"
+            className="block text-[#323232] font-blaka text-[1.5vw] mb-[0.5vh] transform -rotate-3"
+          >
+            Username
+          </label>
+          <input
+            type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#e3c17d] border-2 border-black rounded-[15px] font-blaka text-black placeholder:text-black focus:outline-none focus:bg-[#e3c17d] focus:text-black transform -rotate-3 text-sm sm:text-base"
+            className="w-full px-[1vw] py-[0.5vh] bg-[#DBC69F] border-[0.2vw] border-black rounded-[1vw] font-blaka text-[1.3vw] text-[#323232] placeholder-black focus:outline-none focus:bg-[#DBC69F] transform -rotate-3 opacity-75"
           />
         </div>
 
-        <div className="space-y-2">
-          <Input
-            id="email"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#e3c17d] border-2 border-black rounded-[15px] font-blaka text-black placeholder:text-black focus:outline-none focus:bg-[#e3c17d] focus:text-black transform -rotate-3 text-sm sm:text-base"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Input
-            id="password"
+        {/* Password input - positioned to overlay the second input box */}
+        <div className="relative mb-[2hv]">
+          <label
+            htmlFor="password"
+            className="block text-[#323232] font-blaka text-[1.5vw] mb-[0.5vh] transform -rotate-3"
+          >
+            Password
+          </label>
+          <input
             type="password"
-            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#e3c17d] border-2 border-black rounded-[15px] font-blaka text-black placeholder:text-black focus:outline-none focus:bg-[#e3c17d] focus:text-black transform -rotate-3 text-sm sm:text-base"
+            className="w-full px-[1vw] py-[0.5vh] bg-[#DBC69F] border-[0.2vw] border-black rounded-[1vw] font-blaka text-[1.3vw] text-[#323232] placeholder-black focus:outline-none focus:bg-[#DBC69F] transform -rotate-3 opacity-75"
           />
         </div>
 
-        {roleId === 1 && (
-          <div className="space-y-2">
-            <Input
-              id="classCode"
-              placeholder="Class Code (Optional)"
-              value={classCode}
-              onChange={(e) => setClassCode(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#e3c17d] border-2 border-black rounded-[15px] font-blaka text-black placeholder:text-black focus:outline-none focus:bg-[#e3c17d] focus:text-black transform -rotate-3 text-sm sm:text-base"
-            />
-          </div>
-        )}
+        {/* Email input - positioned to overlay the third input box */}
+        <div className="relative mb-[2hv]">
+          <label
+            htmlFor="email"
+            className="block text-[#323232] font-blaka text-[1.5vw] mb-[0.5vh] transform -rotate-3"
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-[1vw] py-[0.5vh] bg-[#DBC69F] border-[0.2vw] border-black rounded-[1vw] font-blaka text-[1.3vw] text-[#323232] placeholder-black focus:outline-none focus:bg-[#DBC69F] transform -rotate-3 opacity-75"
+          />
+        </div>
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="w-full py-2 sm:py-3 bg-[#ba4c3c] text-black font-blaka rounded-[15px] transform -rotate-3 hover:bg-[#a03c2c] transition-colors text-sm sm:text-base"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Registering...
-            </>
-          ) : (
-            "Register"
-          )}
-        </Button>
+        {/* Class Code input - positioned to overlay the fourth input box */}
+        <div className="relative mb-[2hv]">
+          <label
+            htmlFor="class_code"
+            className="block text-[#323232] font-blaka text-[1.5vw] mb-[0.5vh] transform -rotate-3"
+          >
+            Class Code (Optional)
+          </label>
+          <input
+            type="text"
+            value={classCode}
+            onChange={(e) => setClassCode(e.target.value)}
+            className="w-full px-[1vw] py-[0.5vh] bg-[#DBC69F] border-[0.2vw] border-black rounded-[1vw] font-blaka text-[1.3vw] text-[#323232] placeholder-black focus:outline-none focus:bg-[#DBC69F] transform -rotate-3 opacity-75"
+          />
+        </div>
+
+        {/* Register button - positioned to overlay the button in the background */}
+        <div className="relative mt-[3vh]">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[#ba4c3c] hover:bg-[#a04234] text-[#f8d78b] font-blaka text-[1.5vw] py-[0.6vh] px-[1vw] rounded-[1vw] transition-colors duration-200 mb-[1.5vh] transform -rotate-3"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin text-[#e8c170]" />
+                <span className="text-[#e8c170]">Registering...</span>
+              </div>
+            ) : (
+              "Register"
+            )}
+          </button>
+        </div>
+
+        {/* Login link - positioned to overlay the login text in the background */}
+        <div className="text-center transform -rotate-3">
+          <span className="text-[#323232] font-blaka text-[1.2vw]">Already have an account? </span>
+          <Link href="/auth/login" className="text-[#ba4c3c] hover:text-[#a04234] font-blaka text-[1.2vw]">
+            Login
+          </Link>
+        </div>
       </form>
-
-      <div className="text-center transform -rotate-3">
-        <span className="text-black font-blaka text-xs sm:text-sm">Already have an account? </span>
-        <Link href="/auth/login" className="text-[#ba4c3c] hover:text-[#a04234] font-blaka text-xs sm:text-sm">
-          Login
-        </Link>
-      </div>
     </div>
   )
 }
