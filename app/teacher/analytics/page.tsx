@@ -8,10 +8,15 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Users, Award, AlertTriangle, BarChart2 } from "lucide-react"
+import { ArrowLeft, Users, BookOpen, Target, BarChart2 } from "lucide-react"
 import {
+  LineChart,
+  Line,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -24,38 +29,25 @@ import {
 } from "recharts"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-export default function ClassAnalyticsPage({ params }: { params: { id: string } }) {
+export default function TeacherAnalyticsPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [classData, setClassData] = useState<any>(null)
-  const [students, setStudents] = useState<any[]>([])
-  const [sections, setSections] = useState<any[]>([])
-  const [waypoints, setWaypoints] = useState<any[]>([])
-  const [progressData, setProgressData] = useState<any[]>([])
-  const [sectionAnalytics, setSectionAnalytics] = useState<any[]>([])
-  const [studentPerformance, setStudentPerformance] = useState<any[]>([])
+  const [classes, setClasses] = useState<any[]>([])
+  const [totalStudents, setTotalStudents] = useState(0)
+  const [completionData, setCompletionData] = useState<any[]>([])
   const [difficultyData, setDifficultyData] = useState<any[]>([])
+  const [progressTrend, setProgressTrend] = useState<any[]>([])
+  const [studentPerformance, setStudentPerformance] = useState<any[]>([])
   const [studentScatterData, setStudentScatterData] = useState<any[]>([])
-  const [overallStats, setOverallStats] = useState({
-    completionRate: 0,
-    averageScore: 0,
-    averageMistakes: 0,
-    averageAttempts: 0,
-  })
+  const [classComparison, setClassComparison] = useState<any[]>([])
   const supabase = createClient()
-  const classId = Number.parseInt(params.id)
 
   const COLORS = ["#f59e0b", "#d97706", "#b45309", "#92400e", "#78350f", "#a16207"]
 
   useEffect(() => {
-    const fetchClassAnalytics = async () => {
+    const fetchAnalyticsData = async () => {
       try {
-        if (isNaN(classId)) {
-          router.push("/teacher/dashboard")
-          return
-        }
-
         // Check if user is authenticated and is a teacher
         const {
           data: { user },
@@ -66,222 +58,227 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
           return
         }
 
-        // Get class details
-        const { data: classDetails, error: classError } = await supabase
-          .from("classes")
-          .select("*")
-          .eq("id", classId)
-          .eq("teacher_id", user.id)
-          .single()
+        const { data: profile } = await supabase.from("profiles").select("role_id").eq("id", user.id).single()
 
-        if (classError || !classDetails) {
-          router.push("/teacher/dashboard")
+        if (!profile || profile.role_id !== 2) {
+          router.push("/auth/login")
           return
         }
 
-        setClassData(classDetails)
+        // Get teacher's classes
+        const { data: classesData } = await supabase.from("classes").select("id, name").eq("teacher_id", user.id)
 
-        // Get students in this class
-        const { data: studentsData, error: studentsError } = await supabase
-          .from("student_classes")
-          .select(`
-            id,
-            student_id,
-            profiles:student_id (
-              id,
-              username
-            )
-          `)
-          .eq("class_id", classId)
+        setClasses(classesData || [])
 
-        if (studentsData) {
-          setStudents(studentsData)
-        }
+        // Get total students across all classes
+        if (classesData && classesData.length > 0) {
+          // Get class IDs
+          const classIds = classesData.map((c) => c.id)
 
-        // Get all game sections
-        const { data: sectionsData } = await supabase.from("game_sections").select("*").order("order_index")
+          // Count students in each class
+          const { data: studentCounts } = await supabase
+            .from("student_classes")
+            .select("student_id, class_id")
+            .in("class_id", classIds)
 
-        if (sectionsData) {
-          setSections(sectionsData)
-        }
+          // Count unique students
+          const uniqueStudents = new Set(studentCounts?.map((s) => s.student_id) || [])
+          setTotalStudents(uniqueStudents.size)
 
-        // Get all waypoints
-        const { data: waypointsData } = await supabase.from("waypoints").select("*").order("order_index")
+          // Create class comparison data
+          const classComparisonData = await Promise.all(
+            classesData.map(async (cls) => {
+              const { data: classStudents } = await supabase
+                .from("student_classes")
+                .select("student_id")
+                .eq("class_id", cls.id)
 
-        if (waypointsData) {
-          setWaypoints(waypointsData)
-        }
+              const studentIds = classStudents?.map((s) => s.student_id) || []
+              const studentCount = studentIds.length
 
-        // Get student progress
-        const studentIds = studentsData?.map((s) => s.student_id) || []
+              // Get progress data for this class
+              let completionRate = 0
+              let avgScore = 0
 
-        if (studentIds.length > 0 && sectionsData && waypointsData) {
-          const { data: progress } = await supabase
-            .from("student_progress")
-            .select(`
-              student_id,
-              waypoint_id,
-              completed,
-              score,
-              mistakes,
-              attempts,
-              updated_at
-            `)
-            .in("student_id", studentIds)
+              if (studentIds.length > 0) {
+                const { data: progress } = await supabase
+                  .from("student_progress")
+                  .select("completed, score")
+                  .in("student_id", studentIds)
 
-          if (progress) {
-            setProgressData(progress)
+                if (progress && progress.length > 0) {
+                  const completed = progress.filter((p) => p.completed).length
+                  const totalScore = progress.reduce((sum, p) => sum + (p.score || 0), 0)
 
-            // Calculate overall stats
-            const totalStudents = studentIds.length
-            const totalPossibleWaypoints = totalStudents * waypointsData.length
-            const completedWaypoints = progress.filter((p) => p.completed).length
+                  // Get waypoints count
+                  const { count: waypointsCount } = await supabase
+                    .from("waypoints")
+                    .select("id", { count: "exact", head: true })
 
-            const overallCompletionRate =
-              totalPossibleWaypoints > 0 ? (completedWaypoints / totalPossibleWaypoints) * 100 : 0
-
-            const totalScore = progress.reduce((sum, p) => sum + (p.score || 0), 0)
-            const totalMistakes = progress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
-            const totalAttempts = progress.reduce((sum, p) => sum + (p.attempts || 0), 0)
-
-            const averageScore = completedWaypoints > 0 ? totalScore / completedWaypoints : 0
-            const averageMistakes = completedWaypoints > 0 ? totalMistakes / completedWaypoints : 0
-            const averageAttempts = completedWaypoints > 0 ? totalAttempts / completedWaypoints : 0
-
-            setOverallStats({
-              completionRate: Math.round(overallCompletionRate * 10) / 10,
-              averageScore: Math.round(averageScore * 10) / 10,
-              averageMistakes: Math.round(averageMistakes * 10) / 10,
-              averageAttempts: Math.round(averageAttempts * 10) / 10,
-            })
-
-            // Calculate section analytics
-            const sectionStats = sectionsData.map((section) => {
-              const sectionWaypoints = waypointsData.filter((w) => w.section_id === section.id)
-              const waypointIds = sectionWaypoints.map((w) => w.id)
-
-              const studentsCompletedSection = new Set()
-              let totalScore = 0
-              let totalMistakes = 0
-              let totalAttempts = 0
-
-              // Track difficulty by waypoint
-              const waypointDifficulty = sectionWaypoints.map((waypoint) => {
-                const waypointProgress = progress.filter((p) => p.waypoint_id === waypoint.id)
-                const completions = waypointProgress.filter((p) => p.completed).length
-                const attempts = waypointProgress.reduce((sum, p) => sum + (p.attempts || 0), 0)
-                const mistakes = waypointProgress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
-
-                return {
-                  id: waypoint.id,
-                  name: waypoint.name,
-                  completionRate: totalStudents > 0 ? (completions / totalStudents) * 100 : 0,
-                  averageMistakes: completions > 0 ? mistakes / completions : 0,
-                  averageAttempts: completions > 0 ? attempts / completions : 0,
-                  difficulty: completions > 0 ? mistakes / completions + attempts / completions : 0,
+                  const totalPossible = studentCount * (waypointsCount || 1)
+                  completionRate = totalPossible > 0 ? (completed / totalPossible) * 100 : 0
+                  avgScore = completed > 0 ? totalScore / completed : 0
                 }
-              })
-
-              // Find the most difficult waypoint
-              const mostDifficult = [...waypointDifficulty]
-                .filter((w) => w.difficulty > 0)
-                .sort((a, b) => b.difficulty - a.difficulty)[0]
-
-              // Calculate section stats
-              progress.forEach((p) => {
-                if (waypointIds.includes(p.waypoint_id) && p.completed) {
-                  studentsCompletedSection.add(p.student_id)
-                  totalScore += p.score || 0
-                  totalMistakes += p.mistakes || 0
-                  totalAttempts += p.attempts || 0
-                }
-              })
+              }
 
               return {
-                id: section.id,
-                name: section.name,
-                completionRate: totalStudents > 0 ? (studentsCompletedSection.size / totalStudents) * 100 : 0,
-                averageScore: studentsCompletedSection.size > 0 ? totalScore / studentsCompletedSection.size : 0,
-                mostDifficultWaypoint: mostDifficult,
-                waypointDifficulty,
+                name: cls.name,
+                students: studentCount,
+                completionRate: Math.round(completionRate),
+                avgScore: Math.round(avgScore),
               }
-            })
+            }),
+          )
 
-            setSectionAnalytics(sectionStats)
+          setClassComparison(classComparisonData)
 
-            // Calculate student performance
-            const studentStats = studentIds
-              .map((studentId) => {
-                const studentProgress = progress.filter((p) => p.student_id === studentId)
-                const completed = studentProgress.filter((p) => p.completed).length
-                const totalScore = studentProgress.reduce((sum, p) => sum + (p.score || 0), 0)
-                const totalMistakes = studentProgress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
-                const totalAttempts = studentProgress.reduce((sum, p) => sum + (p.attempts || 0), 0)
+          if (uniqueStudents.size > 0) {
+            // Get all game sections
+            const { data: sections } = await supabase.from("game_sections").select("id, name").order("order_index")
 
-                const student = studentsData.find((s) => s.student_id === studentId)
+            // Get all waypoints
+            const { data: waypoints } = await supabase
+              .from("waypoints")
+              .select("id, name, section_id")
+              .order("order_index")
 
-                return {
-                  id: studentId,
-                  name: student?.profiles?.username || `Student ${studentId.substring(0, 4)}`,
+            // Get student progress
+            const studentIds = Array.from(uniqueStudents)
+
+            if (studentIds.length > 0 && sections && waypoints) {
+              const { data: progress } = await supabase
+                .from("student_progress")
+                .select(`
+                  student_id,
+                  waypoint_id,
                   completed,
-                  score: totalScore,
-                  mistakes: totalMistakes,
-                  attempts: totalAttempts,
-                  efficiency: totalAttempts > 0 ? Math.round((totalScore / totalAttempts) * 10) / 10 : 0,
-                }
-              })
-              .sort((a, b) => b.score - a.score)
+                  score,
+                  mistakes,
+                  attempts,
+                  updated_at
+                `)
+                .in("student_id", studentIds)
 
-            setStudentPerformance(studentStats)
+              if (progress) {
+                // Calculate completion rates by section
+                const sectionCompletionData = sections.map((section) => {
+                  const sectionWaypoints = waypoints.filter((w) => w.section_id === section.id)
+                  const waypointIds = sectionWaypoints.map((w) => w.id)
 
-            // Create scatter plot data for student performance
-            const scatterData = studentStats.map((student) => ({
-              name: student.name,
-              completed: student.completed,
-              score: student.score,
-              efficiency: student.efficiency,
-            }))
+                  const totalPossible = waypointIds.length * studentIds.length
+                  const completed = progress.filter((p) => waypointIds.includes(p.waypoint_id) && p.completed).length
 
-            setStudentScatterData(scatterData)
+                  const completionRate = totalPossible > 0 ? (completed / totalPossible) * 100 : 0
 
-            // Calculate difficulty data
-            const difficultyByWaypoint = waypointsData
-              .map((waypoint) => {
-                const waypointProgress = progress.filter((p) => p.waypoint_id === waypoint.id && p.completed)
-                const totalAttempts = waypointProgress.reduce((sum, p) => sum + (p.attempts || 0), 0)
-                const totalMistakes = waypointProgress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
+                  return {
+                    name: section.name,
+                    value: Math.round(completionRate),
+                  }
+                })
 
-                const avgAttempts = waypointProgress.length > 0 ? totalAttempts / waypointProgress.length : 0
-                const avgMistakes = waypointProgress.length > 0 ? totalMistakes / waypointProgress.length : 0
+                setCompletionData(sectionCompletionData)
 
-                // Difficulty score is a combination of attempts and mistakes
-                const difficultyScore = avgAttempts + avgMistakes
+                // Calculate difficulty by waypoint
+                const waypointDifficulty = waypoints
+                  .map((waypoint) => {
+                    const waypointProgress = progress.filter((p) => p.waypoint_id === waypoint.id && p.completed)
+                    const totalAttempts = waypointProgress.reduce((sum, p) => sum + (p.attempts || 0), 0)
+                    const totalMistakes = waypointProgress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
 
-                return {
-                  id: waypoint.id,
-                  name: waypoint.name,
-                  section: sectionsData.find((s) => s.id === waypoint.section_id)?.name || "Unknown",
-                  attempts: Math.round(avgAttempts * 10) / 10,
-                  mistakes: Math.round(avgMistakes * 10) / 10,
-                  difficulty: Math.round(difficultyScore * 10) / 10,
-                }
-              })
-              .filter((w) => w.difficulty > 0) // Only include waypoints with actual data
-              .sort((a, b) => b.difficulty - a.difficulty)
+                    const avgAttempts = waypointProgress.length > 0 ? totalAttempts / waypointProgress.length : 0
+                    const avgMistakes = waypointProgress.length > 0 ? totalMistakes / waypointProgress.length : 0
 
-            setDifficultyData(difficultyByWaypoint)
+                    // Difficulty score is a combination of attempts and mistakes
+                    const difficultyScore = avgAttempts + avgMistakes
+
+                    return {
+                      name: waypoint.name,
+                      section: sections.find((s) => s.id === waypoint.section_id)?.name || "Unknown",
+                      attempts: Math.round(avgAttempts * 10) / 10,
+                      mistakes: Math.round(avgMistakes * 10) / 10,
+                      difficulty: Math.round(difficultyScore * 10) / 10,
+                    }
+                  })
+                  .filter((w) => w.difficulty > 0) // Only include waypoints with actual data
+                  .sort((a, b) => b.difficulty - a.difficulty)
+                  .slice(0, 10) // Top 10 most difficult
+
+                setDifficultyData(waypointDifficulty)
+
+                // Generate progress trend data from actual data
+                // Group by day for the last 7 days
+                const last7Days = Array.from({ length: 7 }, (_, i) => {
+                  const date = new Date()
+                  date.setDate(date.getDate() - (6 - i))
+                  return date.toISOString().split("T")[0]
+                })
+
+                const progressByDay = last7Days.map((day) => {
+                  // Filter progress by this day
+                  const dayProgress = progress.filter((p) => {
+                    if (!p.updated_at) return false
+                    const progressDate = new Date(p.updated_at).toISOString().split("T")[0]
+                    return progressDate === day && p.completed
+                  })
+
+                  const totalScore = dayProgress.reduce((sum, p) => sum + (p.score || 0), 0)
+
+                  return {
+                    day: new Date(day).toLocaleDateString("en-US", { weekday: "short" }),
+                    completed: dayProgress.length,
+                    score: totalScore,
+                  }
+                })
+
+                setProgressTrend(progressByDay)
+
+                // Calculate student performance
+                const studentStats = studentIds
+                  .map((studentId) => {
+                    const studentProgress = progress.filter((p) => p.student_id === studentId)
+                    const completed = studentProgress.filter((p) => p.completed).length
+                    const totalScore = studentProgress.reduce((sum, p) => sum + (p.score || 0), 0)
+                    const totalMistakes = studentProgress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
+                    const totalAttempts = studentProgress.reduce((sum, p) => sum + (p.attempts || 0), 0)
+
+                    return {
+                      id: studentId,
+                      name: `Student ${studentId.substring(0, 4)}`, // Anonymized for privacy
+                      completed,
+                      score: totalScore,
+                      mistakes: totalMistakes,
+                      attempts: totalAttempts,
+                      efficiency: totalAttempts > 0 ? Math.round((totalScore / totalAttempts) * 10) / 10 : 0,
+                    }
+                  })
+                  .filter((s) => s.completed > 0) // Only include students with completed waypoints
+                  .sort((a, b) => b.score - a.score)
+
+                setStudentPerformance(studentStats)
+
+                // Create scatter plot data for student performance
+                const scatterData = studentStats.map((student) => ({
+                  name: student.name,
+                  completed: student.completed,
+                  score: student.score,
+                  efficiency: student.efficiency,
+                }))
+
+                setStudentScatterData(scatterData)
+              }
+            }
           }
         }
       } catch (error) {
-        console.error("Error fetching class analytics:", error)
-        setError("Failed to load class analytics. Please try again later.")
+        console.error("Error fetching analytics data:", error)
+        setError("Failed to load analytics data. Please try again later.")
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchClassAnalytics()
-  }, [router, supabase, classId])
+    fetchAnalyticsData()
+  }, [router, supabase])
 
   if (isLoading) {
     return (
@@ -331,61 +328,28 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
     <motion.div className="container mx-auto p-4" variants={container} initial="hidden" animate="show">
       <motion.div variants={item} className="mb-6">
         <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-          <Link href={`/teacher/classes/${classId}`}>
+          <Link href="/teacher/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Class
+            Back to Dashboard
           </Link>
         </Button>
       </motion.div>
 
       <motion.div variants={item}>
         <div className="mb-6">
-          <h1 className="text-3xl font-pixel text-amber-900">{classData.name} Analytics</h1>
-          <p className="text-amber-700 mt-1">Performance data for your class</p>
+          <h1 className="text-3xl font-pixel text-amber-900">Analytics Dashboard</h1>
+          <p className="text-amber-700">Comprehensive view of student performance across all classes</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card className="border-2 border-amber-800 bg-amber-50">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Overall Completion</CardTitle>
+              <CardTitle className="text-lg font-pixel text-amber-900">Classes</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center">
-                <Award className="h-8 w-8 text-amber-600 mr-3" />
-                <div>
-                  <p className="text-3xl font-bold text-amber-700">{overallStats.completionRate}%</p>
-                  <p className="text-xs text-amber-600">of all possible waypoints</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Average Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <BarChart2 className="h-8 w-8 text-amber-600 mr-3" />
-                <div>
-                  <p className="text-3xl font-bold text-amber-700">{overallStats.averageScore}</p>
-                  <p className="text-xs text-amber-600">points per waypoint</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Average Attempts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <AlertTriangle className="h-8 w-8 text-amber-600 mr-3" />
-                <div>
-                  <p className="text-3xl font-bold text-amber-700">{overallStats.averageAttempts}</p>
-                  <p className="text-xs text-amber-600">attempts per waypoint</p>
-                </div>
+                <BookOpen className="h-8 w-8 text-amber-600 mr-3" />
+                <p className="text-3xl font-pixel text-amber-700">{classes.length}</p>
               </div>
             </CardContent>
           </Card>
@@ -397,10 +361,38 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
             <CardContent>
               <div className="flex items-center">
                 <Users className="h-8 w-8 text-amber-600 mr-3" />
-                <div>
-                  <p className="text-3xl font-bold text-amber-700">{students.length}</p>
-                  <p className="text-xs text-amber-600">enrolled in this class</p>
-                </div>
+                <p className="text-3xl font-pixel text-amber-700">{totalStudents}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-amber-800 bg-amber-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-pixel text-amber-900">Avg. Completion</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <Target className="h-8 w-8 text-amber-600 mr-3" />
+                <p className="text-3xl font-pixel text-amber-700">
+                  {completionData.length > 0
+                    ? Math.round(completionData.reduce((sum, item) => sum + item.value, 0) / completionData.length)
+                    : 0}
+                  %
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-amber-800 bg-amber-50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-pixel text-amber-900">Total Waypoints</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <BarChart2 className="h-8 w-8 text-amber-600 mr-3" />
+                <p className="text-3xl font-pixel text-amber-700">
+                  {studentPerformance.reduce((sum, student) => sum + student.completed, 0)}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -408,13 +400,19 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
       </motion.div>
 
       <motion.div variants={item}>
-        <Tabs defaultValue="sections" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-amber-100 border-2 border-amber-300">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-amber-100 border-2 border-amber-300">
             <TabsTrigger
-              value="sections"
+              value="overview"
               className="font-pixel data-[state=active]:bg-amber-600 data-[state=active]:text-white"
             >
-              Sections
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="classes"
+              className="font-pixel data-[state=active]:bg-amber-600 data-[state=active]:text-white"
+            >
+              Classes
             </TabsTrigger>
             <TabsTrigger
               value="students"
@@ -423,28 +421,124 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
               Students
             </TabsTrigger>
             <TabsTrigger
-              value="difficulty"
+              value="content"
               className="font-pixel data-[state=active]:bg-amber-600 data-[state=active]:text-white"
             >
-              Difficulty
+              Content
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sections" className="mt-6">
+          <TabsContent value="overview" className="mt-6">
             <div className="space-y-8">
               <Card className="border-2 border-amber-800 bg-amber-50">
                 <CardHeader>
-                  <CardTitle className="text-xl font-pixel text-amber-900">Section Performance</CardTitle>
+                  <CardTitle className="text-xl font-pixel text-amber-900">Section Completion</CardTitle>
                   <CardDescription className="font-pixel text-amber-700">
-                    How students are progressing through each game section
+                    Completion rates by game section
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-[300px] overflow-x-auto">
-                    {sectionAnalytics.length > 0 ? (
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[300px] min-w-[300px]">
+                    {completionData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={completionData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, value }) => `${name}: ${value}%`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {completionData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value) => [`${value}%`, "Completion Rate"]}
+                            contentStyle={{ backgroundColor: "#fffbeb", borderColor: "#92400e" }}
+                            itemStyle={{ color: "#92400e" }}
+                          />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-amber-700">No completion data available</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 border-amber-800 bg-amber-50">
+                <CardHeader>
+                  <CardTitle className="text-xl font-pixel text-amber-900">Progress Trend</CardTitle>
+                  <CardDescription className="font-pixel text-amber-700">
+                    Completed waypoints and scores over the last week
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[400px] min-w-[600px]">
+                    {progressTrend.length > 0 && progressTrend.some((item) => item.completed > 0) ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={progressTrend} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f3e8d2" />
+                          <XAxis dataKey="day" stroke="#92400e" />
+                          <YAxis yAxisId="left" stroke="#92400e" />
+                          <YAxis yAxisId="right" orientation="right" stroke="#92400e" />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#fffbeb", borderColor: "#92400e" }}
+                            itemStyle={{ color: "#92400e" }}
+                          />
+                          <Legend />
+                          <Line
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="completed"
+                            name="Completed Waypoints"
+                            stroke="#d97706"
+                            strokeWidth={2}
+                            activeDot={{ r: 8 }}
+                          />
+                          <Line
+                            yAxisId="right"
+                            type="monotone"
+                            dataKey="score"
+                            name="Total Score"
+                            stroke="#92400e"
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-amber-700">No progress trend data available</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="classes" className="mt-6">
+            <div className="space-y-8">
+              <Card className="border-2 border-amber-800 bg-amber-50">
+                <CardHeader>
+                  <CardTitle className="text-xl font-pixel text-amber-900">Class Comparison</CardTitle>
+                  <CardDescription className="font-pixel text-amber-700">
+                    Performance metrics across different classes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[400px] min-w-[600px]">
+                    {classComparison.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
-                          data={sectionAnalytics}
+                          data={classComparison}
                           margin={{
                             top: 20,
                             right: 30,
@@ -481,7 +575,7 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                           />
                           <Bar
                             yAxisId="right"
-                            dataKey="averageScore"
+                            dataKey="avgScore"
                             name="Average Score"
                             fill="#d97706"
                             radius={[4, 4, 0, 0]}
@@ -490,7 +584,7 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                       </ResponsiveContainer>
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <p className="text-amber-700">No section data available</p>
+                        <p className="text-amber-700">No class comparison data available</p>
                       </div>
                     )}
                   </div>
@@ -499,35 +593,22 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
 
               <Card className="border-2 border-amber-800 bg-amber-50">
                 <CardHeader>
-                  <CardTitle className="text-xl font-pixel text-amber-900">Section Details</CardTitle>
+                  <CardTitle className="text-xl font-pixel text-amber-900">Class Analytics</CardTitle>
+                  <CardDescription className="font-pixel text-amber-700">
+                    View detailed analytics for each class
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 max-h-[500px] overflow-y-auto">
-                    {sectionAnalytics.map((section) => (
-                      <Card key={section.id} className="border-2 border-amber-300 shadow-md">
+                <CardContent className="max-h-[400px] overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {classes.map((cls) => (
+                      <Card key={cls.id} className="border border-amber-300">
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-lg font-pixel text-amber-900">{section.name}</CardTitle>
-                          <CardDescription className="font-pixel text-amber-700">
-                            {section.completionRate.toFixed(1)}% completion rate
-                          </CardDescription>
+                          <CardTitle className="text-lg font-pixel text-amber-900">{cls.name}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <h4 className="font-medium text-amber-800 mb-1">Average Score</h4>
-                              <p className="text-2xl font-bold text-amber-700">{section.averageScore.toFixed(1)}</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-amber-800 mb-1">Most Challenging Waypoint</h4>
-                              <p className="text-amber-700">{section.mostDifficultWaypoint?.name || "N/A"}</p>
-                              {section.mostDifficultWaypoint && (
-                                <p className="text-sm text-amber-600">
-                                  Avg. {section.mostDifficultWaypoint.averageMistakes.toFixed(1)} mistakes,{" "}
-                                  {section.mostDifficultWaypoint.averageAttempts.toFixed(1)} attempts
-                                </p>
-                              )}
-                            </div>
-                          </div>
+                          <Button asChild className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+                            <Link href={`/teacher/classes/${cls.id}/analytics`}>View Analytics</Link>
+                          </Button>
                         </CardContent>
                       </Card>
                     ))}
@@ -546,8 +627,8 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                     Number of waypoints completed by each student
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-[300px] overflow-x-auto">
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[300px] min-w-[600px]">
                     {studentPerformance.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -587,8 +668,8 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                     Total points earned by each student
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-[300px] overflow-x-auto">
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[300px] min-w-[600px]">
                     {studentPerformance.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
@@ -628,8 +709,8 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                     Relationship between completed waypoints and total score
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-[400px] overflow-x-auto">
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[400px] min-w-[600px]">
                     {studentScatterData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ScatterChart
@@ -688,45 +769,10 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                   </div>
                 </CardContent>
               </Card>
-
-              <Card className="border-2 border-amber-800 bg-amber-50">
-                <CardHeader>
-                  <CardTitle className="text-xl font-pixel text-amber-900">Student Rankings</CardTitle>
-                  <CardDescription className="font-pixel text-amber-700">
-                    Detailed performance metrics for all students
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-md border border-amber-300 overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-amber-100">
-                          <TableHead className="font-pixel">Rank</TableHead>
-                          <TableHead className="font-pixel">Student</TableHead>
-                          <TableHead className="font-pixel text-right">Completed</TableHead>
-                          <TableHead className="font-pixel text-right">Score</TableHead>
-                          <TableHead className="font-pixel text-right">Efficiency</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {studentPerformance.map((student, index) => (
-                          <TableRow key={student.id} className={index % 2 === 0 ? "bg-amber-50" : "bg-amber-100/50"}>
-                            <TableCell className="font-medium">{index + 1}</TableCell>
-                            <TableCell>{student.name}</TableCell>
-                            <TableCell className="text-right">{student.completed}</TableCell>
-                            <TableCell className="text-right">{student.score}</TableCell>
-                            <TableCell className="text-right">{student.efficiency.toFixed(2)}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="difficulty" className="mt-6">
+          <TabsContent value="content" className="mt-6">
             <div className="space-y-8">
               <Card className="border-2 border-amber-800 bg-amber-50">
                 <CardHeader>
@@ -735,8 +781,8 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                     Waypoints with highest difficulty scores
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-[400px] overflow-x-auto">
+                <CardContent className="overflow-x-auto">
+                  <div className="h-[400px] min-w-[600px]">
                     {difficultyData.length > 0 ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart
