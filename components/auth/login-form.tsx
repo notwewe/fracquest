@@ -54,10 +54,15 @@ export function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent multiple submissions
+    if (isLoading) return
+
     setIsLoading(true)
     setError(null)
 
     try {
+      // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -67,94 +72,56 @@ export function LoginForm() {
         throw error
       }
 
-      if (data.user) {
-        // Get user metadata to check for role_id
-        const roleIdFromMetadata = data.user.user_metadata?.role_id
+      if (!data.user) {
+        throw new Error("No user returned from login")
+      }
 
-        // Get user profile
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("role_id")
-          .eq("id", data.user.id)
+      // Get user profile directly from database
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role_id, username")
+        .eq("id", data.user.id)
+        .single()
+
+      if (profileError) {
+        throw new Error(`Failed to get profile: ${profileError.message}`)
+      }
+
+      if (!profile) {
+        throw new Error("No profile found for user")
+      }
+
+      // Redirect based on role
+      if (profile.role_id === 3) {
+        // Admin - force redirect to admin dashboard
+        window.location.href = "/admin/dashboard"
+        return
+      } else if (profile.role_id === 2) {
+        // Teacher
+        window.location.href = "/teacher/dashboard"
+        return
+      } else if (profile.role_id === 1) {
+        // Student - check if they've seen the intro
+        const { data: storyData } = await supabase
+          .from("story_progress")
+          .select("has_seen_intro")
+          .eq("student_id", data.user.id)
           .maybeSingle()
 
-        if (profileError) {
-          console.error("Profile retrieval error:", profileError)
-        }
-
-        // Determine the role - prefer metadata over profile
-        const roleId = roleIdFromMetadata || (profileData && profileData.role_id)
-
-        // If we have a role from either source, use it
-        if (roleId) {
-          // Create profile if it doesn't exist but role is in metadata
-          if (!profileData && roleIdFromMetadata) {
-            try {
-              await supabase.from("profiles").upsert({
-                id: data.user.id,
-                username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "User",
-                role_id: roleIdFromMetadata,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              })
-              console.log("Profile created from metadata during login")
-            } catch (err) {
-              console.error("Error creating profile from metadata:", err)
-            }
-          }
-
-          if (roleId === 1) {
-            // Student
-            // Check if student has seen intro story
-            const { data: storyData } = await supabase
-              .from("story_progress")
-              .select("has_seen_intro")
-              .eq("student_id", data.user.id)
-              .maybeSingle()
-
-            if (storyData && storyData.has_seen_intro) {
-              router.push("/student/dashboard")
-            } else {
-              router.push("/student/story")
-            }
-          } else if (roleId === 2) {
-            // Teacher
-            router.push("/teacher/dashboard")
-          } else {
-            // Default to student dashboard if role is unknown
-            router.push("/student/dashboard")
-          }
+        if (storyData && storyData.has_seen_intro) {
+          window.location.href = "/student/dashboard"
         } else {
-          // If no role found anywhere, create a default student role
-          try {
-            await supabase.from("profiles").upsert({
-              id: data.user.id,
-              username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "User",
-              role_id: 1, // Default to student
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            })
-
-            // Create story progress for the new student
-            await supabase.from("story_progress").insert({
-              student_id: data.user.id,
-              has_seen_intro: false,
-              last_dialogue_index: 0,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            })
-
-            console.log("Created default student profile")
-            router.push("/student/story")
-          } catch (err) {
-            console.error("Error creating default profile:", err)
-            // Even if there's an error, still redirect to student dashboard
-            router.push("/student/dashboard")
-          }
+          window.location.href = "/student/story"
         }
+        return
+      } else {
+        // Unknown role - default to student dashboard
+        window.location.href = "/student/dashboard"
+        return
       }
     } catch (error: any) {
       setError(error.message || "An error occurred during login")
+    } finally {
       setIsLoading(false)
     }
   }

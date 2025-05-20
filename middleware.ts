@@ -1,60 +1,84 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 
-export async function middleware(req: NextRequest) {
+export async function middleware(request: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+  const pathname = request.nextUrl.pathname
 
-  // Get the pathname from the URL
-  const pathname = req.nextUrl.pathname
-
-  // Redirect root path to login immediately
-  if (pathname === "/" || pathname === "") {
-    return NextResponse.redirect(new URL("/auth/login", req.url))
-  }
-
-  // Skip middleware for logout-related routes
-  if (pathname.startsWith("/auth/logout") || pathname.startsWith("/api/logout")) {
+  // Skip middleware for static assets and API routes
+  if (
+    pathname.includes("/_next") ||
+    pathname.includes("/api/") ||
+    pathname.includes("/favicon.ico") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".css") ||
+    pathname.endsWith(".js")
+  ) {
     return res
   }
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+  // Create a Supabase client configured to use cookies
+  const supabase = createMiddlewareClient({ req: request, res })
 
-    // Check auth condition
-    const isAuthRoute = pathname.startsWith("/auth")
-    const isApiRoute = pathname.startsWith("/api")
-    const isCallbackRoute = pathname === "/auth/callback"
+  // Refresh session if expired
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-    // Always allow access to callback routes
-    if (isCallbackRoute) {
+  // If no session and trying to access protected routes
+  if (!session) {
+    // Allow access to public routes
+    if (pathname === "/" || pathname.startsWith("/auth/") || pathname === "/api/auth/callback") {
       return res
     }
 
-    // If user is logged in
-    if (session) {
-      // If accessing auth routes while logged in, redirect to student dashboard
-      if (isAuthRoute && pathname !== "/auth/logout") {
-        return NextResponse.redirect(new URL("/student/dashboard", req.url))
-      }
+    // Redirect to login for protected routes
+    return NextResponse.redirect(new URL("/auth/login", request.url))
+  }
 
-      // Allow access to all student routes when logged in
-      return res
-    } else if (!isAuthRoute && !isApiRoute) {
-      // If accessing protected routes while not logged in, redirect to login
-      return NextResponse.redirect(new URL("/auth/login", req.url))
+  // User is authenticated, check role-based access
+  const { data: profile } = await supabase.from("profiles").select("role_id").eq("id", session.user.id).single()
+
+  const role = profile?.role_id || 0
+
+  // Admin routes
+  if (pathname.startsWith("/admin")) {
+    if (role !== 3) {
+      return NextResponse.redirect(new URL("/", request.url))
     }
-
-    return res
-  } catch (error) {
-    console.error("Middleware error:", error)
     return res
   }
+
+  // Teacher routes
+  if (pathname.startsWith("/teacher")) {
+    if (role !== 2 && role !== 3) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+    return res
+  }
+
+  // Student routes
+  if (pathname.startsWith("/student")) {
+    if (role !== 1 && role !== 3) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+    return res
+  }
+
+  // Debug routes - admin only
+  if (pathname.startsWith("/debug")) {
+    if (role !== 3) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+    return res
+  }
+
+  return res
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }
