@@ -1,106 +1,335 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Volume2, VolumeX } from "lucide-react"
 
-// Email component with viewport-relative styling
-const Email = ({ value, onChange }: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
-  <div className="mb-[1.5vh]">
-    <label htmlFor="email" className="block text-[#323232] font-blaka text-[1.5vw] mb-[0.5vh] transform rotate-3">
-      Email
-    </label>
-    <input
-      id="email"
-      type="email"
-      value={value}
-      onChange={onChange}
-      required
-      className="w-full px-[1vw] py-[1vh] bg-[#DBC69F] border-[0.2vw] border-black rounded-[1vw] font-blaka text-[1.5vw] text-[#323232] placeholder-black focus:outline-none focus:bg-[#DBC69F] transform rotate-3 opacity-75"
-    />
-  </div>
-)
+// Add floating animation keyframes
+const floatingAnimation = `
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-5px) rotate(0.5deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(5px) rotate(-0.5deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
 
-// Password component with viewport-relative styling
-const Password = ({
-  value,
-  onChange,
-}: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
-  <div className="mb-[2vh]">
-    <label htmlFor="password" className="block text-[#323232] font-blaka text-[1.5vw] mb-[0.5vh] transform rotate-3">
-      Password
-    </label>
-    <input
-      id="password"
-      type="password"
-      value={value}
-      onChange={onChange}
-      required
-      className="w-full px-[1vw] py-[1vh] bg-[#DBC69F] border-[0.2vw] border-black rounded-[1vw] font-blaka text-[1.5vw] text-[#323232] placeholder-black focus:outline-none focus:bg-[#DBC69F] transform rotate-3 opacity-75"
-    />
-  </div>
-)
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s ease-in-out infinite;
+}
+`
+
+// Cloud object type
+type Cloud = {
+  id: number
+  cloudNumber: number
+  top: string
+  left: string
+  speed: number
+  direction: 1 | -1
+  size: number
+  isActive: boolean
+}
 
 export function LoginForm() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [clouds, setClouds] = useState<Cloud[]>([])
+  const [windowWidth, setWindowWidth] = useState(0)
+  const [isMuted, setIsMuted] = useState(true) // Start muted
+  const [audioEnabled, setAudioEnabled] = useState(true) // Track if audio is available
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const cloudIdCounter = useRef(0)
   const supabase = createClient()
+
+  // Track window size for responsive adjustments
+  useEffect(() => {
+    // Set initial window width
+    setWindowWidth(window.innerWidth)
+
+    // Update window width on resize
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  // Initialize audio with error handling
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    try {
+      // Create audio element if it doesn't exist
+      if (!audioRef.current) {
+        const audio = new Audio()
+
+        // Set up event listeners before setting src to catch load errors
+        audio.addEventListener("error", (e) => {
+          console.error("Audio error details:", {
+            code: audio.error?.code,
+            message: audio.error?.message,
+            // name: audio.error?.name, // 'name' does not exist on MediaError
+          })
+          setAudioEnabled(false) // Disable audio functionality
+        })
+
+        // Set audio properties
+        audio.loop = true
+        audio.volume = 0 // Start with volume at 0
+        audio.preload = "auto"
+
+        // Set source last
+        audio.src = "/audio/auththeme.mp3"
+
+        audioRef.current = audio
+      }
+    } catch (error) {
+      console.error("Audio initialization error:", error)
+      setAudioEnabled(false) // Disable audio functionality
+    }
+
+    return () => {
+      // Clean up
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current)
+        fadeIntervalRef.current = null
+      }
+
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause()
+          audioRef.current.src = ""
+          audioRef.current = null
+        } catch (error) {
+          console.error("Audio cleanup error:", error)
+        }
+      }
+    }
+  }, [])
+
+  // Handle mute state changes
+  useEffect(() => {
+    // Skip if audio is not enabled or ref doesn't exist
+    if (!audioEnabled || !audioRef.current) return
+
+    try {
+      if (isMuted) {
+        // When muted, pause the audio and reset volume
+        audioRef.current.pause()
+        audioRef.current.volume = 0
+
+        // Clear any fade interval
+        if (fadeIntervalRef.current) {
+          clearInterval(fadeIntervalRef.current)
+          fadeIntervalRef.current = null
+        }
+      } else {
+        // When unmuted, play the audio and fade in volume
+        const playPromise = audioRef.current.play()
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Clear any existing interval
+              if (fadeIntervalRef.current) {
+                clearInterval(fadeIntervalRef.current)
+                fadeIntervalRef.current = null
+              }
+
+              // Start fade in
+              fadeIntervalRef.current = setInterval(() => {
+                if (audioRef.current) {
+                  // Calculate new volume, ensuring it doesn't exceed 1.0
+                  const newVolume = Math.min(audioRef.current.volume + 0.1, 0.5) // Max volume 0.5
+                  audioRef.current.volume = newVolume
+
+                  // If we've reached target volume, clear the interval
+                  if (newVolume >= 0.5) {
+                    if (fadeIntervalRef.current) {
+                      clearInterval(fadeIntervalRef.current)
+                      fadeIntervalRef.current = null
+                    }
+                  }
+                } else {
+                  // Audio element no longer exists, clear interval
+                  if (fadeIntervalRef.current) {
+                    clearInterval(fadeIntervalRef.current)
+                    fadeIntervalRef.current = null
+                  }
+                }
+              }, 100)
+            })
+            .catch((error) => {
+              console.error("Audio play failed:", error)
+              // Reset to muted state if play fails
+              setIsMuted(true)
+            })
+        }
+      }
+    } catch (error) {
+      console.error("Audio control error:", error)
+      setAudioEnabled(false) // Disable audio functionality on error
+    }
+  }, [isMuted, audioEnabled])
+
+  // Toggle mute state
+  const toggleMute = () => {
+    if (!audioEnabled) return // Don't toggle if audio is disabled
+    setIsMuted(!isMuted)
+  }
+
+  // Initialize clouds
+  useEffect(() => {
+    if (!windowWidth) return
+
+    // Create initial set of clouds
+    const initialClouds: Cloud[] = []
+
+    // Adjust number of clouds based on screen size
+    const cloudCount = windowWidth < 640 ? 5 : 8
+
+    // Create clouds
+    for (let i = 0; i < cloudCount; i++) {
+      initialClouds.push(createNewCloud())
+    }
+
+    setClouds(initialClouds)
+
+    // Start cloud animation
+    const intervalId = setInterval(() => {
+      setClouds((prevClouds) => {
+        return prevClouds.map((cloud) => {
+          // Move cloud based on its speed and direction
+          const currentLeft = Number.parseFloat(cloud.left)
+          const newLeft = currentLeft + cloud.speed * cloud.direction
+
+          // Check if cloud has left the viewport
+          if ((cloud.direction === 1 && newLeft > 110) || (cloud.direction === -1 && newLeft < -30)) {
+            // Replace with a new cloud from the opposite side
+            return createNewCloud(cloud.direction === 1 ? -1 : 1)
+          }
+
+          // Update cloud position
+          return {
+            ...cloud,
+            left: `${newLeft}%`,
+          }
+        })
+      })
+    }, 33) // ~30fps for smooth animation
+
+    return () => clearInterval(intervalId)
+  }, [windowWidth])
+
+  // Function to create a new cloud
+  const createNewCloud = (forcedDirection?: -1 | 1): Cloud => {
+    // Randomly select cloud image (1, 2, or 3)
+    const cloudNumber = Math.floor(Math.random() * 3) + 1
+
+    // Adjust cloud size based on screen width
+    const baseSize = windowWidth < 640 ? 120 : windowWidth < 1024 ? 150 : 180
+    const sizeVariation = windowWidth < 640 ? 60 : 100
+
+    // Random cloud size
+    const size = Math.floor(Math.random() * sizeVariation) + baseSize
+
+    // Random speed between 0.08 and 0.2, adjusted for screen size
+    const speedFactor = windowWidth < 640 ? 0.7 : 1
+    const speed = (Math.random() * 0.12 + 0.08) * speedFactor
+
+    // Random direction (left or right) if not forced
+    const direction = forcedDirection || (Math.random() > 0.5 ? 1 : -1)
+
+    // Random vertical position between 5% and 85%
+    const top = `${Math.floor(Math.random() * 80) + 5}%`
+
+    // Starting position based on direction
+    // If moving right, start from left (-20% to -10%)
+    // If moving left, start from right (110% to 120%)
+    const left =
+      direction === 1 ? `${Math.floor(Math.random() * 10) - 20}%` : `${Math.floor(Math.random() * 10) + 110}%`
+
+    return {
+      id: cloudIdCounter.current++,
+      cloudNumber,
+      top,
+      left,
+      speed,
+      direction,
+      size,
+      isActive: true,
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Prevent multiple submissions
     if (isLoading) return
 
     setIsLoading(true)
     setError(null)
 
     try {
-      // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
+      if (!data.user) throw new Error("No user returned from login")
 
-      if (!data.user) {
-        throw new Error("No user returned from login")
-      }
-
-      // Get user profile directly from database
+      // Get user profile
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role_id, username")
         .eq("id", data.user.id)
         .single()
 
-      if (profileError) {
-        throw new Error(`Failed to get profile: ${profileError.message}`)
-      }
-
-      if (!profile) {
-        throw new Error("No profile found for user")
-      }
+      if (profileError) throw new Error(`Failed to get profile: ${profileError.message}`)
+      if (!profile) throw new Error("No profile found for user")
 
       // Redirect based on role
       if (profile.role_id === 3) {
-        // Admin - force redirect to admin dashboard
         window.location.href = "/admin/dashboard"
-        return
       } else if (profile.role_id === 2) {
-        // Teacher
         window.location.href = "/teacher/dashboard"
-        return
       } else if (profile.role_id === 1) {
-        // Student - check if they've seen the intro
+        // Check if student has seen intro
         const { data: storyData } = await supabase
           .from("story_progress")
           .select("has_seen_intro")
@@ -112,11 +341,8 @@ export function LoginForm() {
         } else {
           window.location.href = "/student/story"
         }
-        return
       } else {
-        // Unknown role - default to student dashboard
         window.location.href = "/student/dashboard"
-        return
       }
     } catch (error: any) {
       setError(error.message || "An error occurred during login")
@@ -125,39 +351,162 @@ export function LoginForm() {
     }
   }
 
+  // Add the animation styles to the document
+  useEffect(() => {
+    // Create style element
+    const styleElement = document.createElement("style")
+    styleElement.innerHTML = floatingAnimation
+    document.head.appendChild(styleElement)
+
+    // Clean up
+    return () => {
+      document.head.removeChild(styleElement)
+    }
+  }, [])
+
   return (
-    <form onSubmit={handleLogin} className="w-full">
-      {error && (
-        <div className="bg-red-800 bg-opacity-20 border border-red-800 text-red-900 px-[1vw] py-[0.5vh] rounded-[0.5vw] mb-[1vh] text-[1.2vw] font-blaka">
-          {error}
-        </div>
+    <div className="fixed inset-0 bg-[#8B3734] flex flex-col items-center justify-center min-h-screen overflow-hidden">
+      {/* Full-width container for clouds */}
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
+        {/* Render all active clouds */}
+        {clouds.map((cloud) => (
+          <div
+            key={cloud.id}
+            className="absolute pixelated z-10"
+            style={{
+              top: cloud.top,
+              left: cloud.left,
+              width: `${cloud.size}px`,
+              height: "auto",
+              transition: "left 0.033s linear", // Very smooth transition
+            }}
+          >
+            <Image
+              src={`/auth/cloud-${cloud.cloudNumber}.webp`}
+              alt="Cloud"
+              width={cloud.size}
+              height={cloud.size / 2}
+              className="pixelated"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Audio toggle button - only show if audio is enabled */}
+      {audioEnabled && (
+        <button
+          onClick={toggleMute}
+          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow"
+          aria-label={isMuted ? "Unmute background music" : "Mute background music"}
+        >
+          {isMuted ? (
+            <VolumeX size={20} className="text-amber-100" /> // Show muted icon when muted (click to unmute)
+          ) : (
+            <Volume2 size={20} className="text-amber-100" /> // Show volume icon when not muted (click to mute)
+          )}
+        </button>
       )}
 
-      {/* Email component */}
-      <Email value={email} onChange={(e) => setEmail(e.target.value)} />
+      {/* Centered content container */}
+      <div className="relative z-20 flex flex-col items-center justify-center w-full max-w-md mx-auto">
+        {/* Title Banner with floating animation */}
+        <div className="relative mb-4 flex justify-center w-full">
+          <div className="relative animate-float w-[280px] sm:w-[320px] md:w-[360px]">
+            <Image
+              src="/auth/header-banner.png"
+              alt="FracQuest Banner"
+              width={400}
+              height={100}
+              className="w-full h-auto"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <h1 className="font-blaka text-amber-900 text-xl sm:text-2xl pt-1">FracQuest</h1>
+            </div>
+          </div>
+        </div>
 
-      {/* Password component */}
-      <Password value={password} onChange={(e) => setPassword(e.target.value)} />
+        {/* Container with task blank as background */}
+        <div className="relative w-[340px] sm:w-[380px] md:w-[420px]">
+          <div className="relative">
+            {/* Task blank image as background */}
+            <Image
+              src="/auth/task-blank.png"
+              alt="Login form background"
+              width={420}
+              height={630}
+              className="w-full h-auto"
+              priority
+            />
 
-      {/* Login button with viewport-relative styling */}
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-[#ba4c3c] hover:bg-[#a04234] text-[#f8d78b] font-blaka text-[1.5vw] py-[1vh] px-[1vw] rounded-[1vw] transition-colors duration-200 mb-[1.5vh] transform rotate-3"
-      >
-        {isLoading ? "Loading..." : "Login"}
-      </button>
+            {/* Form content positioned over the task blank with adjusted positioning */}
+            <div className="absolute inset-0 flex flex-col items-center pt-[30%]">
+              {/* Inner container with adjusted width */}
+              <div className="w-[65%] mx-auto">
+                {/* Error message if any */}
+                {error && (
+                  <div className="w-full bg-red-800 bg-opacity-70 border border-red-900 text-amber-100 px-3 py-2 rounded mb-4 text-xs">
+                    {error}
+                  </div>
+                )}
 
-      {/* Register link with viewport-relative styling */}
-      <div className="text-center transform rotate-3">
-        <span className="text-[#323232] font-blaka text-[1.2vw]">Don&apos;t have an account? </span>
-        <a
-          href="/auth/select-role-register"
-          className="text-[#ba4c3c] hover:text-[#a04234] font-blaka text-[1.2vw]"
-        >
-          Register
-        </a>
+                <form onSubmit={handleLogin} className="w-full">
+                  {/* Email field - positioned lower with smaller size */}
+                  <div className="mb-8">
+                    <label htmlFor="email" className="block text-amber-900 font-medieval text-xs mb-1">
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="w-full px-3 py-1.5 bg-[#fff8e7] border border-amber-800 rounded text-amber-900 text-xs focus:outline-none focus:ring-1 focus:ring-amber-600"
+                    />
+                  </div>
+
+                  {/* Password field - positioned lower with smaller size */}
+                  <div className="mb-10">
+                    <label htmlFor="password" className="block text-amber-900 font-medieval text-xs mb-1">
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="w-full px-3 py-1.5 bg-[#fff8e7] border border-amber-800 rounded text-amber-900 text-xs focus:outline-none focus:ring-1 focus:ring-amber-600"
+                    />
+                  </div>
+
+                  {/* Login button - centered */}
+                  <div className="flex justify-center mb-6">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="bg-amber-800 hover:bg-amber-700 text-amber-100 font-blaka py-1.5 px-8 rounded-md transition-colors duration-200 text-base"
+                    >
+                      {isLoading ? "Loading..." : "Login"}
+                    </button>
+                  </div>
+
+                  {/* Register link - centered */}
+                  <div className="text-center mb-4">
+                    <span className="text-amber-900 text-xs">Don&apos;t have an account? </span>
+                    <a
+                      href="/auth/select-role-register"
+                      className="text-amber-700 hover:text-amber-600 font-bold text-xs"
+                    >
+                      Register
+                    </a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </form>
+    </div>
   )
 }
