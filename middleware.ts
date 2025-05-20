@@ -20,6 +20,17 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
+  // Always allow access to these public pages without any auth checks
+  if (
+    pathname === "/" ||
+    pathname === "/auth/login" ||
+    pathname === "/auth/select-role-register" ||
+    pathname === "/auth/register-redirect-test" ||
+    pathname === "/api/auth/callback"
+  ) {
+    return res
+  }
+
   // Create a Supabase client configured to use cookies
   const supabase = createMiddlewareClient({ req: request, res })
 
@@ -30,8 +41,8 @@ export async function middleware(request: NextRequest) {
 
   // If no session and trying to access protected routes
   if (!session) {
-    // Allow access to public routes
-    if (pathname === "/" || pathname.startsWith("/auth/") || pathname === "/api/auth/callback") {
+    // Allow access to other auth routes
+    if (pathname.startsWith("/auth/")) {
       return res
     }
 
