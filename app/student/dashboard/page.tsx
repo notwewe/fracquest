@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { StudentDashboardClient } from "@/components/student/student-dashboard-client"
+import { PixelDashboard } from "@/components/student/pixel-dashboard"
 
 export default async function StudentDashboard() {
   const supabase = createClient()
@@ -30,7 +30,7 @@ export default async function StudentDashboard() {
   const isEnrolled = !!studentClass
 
   return (
-    <StudentDashboardClient
+    <PixelDashboard
       username={profile.username || "Student"}
       isEnrolled={isEnrolled}
       className={studentClass?.classes?.name || ""}
