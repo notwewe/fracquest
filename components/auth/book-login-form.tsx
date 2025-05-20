@@ -1,10 +1,12 @@
 "use client"
 
 import type React from "react"
+
 import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
 import { Volume2, VolumeX } from "lucide-react"
+import Link from "next/link"
 
 // Add floating animation keyframes
 const floatingAnimation = `
@@ -48,6 +50,133 @@ const floatingAnimation = `
 .animate-pulse-slow {
   animation: pulse 2s ease-in-out infinite;
 }
+
+@keyframes bannerWave {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-banner {
+  animation: bannerWave 3s ease-in-out infinite;
+}
+
+/* Book content positioning */
+.book-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+}
+
+.left-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  height: 100%;
+  padding: 5% 8% 15% 8%;
+  padding-left: 9%; /* Slightly increased left padding to shift content right */
+  padding-right: 7%; /* Slightly decreased right padding */
+}
+
+.right-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  height: 100%;
+  padding: 5% 8% 15% 8%;
+  padding-left: 7%; /* Slightly decreased left padding to shift content left */
+  padding-right: 9%; /* Slightly increased right padding */
+}
+
+.welcome-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-15%) translateX(2%); /* Move content higher and slightly right */
+}
+
+.login-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-15%) translateX(-2%); /* Move content higher and slightly left */
+}
+
+@media (max-width: 768px) {
+  .left-page {
+    padding: 5% 6% 15% 6%;
+    padding-left: 8%;
+    padding-right: 4%;
+  }
+  .right-page {
+    padding: 5% 6% 15% 6%;
+    padding-left: 4%;
+    padding-right: 8%;
+  }
+  .welcome-content {
+    transform: translateY(-12%) translateX(1.5%);
+  }
+  .login-content {
+    transform: translateY(-12%) translateX(-1.5%);
+  }
+}
+
+@media (max-width: 640px) {
+  .left-page {
+    padding: 5% 5% 15% 5%;
+    padding-left: 7%;
+    padding-right: 3%;
+  }
+  .right-page {
+    padding: 5% 5% 15% 5%;
+    padding-left: 3%;
+    padding-right: 7%;
+  }
+  .welcome-content {
+    transform: translateY(-10%) translateX(1%);
+  }
+  .login-content {
+    transform: translateY(-10%) translateX(-1%);
+  }
+}
+
+@media (max-width: 480px) {
+  .left-page {
+    padding: 5% 4% 15% 4%;
+    padding-left: 6%;
+    padding-right: 2%;
+  }
+  .right-page {
+    padding: 5% 4% 15% 4%;
+    padding-left: 2%;
+    padding-right: 6%;
+  }
+  .welcome-content {
+    transform: translateY(-8%) translateX(0.5%);
+  }
+  .login-content {
+    transform: translateY(-8%) translateX(-0.5%);
+  }
+}
 `
 
 // Cloud object type
@@ -62,13 +191,14 @@ type Cloud = {
   isActive: boolean
 }
 
-export function LoginForm() {
+export function BookLoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [clouds, setClouds] = useState<Cloud[]>([])
   const [windowWidth, setWindowWidth] = useState(0)
+  const [windowHeight, setWindowHeight] = useState(0)
   const [isMuted, setIsMuted] = useState(true) // Start muted
   const [audioEnabled, setAudioEnabled] = useState(true) // Track if audio is available
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -78,12 +208,14 @@ export function LoginForm() {
 
   // Track window size for responsive adjustments
   useEffect(() => {
-    // Set initial window width
+    // Set initial window dimensions
     setWindowWidth(window.innerWidth)
+    setWindowHeight(window.innerHeight)
 
-    // Update window width on resize
+    // Update window dimensions on resize
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
+      setWindowHeight(window.innerHeight)
     }
 
     window.addEventListener("resize", handleResize)
@@ -104,7 +236,6 @@ export function LoginForm() {
           console.error("Audio error details:", {
             code: audio.error?.code,
             message: audio.error?.message,
-            // name: audio.error?.name, // 'name' does not exist on MediaError
           })
           setAudioEnabled(false) // Disable audio functionality
         })
@@ -365,7 +496,7 @@ export function LoginForm() {
   }, [])
 
   return (
-    <div className="fixed inset-0 bg-[#8B3734] flex flex-col items-center justify-center min-h-screen overflow-hidden">
+    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen overflow-hidden bg-[#8B3734]">
       {/* Full-width container for clouds */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Render all active clouds */}
@@ -407,101 +538,117 @@ export function LoginForm() {
         </button>
       )}
 
-      {/* Centered content container */}
-      <div className="relative z-20 flex flex-col items-center justify-center w-full max-w-md mx-auto">
-        {/* Title Banner with floating animation */}
-        <div className="relative mb-4 flex justify-center w-full">
-          <div className="relative animate-float w-[280px] sm:w-[320px] md:w-[360px]">
+      {/* Open Book Login Form */}
+      <div className="relative z-20 w-[90%] max-w-[800px] mx-auto">
+        <div className="relative">
+          {/* Book image container */}
+          <div className="relative w-full">
             <Image
-              src="/auth/header-banner.png"
-              alt="FracQuest Banner"
-              width={400}
-              height={100}
-              className="w-full h-auto"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <h1 className="font-blaka text-amber-900 text-xl sm:text-2xl pt-1">FracQuest</h1>
-            </div>
-          </div>
-        </div>
-
-        {/* Container with task blank as background */}
-        <div className="relative w-[340px] sm:w-[380px] md:w-[420px]">
-          <div className="relative">
-            {/* Task blank image as background */}
-            <Image
-              src="/auth/task-blank.png"
-              alt="Login form background"
-              width={420}
-              height={630}
-              className="w-full h-auto"
+              src="/book.png"
+              alt="Open book"
+              width={800}
+              height={600}
+              className="w-full h-auto pixelated"
               priority
             />
 
-            {/* Form content positioned over the task blank with adjusted positioning */}
-            <div className="absolute inset-0 flex flex-col items-center pt-[30%]">
-              {/* Inner container with adjusted width */}
-              <div className="w-[65%] mx-auto">
-                {/* Error message if any */}
-                {error && (
-                  <div className="w-full bg-red-800 bg-opacity-70 border border-red-900 text-amber-100 px-3 py-2 rounded mb-4 text-xs">
-                    {error}
-                  </div>
-                )}
+            {/* Content positioned over the book image */}
+            <div className="book-content">
+              {/* Left page content */}
+              <div className="left-page">
+                <div className="welcome-content">
+                  <p className="font-blaka text-[#8B3734] text-xl sm:text-2xl md:text-3xl mb-1">Welcome to</p>
+                  <h1 className="font-blaka text-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl">FracQuest</h1>
+                </div>
+              </div>
 
-                <form onSubmit={handleLogin} className="w-full">
-                  {/* Email field - positioned lower with smaller size */}
-                  <div className="mb-8">
-                    <label htmlFor="email" className="block text-amber-900 font-medieval text-xs mb-1">
-                      Email
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="w-full px-3 py-1.5 bg-[#fff8e7] border border-amber-800 rounded text-amber-900 text-xs focus:outline-none focus:ring-1 focus:ring-amber-600"
-                    />
-                  </div>
-
-                  {/* Password field - positioned lower with smaller size */}
-                  <div className="mb-10">
-                    <label htmlFor="password" className="block text-amber-900 font-medieval text-xs mb-1">
-                      Password
-                    </label>
-                    <input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="w-full px-3 py-1.5 bg-[#fff8e7] border border-amber-800 rounded text-amber-900 text-xs focus:outline-none focus:ring-1 focus:ring-amber-600"
-                    />
+              {/* Right page - login form */}
+              <div className="right-page">
+                <div className="login-content">
+                  {/* Animated banner for Login text */}
+                  <div className="animate-banner mb-2 relative">
+                    <div className="relative">
+                      <Image
+                        src="/auth/header-banner.png"
+                        alt="Banner"
+                        width={240}
+                        height={60}
+                        className="pixelated w-[160px] sm:w-[180px] md:w-[200px] lg:w-[240px]"
+                      />
+                      <h2 className="font-blaka text-[#8B3734] text-xl sm:text-2xl absolute inset-0 flex items-center justify-center">
+                        Login
+                      </h2>
+                    </div>
                   </div>
 
-                  {/* Login button - centered */}
-                  <div className="flex justify-center mb-6">
+                  {/* Login form */}
+                  <form onSubmit={handleLogin} className="w-full max-w-[90%] mx-auto">
+                    {/* Error message */}
+                    {error && (
+                      <div className="w-full bg-red-800 bg-opacity-70 border border-red-900 text-amber-100 px-3 py-2 rounded mb-4 text-xs">
+                        {error}
+                      </div>
+                    )}
+
+                    {/* Username/Email field */}
+                    <div className="mb-2">
+                      <label
+                        htmlFor="email"
+                        className="block text-[#8B3734] font-blaka text-lg sm:text-xl md:text-2xl mb-1"
+                      >
+                        Email
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="w-full px-3 py-1.5 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                      />
+                    </div>
+
+                    {/* Password field */}
+                    <div className="mb-4">
+                      <label
+                        htmlFor="password"
+                        className="block text-[#8B3734] font-blaka text-lg sm:text-xl md:text-2xl mb-1"
+                      >
+                        Password
+                      </label>
+                      <input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="w-full px-3 py-1.5 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                      />
+                    </div>
+
+                    {/* Login button */}
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="bg-amber-800 hover:bg-amber-700 text-amber-100 font-blaka py-1.5 px-8 rounded-md transition-colors duration-200 text-base"
+                      className="w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-1.5 px-4 rounded-sm border border-black transition-colors duration-200 text-lg sm:text-xl md:text-2xl pixelated"
                     >
                       {isLoading ? "Loading..." : "Login"}
                     </button>
-                  </div>
 
-                  {/* Register link - centered */}
-                  <div className="text-center mb-4">
-                    <span className="text-amber-900 text-xs">Don&apos;t have an account? </span>
-                    <a
-                      href="/auth/select-role-register"
-                      className="text-amber-700 hover:text-amber-600 font-bold text-xs"
-                    >
-                      Register
-                    </a>
-                  </div>
-                </form>
+                    {/* Register link */}
+                    <div className="text-center mt-3">
+                      <span className="text-black text-xs sm:text-sm md:text-lg font-blaka">
+                        Don't have an account?{" "}
+                      </span>
+                      <Link
+                        href="/auth/select-role-register"
+                        className="text-[#8B3734] hover:text-[#a04234] font-bold text-xs sm:text-sm md:text-lg font-blaka underline"
+                      >
+                        Register
+                      </Link>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
