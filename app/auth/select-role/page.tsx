@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { RoleSelector } from "@/components/auth/role-selector"
+import { RoleSelector } from "@/components/auth/book-role-selector"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function SelectRolePage() {
@@ -56,15 +56,13 @@ export default function SelectRolePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-amber-100 p-4">
-      <div className="w-full max-w-md">
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        <RoleSelector onRoleSelect={handleRoleSelect} />
-      </div>
+    <div className="fixed inset-0 flex items-center justify-center bg-[#8B3734]">
+      {error && (
+        <Alert variant="destructive" className="absolute top-4 left-4 right-4 z-50">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <RoleSelector onRoleSelect={handleRoleSelect} />
     </div>
   )
 }
