@@ -108,6 +108,7 @@ const floatingAnimation = `
   align-items: center;
   justify-content: center;
   transform: translateY(-15%) translateX(2%); /* Move content higher and slightly right */
+  scale: 1.15; /* Make content 15% bigger */
 }
 
 .register-content {
@@ -118,6 +119,45 @@ const floatingAnimation = `
   justify-content: center;
   transform: translateY(0%) translateX(-2%); /* Remove the negative translateY value */
   padding-top: 0; /* Add explicit padding-top: 0 */
+  scale: 1.15; /* Make content 15% bigger */
+}
+
+/* Shadow styles for inputs and buttons */
+.form-input {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.form-button {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.form-button:hover:not(:disabled) {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.form-button:active:not(:disabled) {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+}
+
+.role-button {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.role-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.role-button.selected {
+  box-shadow: 0 3px 6px rgba(139, 55, 52, 0.3);
 }
 
 @media (max-width: 768px) {
@@ -485,7 +525,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
       {audioEnabled && (
         <button
           onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow"
+          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow shadow-md"
           aria-label={isMuted ? "Unmute background music" : "Mute background music"}
         >
           {isMuted ? (
@@ -515,8 +555,8 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
               {/* Left page content */}
               <div className="left-page">
                 <div className="welcome-content">
-                  <p className="font-blaka text-[#8B3734] text-xl sm:text-2xl md:text-3xl mb-1">Welcome to</p>
-                  <h1 className="font-blaka text-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl">FracQuest</h1>
+                  <p className="font-blaka text-[#8B3734] text-2xl sm:text-3xl md:text-4xl mb-1">Welcome to</p>
+                  <h1 className="font-blaka text-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl">FracQuest</h1>
                 </div>
               </div>
 
@@ -533,7 +573,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
                         height={60}
                         className="pixelated w-[160px] sm:w-[180px] md:w-[200px] lg:w-[240px]"
                       />
-                      <h2 className="font-blaka text-[#8B3734] text-xl sm:text-2xl absolute inset-0 flex items-center justify-center">
+                      <h2 className="font-blaka text-[#8B3734] text-2xl sm:text-3xl absolute inset-0 flex items-center justify-center">
                         Register
                       </h2>
                     </div>
@@ -542,46 +582,46 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
                   {/* Role selector form */}
                   <div className="w-full max-w-[90%] mx-auto">
                     <div className="mb-2">
-                      <label className="block text-[#8B3734] font-blaka text-lg sm:text-xl md:text-2xl mb-1">
+                      <label className="block text-[#8B3734] font-blaka text-xl sm:text-2xl md:text-3xl mb-2">
                         Choose your role
                       </label>
                       <div className="space-y-2">
                         <button
                           type="button"
                           onClick={() => handleRoleSelect(1)}
-                          className={`w-full px-4 py-2 rounded-sm border-2 transition-colors duration-200 flex items-center ${
+                          className={`w-full px-4 py-3 rounded-sm border-2 transition-colors duration-200 flex items-center role-button ${
                             selectedRole === 1
-                              ? "bg-[#8B3734] text-[#f5e9d0] border-black"
+                              ? "bg-[#8B3734] text-[#f5e9d0] border-black selected"
                               : "bg-[#f5e9d0] bg-opacity-50 text-[#8B3734] border-[#8B3734] hover:bg-[#8B3734] hover:bg-opacity-20"
                           }`}
                         >
-                          <div className="w-6 h-6 mr-2 flex items-center justify-center">
+                          <div className="w-7 h-7 mr-3 flex items-center justify-center">
                             {selectedRole === 1 ? (
-                              <div className="w-3.5 h-3.5 bg-[#f5e9d0] rounded-full"></div>
+                              <div className="w-4 h-4 bg-[#f5e9d0] rounded-full"></div>
                             ) : (
-                              <div className="w-3.5 h-3.5 border-2 border-[#8B3734] rounded-full"></div>
+                              <div className="w-4 h-4 border-2 border-[#8B3734] rounded-full"></div>
                             )}
                           </div>
-                          <span className="font-blaka text-sm sm:text-base">Student</span>
+                          <span className="font-blaka text-base sm:text-lg">Student</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => handleRoleSelect(2)}
-                          className={`w-full px-4 py-2 rounded-sm border-2 transition-colors duration-200 flex items-center ${
+                          className={`w-full px-4 py-3 rounded-sm border-2 transition-colors duration-200 flex items-center role-button ${
                             selectedRole === 2
-                              ? "bg-[#8B3734] text-[#f5e9d0] border-black"
+                              ? "bg-[#8B3734] text-[#f5e9d0] border-black selected"
                               : "bg-[#f5e9d0] bg-opacity-50 text-[#8B3734] border-[#8B3734] hover:bg-[#8B3734] hover:bg-opacity-20"
                           }`}
                         >
-                          <div className="w-6 h-6 mr-2 flex items-center justify-center">
+                          <div className="w-7 h-7 mr-3 flex items-center justify-center">
                             {selectedRole === 2 ? (
-                              <div className="w-3.5 h-3.5 bg-[#f5e9d0] rounded-full"></div>
+                              <div className="w-4 h-4 bg-[#f5e9d0] rounded-full"></div>
                             ) : (
-                              <div className="w-3.5 h-3.5 border-2 border-[#8B3734] rounded-full"></div>
+                              <div className="w-4 h-4 border-2 border-[#8B3734] rounded-full"></div>
                             )}
                           </div>
-                          <span className="font-blaka text-sm sm:text-base">Teacher</span>
+                          <span className="font-blaka text-base sm:text-lg">Teacher</span>
                         </button>
                       </div>
                     </div>
@@ -591,7 +631,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
                         type="button"
                         onClick={handleContinue}
                         disabled={!selectedRole}
-                        className={`w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-1.5 px-4 rounded-sm border border-black transition-colors duration-200 pixelated ${
+                        className={`w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-2.5 px-4 rounded-sm border border-black transition-colors duration-200 pixelated text-base sm:text-lg form-button ${
                           !selectedRole ? "opacity-50 cursor-not-allowed" : ""
                         }`}
                       >

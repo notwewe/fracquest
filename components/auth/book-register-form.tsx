@@ -113,6 +113,7 @@ const floatingAnimation = `
   align-items: center;
   justify-content: center;
   transform: translateY(-15%) translateX(2%); /* Move content higher and slightly right */
+  scale: 1.15; /* Make content 15% bigger to match login page */
 }
 
 .register-content {
@@ -123,6 +124,31 @@ const floatingAnimation = `
   justify-content: center;
   transform: translateY(-8%) translateX(-2%); /* Changed from 0% to -8% to move content up */
   padding-top: 0;
+}
+
+/* Shadow styles for inputs and buttons */
+.form-input {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.form-button {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.form-button:hover:not(:disabled) {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.form-button:active:not(:disabled) {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
@@ -587,7 +613,7 @@ export function BookRegisterForm() {
       {audioEnabled && (
         <button
           onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow"
+          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow shadow-md"
           aria-label={isMuted ? "Unmute background music" : "Mute background music"}
         >
           {isMuted ? (
@@ -617,8 +643,8 @@ export function BookRegisterForm() {
               {/* Left page content */}
               <div className="left-page">
                 <div className="welcome-content">
-                  <p className="font-blaka text-[#8B3734] text-xl sm:text-2xl md:text-3xl mb-1">Welcome to</p>
-                  <h1 className="font-blaka text-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl">FracQuest</h1>
+                  <p className="font-blaka text-[#8B3734] text-2xl sm:text-3xl md:text-4xl mb-1">Welcome to</p>
+                  <h1 className="font-blaka text-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl">FracQuest</h1>
                 </div>
               </div>
 
@@ -635,7 +661,7 @@ export function BookRegisterForm() {
                         height={60}
                         className="pixelated w-[160px] sm:w-[180px] md:w-[200px] lg:w-[240px]"
                       />
-                      <h2 className="font-blaka text-[#8B3734] text-xl sm:text-2xl absolute inset-0 flex items-center justify-center">
+                      <h2 className="font-blaka text-[#8B3734] text-2xl sm:text-3xl absolute inset-0 flex items-center justify-center">
                         Register
                       </h2>
                     </div>
@@ -645,7 +671,7 @@ export function BookRegisterForm() {
                   <form onSubmit={handleRegister} className="w-full max-w-[90%] mx-auto">
                     {/* Error message */}
                     {error && (
-                      <div className="w-full bg-red-800 bg-opacity-70 border border-red-900 text-amber-100 px-3 py-2 rounded mb-4 text-xs">
+                      <div className="w-full bg-red-800 bg-opacity-70 border border-red-900 text-amber-100 px-3 py-2 rounded mb-4 text-xs shadow-md">
                         {error}
                       </div>
                     )}
@@ -664,7 +690,7 @@ export function BookRegisterForm() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734] form-input"
                       />
                     </div>
 
@@ -682,7 +708,7 @@ export function BookRegisterForm() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734] form-input"
                       />
                     </div>
 
@@ -700,7 +726,7 @@ export function BookRegisterForm() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734] form-input"
                       />
                     </div>
 
@@ -718,7 +744,7 @@ export function BookRegisterForm() {
                           type="text"
                           value={classCode}
                           onChange={(e) => setClassCode(e.target.value)}
-                          className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                          className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734] form-input"
                         />
                       </div>
                     )}
@@ -728,7 +754,7 @@ export function BookRegisterForm() {
                       <button
                         type="submit"
                         disabled={isLoading || !roleId}
-                        className="w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-2 px-4 rounded-sm border border-black transition-colors duration-200 pixelated disabled:opacity-50"
+                        className="w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-2 px-4 rounded-sm border border-black transition-colors duration-200 pixelated disabled:opacity-50 form-button"
                       >
                         {isLoading ? (
                           <div className="flex items-center justify-center">
