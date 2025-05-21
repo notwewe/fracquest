@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { createClient } from "@/lib/supabase/client"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusIcon, UsersIcon, BarChartIcon, UserIcon, BookOpenIcon, TrophyIcon } from "lucide-react"
+import { PlusIcon, UsersIcon, BarChartIcon, UserIcon, BookOpenIcon, TrophyIcon, LogOutIcon } from "lucide-react"
 import {
   LineChart,
   Line,
@@ -171,29 +169,25 @@ export default function TeacherDashboard() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
+      <div className="flex justify-center items-center min-h-screen bg-[#8B4513] bg-opacity-20">
+        <div className="pixel-loader"></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-screen">
-        <Card className="border-2 border-amber-800 bg-amber-50 w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-xl font-pixel text-amber-900">Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-amber-700">{error}</p>
-            <Button
-              onClick={() => window.location.reload()}
-              className="mt-4 w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-            >
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex justify-center items-center min-h-screen bg-[#8B4513] bg-opacity-20">
+        <div className="w-full max-w-md p-6 pixel-border bg-[#f5e9d0]">
+          <h2 className="text-2xl font-blaka text-[#8B4513] mb-4 text-center">Error!</h2>
+          <p className="text-[#8B4513] mb-6 text-center">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full py-2 px-4 bg-[#8B4513] text-[#f5e9d0] font-blaka hover:bg-[#a0522d] transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     )
   }
@@ -214,223 +208,222 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <motion.div className="container mx-auto p-4" variants={container} initial="hidden" animate="show">
-      <motion.div variants={item} className="grid gap-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-pixel text-amber-900">Teacher Dashboard</h1>
-            <p className="text-amber-700">Welcome back, {userData?.username || "Teacher"}!</p>
+    <div
+      className="min-h-screen p-6 bg-[#8B4513] bg-opacity-20"
+      style={{
+        backgroundImage: "url('/pixel-ui/parchment-bg.png')",
+        backgroundSize: "cover",
+        backgroundRepeat: "repeat",
+      }}
+    >
+      <motion.div className="max-w-7xl mx-auto" variants={container} initial="hidden" animate="show">
+        {/* Header */}
+        <motion.div variants={item} className="mb-8">
+          <div className="relative bg-[#8B4513] p-4 rounded-lg pixel-border mb-6">
+            <h1 className="text-4xl font-blaka text-[#f5e9d0] text-center">Teacher's Quest Board</h1>
+            <div className="absolute top-2 right-2">
+              <Link href="/auth/logout">
+                <button className="flex items-center gap-2 px-4 py-2 bg-[#a0522d] text-[#f5e9d0] rounded hover:bg-[#8B4513] transition-colors">
+                  <LogOutIcon size={16} />
+                  <span className="font-blaka">Logout</span>
+                </button>
+              </Link>
+            </div>
           </div>
-          <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-            <Link href="/auth/logout">Logout</Link>
-          </Button>
-        </div>
 
-        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Total Classes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <BookOpenIcon className="h-8 w-8 text-amber-600 mr-3" />
-                <p className="text-3xl font-pixel text-amber-700">{classes?.length || 0}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Total Students</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <UsersIcon className="h-8 w-8 text-amber-600 mr-3" />
-                <p className="text-3xl font-pixel text-amber-700">{totalStudents}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Create New Class</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-                <Link href="/teacher/classes/new">
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  New Class
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <h2 className="text-2xl font-blaka text-[#8B4513]">Welcome, Master {userData?.username || "Teacher"}!</h2>
+            <p className="text-[#8B4513]">Your students await your guidance in the realm of fractions.</p>
+          </div>
         </motion.div>
 
-        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-2 border-amber-800 bg-amber-50 md:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-xl font-pixel text-amber-900">Student Progress Trend</CardTitle>
-              <CardDescription className="font-pixel text-amber-700">
-                Completed waypoints over the last week
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <div className="h-[300px] min-w-[500px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={progressTrend} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f3e8d2" />
-                    <XAxis dataKey="day" stroke="#92400e" />
-                    <YAxis stroke="#92400e" />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "#fffbeb", borderColor: "#92400e" }}
-                      itemStyle={{ color: "#92400e" }}
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="completed"
-                      name="Completed Waypoints"
-                      stroke="#d97706"
-                      strokeWidth={2}
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+        {/* Stats Cards */}
+        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-blaka text-[#8B4513]">Classes</h3>
+                <p className="text-4xl font-blaka text-[#a0522d]">{classes?.length || 0}</p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="h-16 w-16 bg-[#a0522d] rounded-full flex items-center justify-center">
+                <BookOpenIcon size={32} className="text-[#f5e9d0]" />
+              </div>
+            </div>
+          </div>
 
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader>
-              <CardTitle className="text-xl font-pixel text-amber-900">Recent Activity</CardTitle>
-              <CardDescription className="font-pixel text-amber-700">Latest student achievements</CardDescription>
-            </CardHeader>
-            <CardContent className="max-h-[300px] overflow-y-auto">
-              <div className="space-y-4">
-                {recentActivity.length > 0 ? (
-                  recentActivity.map((activity, index) => (
-                    <div key={activity.id} className="flex items-start space-x-3 border-b border-amber-200 pb-2">
-                      <TrophyIcon className="h-5 w-5 text-amber-600 mt-1 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-amber-900">{activity.profiles?.username || "Student"}</p>
-                        <p className="text-xs text-amber-700">Completed: {activity.waypoints?.name || "Waypoint"}</p>
-                        <p className="text-xs text-amber-600">Score: {activity.score} points</p>
-                      </div>
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-blaka text-[#8B4513]">Students</h3>
+                <p className="text-4xl font-blaka text-[#a0522d]">{totalStudents}</p>
+              </div>
+              <div className="h-16 w-16 bg-[#a0522d] rounded-full flex items-center justify-center">
+                <UsersIcon size={32} className="text-[#f5e9d0]" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <h3 className="text-xl font-blaka text-[#8B4513] mb-2">Create New Class</h3>
+            <Link href="/teacher/classes/new">
+              <button className="w-full py-3 bg-[#a0522d] text-[#f5e9d0] font-blaka rounded hover:bg-[#8B4513] transition-colors flex items-center justify-center gap-2">
+                <PlusIcon size={20} />
+                <span>New Class</span>
+              </button>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Charts */}
+        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border md:col-span-2">
+            <h3 className="text-xl font-blaka text-[#8B4513] mb-2">Student Progress</h3>
+            <p className="text-sm text-[#8B4513] mb-4">Completed waypoints over the last week</p>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={progressTrend} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#d9c8a9" />
+                  <XAxis dataKey="day" stroke="#8B4513" />
+                  <YAxis stroke="#8B4513" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#f5e9d0", borderColor: "#8B4513" }}
+                    itemStyle={{ color: "#8B4513" }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    name="Completed Waypoints"
+                    stroke="#a0522d"
+                    strokeWidth={2}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <h3 className="text-xl font-blaka text-[#8B4513] mb-2">Recent Achievements</h3>
+            <div className="space-y-4 max-h-[300px] overflow-y-auto">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3 border-b border-[#d9c8a9] pb-2">
+                    <div className="mt-1 h-8 w-8 bg-[#a0522d] rounded-full flex items-center justify-center flex-shrink-0">
+                      <TrophyIcon size={16} className="text-[#f5e9d0]" />
                     </div>
-                  ))
-                ) : (
-                  <p className="text-amber-700 text-center py-4">No recent activity</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader>
-              <CardTitle className="text-xl font-pixel text-amber-900">Section Completion Rates</CardTitle>
-              <CardDescription className="font-pixel text-amber-700">
-                How students are progressing through each game section
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <div className="h-[300px] min-w-[500px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={completionStats} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f3e8d2" />
-                    <XAxis dataKey="name" stroke="#92400e" />
-                    <YAxis stroke="#92400e" />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "#fffbeb", borderColor: "#92400e" }}
-                      itemStyle={{ color: "#92400e" }}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="completionRate"
-                      fill="#d97706"
-                      name="Completion Rate (%)"
-                      radius={[4, 4, 0, 0]}
-                      label={{ position: "top", fill: "#92400e" }}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader>
-              <CardTitle className="text-2xl font-pixel text-amber-900">Your Classes</CardTitle>
-              <CardDescription className="font-pixel text-amber-700">
-                Manage your classes and view student progress
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="max-h-[600px] overflow-y-auto">
-              {classes && classes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {classes.map((cls) => (
-                    <Card key={cls.id} className="border border-amber-300">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg font-pixel text-amber-900">{cls.name}</CardTitle>
-                        <CardDescription className="font-pixel text-amber-700">
-                          Class Code: <span className="font-bold">{cls.class_code}</span>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm mb-4 line-clamp-2">{cls.description || "No description"}</p>
-                        <div className="flex space-x-2">
-                          <Button asChild className="flex-1 font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-                            <Link href={`/teacher/classes/${cls.id}`}>View</Link>
-                          </Button>
-                          <Button asChild className="flex-1 font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-                            <Link href={`/teacher/classes/${cls.id}/analytics`}>Stats</Link>
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                    <div>
+                      <p className="font-blaka text-[#8B4513]">{activity.profiles?.username || "Student"}</p>
+                      <p className="text-sm text-[#a0522d]">Completed: {activity.waypoints?.name || "Waypoint"}</p>
+                      <p className="text-xs text-[#8B4513]">Score: {activity.score} points</p>
+                    </div>
+                  </div>
+                ))
               ) : (
                 <div className="text-center py-8">
-                  <p className="font-pixel text-amber-700 mb-4">You haven't created any classes yet.</p>
-                  <Button asChild className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-                    <Link href="/teacher/classes/new">
-                      <PlusIcon className="mr-2 h-4 w-4" />
-                      Create Your First Class
-                    </Link>
-                  </Button>
+                  <p className="text-[#8B4513]">No recent activity</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
 
-        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button asChild className="h-auto py-6 font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-            <Link href="/teacher/classes" className="flex flex-col items-center gap-2">
-              <UsersIcon className="h-8 w-8" />
-              <span>Manage Classes</span>
-            </Link>
-          </Button>
+        {/* Completion Rates */}
+        <motion.div variants={item} className="mb-8">
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <h3 className="text-xl font-blaka text-[#8B4513] mb-2">Section Completion</h3>
+            <p className="text-sm text-[#8B4513] mb-4">How students are progressing through each game section</p>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={completionStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#d9c8a9" />
+                  <XAxis dataKey="name" stroke="#8B4513" />
+                  <YAxis stroke="#8B4513" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#f5e9d0", borderColor: "#8B4513" }}
+                    itemStyle={{ color: "#8B4513" }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="completionRate"
+                    fill="#a0522d"
+                    name="Completion Rate (%)"
+                    radius={[4, 4, 0, 0]}
+                    label={{ position: "top", fill: "#8B4513" }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.div>
 
-          <Button asChild className="h-auto py-6 font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-            <Link href="/teacher/analytics" className="flex flex-col items-center gap-2">
-              <BarChartIcon className="h-8 w-8" />
-              <span>Analytics</span>
-            </Link>
-          </Button>
+        {/* Classes */}
+        <motion.div variants={item} className="mb-8">
+          <div className="bg-[#f5e9d0] p-4 rounded-lg pixel-border">
+            <h3 className="text-2xl font-blaka text-[#8B4513] mb-4">Your Classes</h3>
 
-          <Button asChild className="h-auto py-6 font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-            <Link href="/teacher/profile" className="flex flex-col items-center gap-2">
-              <UserIcon className="h-8 w-8" />
-              <span>Profile</span>
-            </Link>
-          </Button>
+            {classes && classes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {classes.map((cls) => (
+                  <div key={cls.id} className="bg-[#e5d9c0] p-4 rounded border-2 border-[#d9c8a9]">
+                    <h4 className="text-lg font-blaka text-[#8B4513] mb-1">{cls.name}</h4>
+                    <p className="text-sm text-[#a0522d] mb-3">
+                      Class Code: <span className="font-bold">{cls.class_code}</span>
+                    </p>
+                    <p className="text-sm text-[#8B4513] mb-4 line-clamp-2">{cls.description || "No description"}</p>
+                    <div className="flex gap-2">
+                      <Link href={`/teacher/classes/${cls.id}`} className="flex-1">
+                        <button className="w-full py-2 bg-[#a0522d] text-[#f5e9d0] font-blaka rounded hover:bg-[#8B4513] transition-colors">
+                          View
+                        </button>
+                      </Link>
+                      <Link href={`/teacher/classes/${cls.id}/analytics`} className="flex-1">
+                        <button className="w-full py-2 bg-[#a0522d] text-[#f5e9d0] font-blaka rounded hover:bg-[#8B4513] transition-colors">
+                          Stats
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-[#e5d9c0] rounded">
+                <p className="font-blaka text-[#8B4513] mb-4">You haven't created any classes yet.</p>
+                <Link href="/teacher/classes/new">
+                  <button className="py-2 px-6 bg-[#a0522d] text-[#f5e9d0] font-blaka rounded hover:bg-[#8B4513] transition-colors flex items-center gap-2 mx-auto">
+                    <PlusIcon size={20} />
+                    <span>Create Your First Class</span>
+                  </button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Navigation */}
+        <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link href="/teacher/classes">
+            <div className="bg-[#a0522d] p-6 rounded-lg pixel-border hover:bg-[#8B4513] transition-colors text-center">
+              <UsersIcon size={32} className="text-[#f5e9d0] mx-auto mb-2" />
+              <span className="font-blaka text-xl text-[#f5e9d0]">Manage Classes</span>
+            </div>
+          </Link>
+
+          <Link href="/teacher/analytics">
+            <div className="bg-[#a0522d] p-6 rounded-lg pixel-border hover:bg-[#8B4513] transition-colors text-center">
+              <BarChartIcon size={32} className="text-[#f5e9d0] mx-auto mb-2" />
+              <span className="font-blaka text-xl text-[#f5e9d0]">Analytics</span>
+            </div>
+          </Link>
+
+          <Link href="/teacher/profile">
+            <div className="bg-[#a0522d] p-6 rounded-lg pixel-border hover:bg-[#8B4513] transition-colors text-center">
+              <UserIcon size={32} className="text-[#f5e9d0] mx-auto mb-2" />
+              <span className="font-blaka text-xl text-[#f5e9d0]">Profile</span>
+            </div>
+          </Link>
         </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   )
 }

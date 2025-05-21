@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Award } from "lucide-react"
+import { trackWaypointTime, updateStudentProgress } from "@/lib/time-tracking"
 
 interface FractionAdditionGameProps {
   waypointId: number
@@ -321,6 +322,103 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
       </div>
     </div>
   )
+
+  // Time tracking
+  const startTimeRef = useRef<number>(Date.now())
+  const lastTrackTimeRef = useRef<number>(Date.now())
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Track time in chunks
+  useEffect(() => {
+    // Track time every 30 seconds
+    intervalRef.current = setInterval(() => {
+      const now = Date.now()
+      const timeSpent = now - lastTrackTimeRef.current
+
+      if (timeSpent > 1000) {
+        // Only track if more than 1 second has passed
+        trackWaypointTime(userId, waypointId, timeSpent)
+        lastTrackTimeRef.current = now
+      }
+    }, 30000) // 30 seconds
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+
+      // Track final time when component unmounts
+      const finalTime = Date.now() - lastTrackTimeRef.current
+      if (finalTime > 1000) {
+        trackWaypointTime(userId, waypointId, finalTime)
+      }
+    }
+  }, [userId, waypointId])
+
+  // Handle game completion
+  const handleGameComplete = async () => {
+    if (gameState === "complete") return
+
+    setGameState("complete")
+
+    // Calculate total time spent
+    const totalTimeSpent = Math.round((Date.now() - startTimeRef.current) / 1000) // in seconds
+
+    // Update progress with completion data
+    await updateStudentProgress(userId, waypointId, {
+      completed: true,
+      score,
+      mistakes,
+      attempts,
+      timeSpent: totalTimeSpent,
+    })
+
+    // Clear the interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+
+    // Call the onComplete callback
+    onComplete(score, mistakes, attempts)
+  }
+
+  // Handle attempt
+  const handleAnswerUpdated = (selectedAnswer: string) => {
+    if (!currentQuestion) return
+
+    setAttempts((prev) => prev + 1)
+
+    if (selectedAnswer === currentQuestion.answer) {
+      // Correct answer
+      setScore((prev) => prev + 10)
+      setFeedback("Correct! The compass piece fits perfectly!")
+      setCompassPieces((prev) => {
+        const newValue = prev + 1
+        if (newValue >= 5) {
+          // Game complete after 5 correct answers
+          setTimeout(() => {
+            handleGameComplete()
+          }, 1500)
+        }
+        return newValue
+      })
+
+      // Next question after a short delay
+      setTimeout(() => {
+        setCurrentQuestion(generateQuestion())
+        setFeedback(null)
+      }, 1500)
+    } else {
+      // Wrong answer
+      setMistakes((prev) => prev + 1)
+      setFeedback("That doesn't align with the others. Try again!")
+
+      // Clear feedback after 1.5 seconds
+      setTimeout(() => {
+        setFeedback(null)
+      }, 1500)
+    }
+  }
 
   return (
     <Card className="border-2 border-amber-800 bg-amber-50">

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
 import { Volume2, VolumeX } from "lucide-react"
 import Link from "next/link"
+import { BackgroundSlideshow } from "./background-slideshow"
 
 // Add floating animation keyframes
 const floatingAnimation = `
@@ -118,7 +119,8 @@ const floatingAnimation = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform: translateY(-15%) translateX(-2%); /* Move content higher and slightly left */
+  transform: translateY(0%) translateX(-2%); /* Remove the negative translateY value */
+  padding-top: 0; /* Add explicit padding-top: 0 */
 }
 
 @media (max-width: 768px) {
@@ -136,7 +138,7 @@ const floatingAnimation = `
     transform: translateY(-12%) translateX(1.5%);
   }
   .login-content {
-    transform: translateY(-12%) translateX(-1.5%);
+    transform: translateY(0%) translateX(-1.5%);
   }
 }
 
@@ -155,7 +157,7 @@ const floatingAnimation = `
     transform: translateY(-10%) translateX(1%);
   }
   .login-content {
-    transform: translateY(-10%) translateX(-1%);
+    transform: translateY(0%) translateX(-1%);
   }
 }
 
@@ -174,7 +176,7 @@ const floatingAnimation = `
     transform: translateY(-8%) translateX(0.5%);
   }
   .login-content {
-    transform: translateY(-8%) translateX(-0.5%);
+    transform: translateY(0%) translateX(-0.5%);
   }
 }
 `
@@ -496,7 +498,10 @@ export function BookLoginForm() {
   }, [])
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen overflow-hidden bg-[#8B3734]">
+    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen overflow-hidden">
+      {/* Background slideshow */}
+      <BackgroundSlideshow interval={8000} fadeTime={1500} />
+
       {/* Full-width container for clouds */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Render all active clouds */}
@@ -539,16 +544,16 @@ export function BookLoginForm() {
       )}
 
       {/* Open Book Login Form */}
-      <div className="relative z-20 w-[90%] max-w-[800px] mx-auto">
+      <div className="relative z-20 w-[92%] max-w-[900px] mx-auto">
         <div className="relative">
           {/* Book image container */}
           <div className="relative w-full">
             <Image
               src="/book.png"
               alt="Open book"
-              width={800}
-              height={600}
-              className="w-full h-auto pixelated"
+              width={900}
+              height={675}
+              className="w-full h-auto pixelated scale-105 transform-gpu"
               priority
             />
 
@@ -591,10 +596,10 @@ export function BookLoginForm() {
                     )}
 
                     {/* Username/Email field */}
-                    <div className="mb-2">
+                    <div className="mb-1.5">
                       <label
                         htmlFor="email"
-                        className="block text-[#8B3734] font-blaka text-lg sm:text-xl md:text-2xl mb-1"
+                        className="block text-[#8B3734] font-blaka text-base sm:text-lg md:text-xl mb-0.5"
                       >
                         Email
                       </label>
@@ -604,15 +609,15 @@ export function BookLoginForm() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full px-3 py-1.5 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
                       />
                     </div>
 
                     {/* Password field */}
-                    <div className="mb-4">
+                    <div className="mb-3">
                       <label
                         htmlFor="password"
-                        className="block text-[#8B3734] font-blaka text-lg sm:text-xl md:text-2xl mb-1"
+                        className="block text-[#8B3734] font-blaka text-base sm:text-lg md:text-xl mb-0.5"
                       >
                         Password
                       </label>
@@ -622,7 +627,7 @@ export function BookLoginForm() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-3 py-1.5 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
+                        className="w-full px-4 py-2 bg-[#f5e9d0] bg-opacity-50 border-2 border-[#8B3734] rounded-sm text-[#8B3734] text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-[#8B3734]"
                       />
                     </div>
 
@@ -630,7 +635,7 @@ export function BookLoginForm() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-1.5 px-4 rounded-sm border border-black transition-colors duration-200 text-lg sm:text-xl md:text-2xl pixelated"
+                      className="w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-2 px-4 rounded-sm border border-black transition-colors duration-200 pixelated"
                     >
                       {isLoading ? "Loading..." : "Login"}
                     </button>

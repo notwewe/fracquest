@@ -2,25 +2,28 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 export function LogoutButton({ className = "" }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const router = useRouter()
+  const supabase = createClientComponentClient()
 
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true)
 
-      // First try the API route
-      const response = await fetch("/api/logout")
+      // Try to sign out directly
+      await supabase.auth.signOut()
 
-      // Redirect regardless of response
+      // Redirect to login page
       router.push("/auth/login")
       router.refresh()
     } catch (error) {
       console.error("Logout error:", error)
-      // If all else fails, just redirect to login
-      router.push("/auth/login")
+
+      // If direct logout fails, try the simple logout page
+      router.push("/auth/logout")
     }
   }
 

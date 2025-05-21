@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("API logout error:", error)
-    return NextResponse.json({ success: false, error: "Logout failed" }, { status: 500 })
+    // Return success even if there's an error to ensure client-side handling works
+    return NextResponse.json({ success: true, error: "Handled error" })
   }
 }

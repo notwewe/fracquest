@@ -141,7 +141,7 @@ export function ImproperFractions({ waypointId }: { waypointId: number }) {
         <div className="space-y-4">
           <p className="text-lg">
             <span className="font-bold text-blue-700">Whiskers:</span> "That's not so hard when you break it down like
-            that. Let's play that conversion game now—I'm ready!"
+            that. Let's play that conversion game now���I'm ready!"
           </p>
           <p className="text-lg">
             <span className="font-bold text-amber-700">Squeaks:</span> "Let's see how fast your brain and paws can work

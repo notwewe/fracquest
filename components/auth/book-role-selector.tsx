@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Volume2, VolumeX } from "lucide-react"
 import Link from "next/link"
+import { BackgroundSlideshow } from "./background-slideshow"
 
 // Add floating animation keyframes
 const floatingAnimation = `
@@ -115,7 +116,8 @@ const floatingAnimation = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform: translateY(-15%) translateX(-2%); /* Move content higher and slightly left */
+  transform: translateY(0%) translateX(-2%); /* Remove the negative translateY value */
+  padding-top: 0; /* Add explicit padding-top: 0 */
 }
 
 @media (max-width: 768px) {
@@ -133,7 +135,7 @@ const floatingAnimation = `
     transform: translateY(-12%) translateX(1.5%);
   }
   .register-content {
-    transform: translateY(-12%) translateX(-1.5%);
+    transform: translateY(0%) translateX(-1.5%);
   }
 }
 
@@ -152,7 +154,7 @@ const floatingAnimation = `
     transform: translateY(-10%) translateX(1%);
   }
   .register-content {
-    transform: translateY(-10%) translateX(-1%);
+    transform: translateY(0%) translateX(-1%);
   }
 }
 
@@ -171,7 +173,7 @@ const floatingAnimation = `
     transform: translateY(-8%) translateX(0.5%);
   }
   .register-content {
-    transform: translateY(-8%) translateX(-0.5%);
+    transform: translateY(0%) translateX(-0.5%);
   }
 }
 `
@@ -449,7 +451,10 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
   }, [])
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen overflow-hidden bg-[#8B3734]">
+    <div className="fixed inset-0 flex flex-col items-center justify-center min-h-screen overflow-hidden">
+      {/* Background slideshow */}
+      <BackgroundSlideshow interval={8000} fadeTime={1500} />
+
       {/* Full-width container for clouds */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         {/* Render all active clouds */}
@@ -492,16 +497,16 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
       )}
 
       {/* Open Book Role Selector Form */}
-      <div className="relative z-20 w-[90%] max-w-[800px] mx-auto">
+      <div className="relative z-20 w-[92%] max-w-[900px] mx-auto">
         <div className="relative">
           {/* Book image container */}
           <div className="relative w-full">
             <Image
               src="/book.png"
               alt="Open book"
-              width={800}
-              height={600}
-              className="w-full h-auto pixelated"
+              width={900}
+              height={675}
+              className="w-full h-auto pixelated scale-105 transform-gpu"
               priority
             />
 
@@ -586,7 +591,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
                         type="button"
                         onClick={handleContinue}
                         disabled={!selectedRole}
-                        className={`w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-1.5 px-4 rounded-sm border border-black transition-colors duration-200 text-lg sm:text-xl md:text-2xl pixelated ${
+                        className={`w-full bg-[#8B3734] hover:bg-[#a04234] text-[#f5e9d0] font-blaka py-1.5 px-4 rounded-sm border border-black transition-colors duration-200 pixelated ${
                           !selectedRole ? "opacity-50 cursor-not-allowed" : ""
                         }`}
                       >

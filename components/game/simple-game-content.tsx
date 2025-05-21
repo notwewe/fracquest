@@ -1,24 +1,32 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { ArrowLeft } from "lucide-react"
 import { LevelCompletionPopup } from "./level-completion-popup"
+import { trackWaypointTime, updateStudentProgress } from "@/lib/time-tracking"
 
 type GameProps = {
+  studentId: string
   waypointId: number
   gameType: string
   onComplete?: () => void
   levelName?: string
 }
 
-export function SimpleGameContent({ waypointId, gameType, onComplete, levelName = "Practice Game" }: GameProps) {
+export function SimpleGameContent({
+  studentId,
+  waypointId,
+  gameType,
+  onComplete,
+  levelName = "Practice Game",
+}: GameProps) {
   const router = useRouter()
   const [isCompleted, setIsCompleted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
   const [currentQuestion, setCurrentQuestion] = useState(1)
   const [totalQuestions] = useState(5) // 5 questions per game
@@ -26,6 +34,38 @@ export function SimpleGameContent({ waypointId, gameType, onComplete, levelName 
   const [score, setScore] = useState(20) // Start with max score
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const supabase = createClient()
+
+  // Time tracking
+  const startTimeRef = useRef<number>(Date.now())
+  const lastTrackTimeRef = useRef<number>(Date.now())
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Track time in chunks to avoid losing all time data if the user navigates away
+  useEffect(() => {
+    // Track time every 30 seconds
+    intervalRef.current = setInterval(() => {
+      const now = Date.now()
+      const timeSpent = now - lastTrackTimeRef.current
+
+      if (timeSpent > 1000) {
+        // Only track if more than 1 second has passed
+        trackWaypointTime(studentId, waypointId, timeSpent)
+        lastTrackTimeRef.current = now
+      }
+    }, 30000) // 30 seconds
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+
+      // Track final time when component unmounts
+      const finalTime = Date.now() - lastTrackTimeRef.current
+      if (finalTime > 1000) {
+        trackWaypointTime(studentId, waypointId, finalTime)
+      }
+    }
+  }, [studentId, waypointId])
 
   // Check if the game is already completed
   useEffect(() => {
@@ -52,6 +92,8 @@ export function SimpleGameContent({ waypointId, gameType, onComplete, levelName 
         }
       } catch (error) {
         console.error("Error checking completion:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -110,6 +152,9 @@ export function SimpleGameContent({ waypointId, gameType, onComplete, levelName 
 
     setIsLoading(true)
 
+    // Calculate total time spent
+    const totalTimeSpent = Math.round((Date.now() - startTimeRef.current) / 1000) // in seconds
+
     try {
       // Mark level as completed in the database
       const {
@@ -117,12 +162,12 @@ export function SimpleGameContent({ waypointId, gameType, onComplete, levelName 
       } = await supabase.auth.getUser()
 
       if (user) {
-        await supabase.from("student_progress").upsert({
-          student_id: user.id,
-          waypoint_id: waypointId,
+        await updateStudentProgress(studentId, waypointId, {
           completed: true,
           score: score, // Save the calculated score
-          last_updated: new Date().toISOString(),
+          mistakes: mistakes,
+          attempts: 0, // Assuming attempts are not tracked in the original code
+          timeSpent: totalTimeSpent,
         })
       }
 
@@ -141,7 +186,16 @@ export function SimpleGameContent({ waypointId, gameType, onComplete, levelName 
       router.push("/student/game")
     } finally {
       setIsLoading(false)
+      // Clear the interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
     }
+  }
+
+  // Handle attempt
+  const handleAttempt = (isCorrect: boolean) => {
+    setMistakes((prev) => prev + (isCorrect ? 0 : 1))
   }
 
   return (

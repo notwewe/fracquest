@@ -234,9 +234,9 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
               }
             }
           `}</style>
-          <div className="relative top-6">
-            <Image src="/dashboard/welcome.png" alt="Welcome Banner" width={500} height={80} className="pixelated" />
-            <h1 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg sm:text-xl md:text-4xl whitespace-nowrap font-bold text-[#8B3734] font-blaka">
+          <div className="relative">
+            <Image src="/dashboard/welcome.png" alt="Welcome Banner" width={350} height={80} className="pixelated" />
+            <h1 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg sm:text-xl md:text-2xl whitespace-nowrap font-bold text-[#8B3734] font-blaka">
               Welcome to FracQuest
             </h1>
           </div>
@@ -254,7 +254,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
       <div className="flex items-center justify-center w-full z-20 px-4">
         <div className="relative max-w-xl w-full">
           <Image
-            src="/dashboard/con.png"
+            src="/dashboard/container.png"
             alt="Container"
             width={500}
             height={333}

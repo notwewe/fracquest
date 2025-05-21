@@ -1,15 +1,33 @@
-import { redirect } from "next/navigation"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+"use client"
 
-export default async function SimpleLogoutPage() {
-  const supabase = createServerComponentClient({ cookies })
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
-  try {
-    await supabase.auth.signOut()
-  } catch (error) {
-    console.error("Server logout error:", error)
-  }
+export default function SimpleLogoutPage() {
+  const router = useRouter()
+  const supabase = createClientComponentClient()
 
-  redirect("/auth/login")
+  useEffect(() => {
+    async function handleLogout() {
+      try {
+        await supabase.auth.signOut()
+      } catch (error) {
+        console.error("Client logout error:", error)
+      } finally {
+        router.push("/auth/login")
+      }
+    }
+
+    handleLogout()
+  }, [router, supabase.auth])
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold mb-4">Logging out...</h1>
+        <p>You will be redirected to the login page shortly.</p>
+      </div>
+    </div>
+  )
 }

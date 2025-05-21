@@ -7,6 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Users, BookOpen, Award, Settings, Database, FileText, Activity } from "lucide-react"
 import { AdminUsers } from "./admin-users"
 import { AdminClasses } from "./admin-classes"
+import { AdminProgress } from "./admin-progress"
+import { AdminAnalytics } from "./admin-analytics"
+import { SystemSettings } from "./system-settings"
+import { DatabaseManagement } from "./database-management"
+import { AdminReports } from "./admin-reports"
 
 const container = {
   hidden: { opacity: 0 },
@@ -201,6 +206,26 @@ export function AdminDashboard() {
 
         <TabsContent value="classes">
           <AdminClasses />
+        </TabsContent>
+
+        <TabsContent value="progress">
+          <AdminProgress />
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <AdminReports />
+        </TabsContent>
+
+        <TabsContent value="database">
+          <DatabaseManagement />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <SystemSettings />
         </TabsContent>
       </Tabs>
     </div>
