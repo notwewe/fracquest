@@ -120,7 +120,7 @@ const floatingAnimation = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform: translateY(0%) translateX(-2%); /* Remove the negative translateY value */
+  transform: translateY(-10%) translateX(-2%); /* Move content up by 10% and slightly left */
   padding-top: 0; /* Add explicit padding-top: 0 */
   scale: 1.15; /* Make content 15% bigger */
 }
@@ -178,7 +178,7 @@ const floatingAnimation = `
     transform: translateY(-12%) translateX(1.5%);
   }
   .register-content {
-    transform: translateY(0%) translateX(-1.5%);
+    transform: translateY(-8%) translateX(-1.5%); /* Adjusted for smaller screens */
   }
 }
 
@@ -197,7 +197,7 @@ const floatingAnimation = `
     transform: translateY(-10%) translateX(1%);
   }
   .register-content {
-    transform: translateY(0%) translateX(-1%);
+    transform: translateY(-6%) translateX(-1%); /* Adjusted for smaller screens */
   }
 }
 
@@ -216,7 +216,7 @@ const floatingAnimation = `
     transform: translateY(-8%) translateX(0.5%);
   }
   .register-content {
-    transform: translateY(0%) translateX(-0.5%);
+    transform: translateY(-5%) translateX(-0.5%); /* Adjusted for smallest screens */
   }
 }
 `

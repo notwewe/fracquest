@@ -8,6 +8,7 @@ import Image from "next/image"
 import { Volume2, VolumeX } from "lucide-react"
 import Link from "next/link"
 import { BackgroundSlideshow } from "./background-slideshow"
+import { useRouter } from "next/navigation"
 
 // Add floating animation keyframes
 const floatingAnimation = `
@@ -120,7 +121,7 @@ const floatingAnimation = `
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform: translateY(0%) translateX(-2%); /* Remove the negative translateY value */
+  transform: translateY(-10%) translateX(-2%); /* Move content up by 10% and slightly left */
   padding-top: 0; /* Add explicit padding-top: 0 */
   scale: 1.15; /* Make content 15% bigger */
 }
@@ -165,7 +166,7 @@ const floatingAnimation = `
     transform: translateY(-12%) translateX(1.5%);
   }
   .login-content {
-    transform: translateY(0%) translateX(-1.5%);
+    transform: translateY(-8%) translateX(-1.5%); /* Adjusted for smaller screens */
   }
 }
 
@@ -184,7 +185,7 @@ const floatingAnimation = `
     transform: translateY(-10%) translateX(1%);
   }
   .login-content {
-    transform: translateY(0%) translateX(-1%);
+    transform: translateY(-6%) translateX(-1%); /* Adjusted for smaller screens */
   }
 }
 
@@ -203,7 +204,7 @@ const floatingAnimation = `
     transform: translateY(-8%) translateX(0.5%);
   }
   .login-content {
-    transform: translateY(0%) translateX(-0.5%);
+    transform: translateY(-5%) translateX(-0.5%); /* Adjusted for smallest screens */
   }
 }
 `
@@ -233,6 +234,7 @@ export function BookLoginForm() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const cloudIdCounter = useRef(0)
+  const router = useRouter()
   const supabase = createClient()
 
   // Track window size for responsive adjustments
@@ -511,6 +513,11 @@ export function BookLoginForm() {
     }
   }
 
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.push("/auth/select-role-register")
+  }
+
   // Add the animation styles to the document
   useEffect(() => {
     // Create style element
@@ -674,6 +681,7 @@ export function BookLoginForm() {
                       </span>
                       <Link
                         href="/auth/select-role-register"
+                        onClick={handleRegisterClick}
                         className="text-[#8B3734] hover:text-[#a04234] font-bold text-xs sm:text-sm md:text-lg font-blaka underline"
                       >
                         Register
