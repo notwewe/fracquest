@@ -562,6 +562,11 @@ export function BookRegisterForm() {
     }
   }
 
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.push("/auth/login")
+  }
+
   // Add the animation styles to the document
   useEffect(() => {
     // Create style element
@@ -783,6 +788,7 @@ export function BookRegisterForm() {
                         </span>
                         <Link
                           href="/auth/login"
+                          onClick={handleLoginClick}
                           className="text-[#8B3734] hover:text-[#a04234] font-bold text-xs sm:text-sm md:text-lg font-blaka underline"
                         >
                           Login

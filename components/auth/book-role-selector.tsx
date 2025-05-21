@@ -1,10 +1,13 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Volume2, VolumeX } from "lucide-react"
 import Link from "next/link"
 import { BackgroundSlideshow } from "./background-slideshow"
+import { useRouter } from "next/navigation"
 
 // Add floating animation keyframes
 const floatingAnimation = `
@@ -244,6 +247,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const cloudIdCounter = useRef(0)
+  const router = useRouter()
 
   // Track window size for responsive adjustments
   useEffect(() => {
@@ -477,6 +481,11 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
     }
   }
 
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.push("/auth/login")
+  }
+
   // Add the animation styles to the document
   useEffect(() => {
     // Create style element
@@ -646,6 +655,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
                       </span>
                       <Link
                         href="/auth/login"
+                        onClick={handleLoginClick}
                         className="text-[#8B3734] hover:text-[#a04234] font-bold text-xs sm:text-sm md:text-lg font-blaka underline"
                       >
                         Login
