@@ -1,3 +1,5 @@
+"use client"
+
 import { PixelScene } from "@/components/game/pixel-scene"
 import { PixelWorldMap } from "@/components/game/pixel-world-map"
 import { FractionVisual } from "@/components/game/fraction-visual"
@@ -50,6 +52,10 @@ export default function PixelGameDemo() {
     // Add more questions as needed
   ]
 
+  const handleGameComplete = (score: number) => {
+    alert(`Game complete! Score: ${score}`)
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-6">FracQuest Pixel Art Demo</h1>
@@ -100,7 +106,7 @@ export default function PixelGameDemo() {
         <PixelMiniGame
           title="Convert Fractions"
           background="/pixel-locations/fraction-emporium-interior.png"
-          onComplete={(score) => alert(`Game complete! Score: ${score}`)}
+          onComplete={handleGameComplete}
           gameType="conversion"
           questions={conversionGameQuestions}
         />
