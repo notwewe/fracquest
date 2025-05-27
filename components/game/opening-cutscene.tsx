@@ -2,59 +2,58 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
+import Image from "next/image"
+
+interface StoryScene {
+  speaker: string
+  text: string
+  background?: string
+  character?: string
+  item?: string
+}
+
+const storyScenes: StoryScene[] = [
+  {
+    speaker: "Narrator",
+    text: "In the mystical kingdom of Numeria, where numbers and fractions lived in perfect harmony, there stood a magnificent castle ruled by the wise King Equalis.",
+    background: "/auth/backgrounds/numeria-castle.png",
+  },
+  {
+    speaker: "Decimal Phantom",
+    text: "Hahaha! Finally, I have found the legendary Fraction Orb! With its power, I shall bring chaos to all mathematical order!",
+    character: "/pixel-characters/decimal-phantom-new.png",
+  },
+  {
+    speaker: "King Equalis",
+    text: "Oh no! The Decimal Phantom has shattered the Fraction Orb! Without it, our kingdom will fall into mathematical chaos! We need a hero to restore balance!",
+    character: "/pixel-characters/king-equalis-new.png",
+  },
+  {
+    speaker: "Whiskers",
+    text: "Your Majesty, I may be small, but I have a brave heart! I will journey across the land to collect the scattered orb fragments and restore peace to Numeria!",
+    background: "/auth/backgrounds/numeria-castle.png",
+    character: "/pixel-characters/whiskers-new.png",
+  },
+  {
+    speaker: "King Equalis",
+    text: "Brave Whiskers, take this magical compass! It will guide you to each fragment. Remember, understanding fractions is the key to defeating the Decimal Phantom. Good luck, young hero!",
+    background: "/auth/backgrounds/numeria-castle.png",
+    character: "/pixel-characters/king-equalis-new.png",
+    item: "/pixel-items/magical-compass.png",
+  },
+]
 
 export function OpeningCutscene() {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
+  const supabase = createClient()
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
   const [displayedText, setDisplayedText] = useState("")
   const [isTyping, setIsTyping] = useState(true)
-  const supabase = createClient()
+  const [showContinue, setShowContinue] = useState(false)
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const dialogue = [
-    {
-      speaker: "Narrator",
-      text: "Long ago, in the magical kingdom of Numeria, numbers and mathematics brought harmony and prosperity to all.",
-    },
-    {
-      speaker: "Narrator",
-      text: "At the heart of the kingdom stood the Fraction Orb, a powerful artifact that maintained balance between all forms of numbers.",
-    },
-    {
-      speaker: "Narrator",
-      text: "But one fateful day, the Decimal Phantom, jealous of the kingdom's prosperity, infiltrated the royal vault.",
-    },
-    {
-      speaker: "Decimal Phantom",
-      text: "Why should fractions hold such power? Decimals are superior! I shall destroy this orb and bring chaos to Numeria!",
-    },
-    {
-      speaker: "Narrator",
-      text: "With a powerful spell, the Phantom shattered the Fraction Orb into pieces, scattering them across the land.",
-    },
-    {
-      speaker: "Narrator",
-      text: "As the orb shattered, mathematical chaos ensued. Numbers became unstable, equations faltered, and the kingdom began to crumble.",
-    },
-    {
-      speaker: "King Equalis",
-      text: "This is terrible! Without the Fraction Orb, our kingdom will fall into mathematical disorder!",
-    },
-    {
-      speaker: "King Equalis",
-      text: "We must find a hero who understands the power of fractions to recover the fragments and restore balance to our realm.",
-    },
-    {
-      speaker: "Narrator",
-      text: "And that's where you come in, brave adventurer. The kingdom needs your mathematical prowess to save it from chaos.",
-    },
-    {
-      speaker: "Narrator",
-      text: "Your journey begins now. Are you ready to master fractions and save the kingdom of Numeria?",
-    },
-  ]
+  const currentScene = storyScenes[currentSceneIndex]
 
   // Clean up on unmount
   useEffect(() => {
@@ -65,134 +64,203 @@ export function OpeningCutscene() {
     }
   }, [])
 
-  // Handle dialogue text display
+  // Typewriter effect
   useEffect(() => {
-    if (currentStep >= dialogue.length) {
-      return
-    }
-
-    // Reset state for new step
-    setIsTyping(true)
     setDisplayedText("")
+    setIsTyping(true)
+    setShowContinue(false)
 
-    // Get the full text for the current step
-    const fullText = dialogue[currentStep].text
-    let charIndex = 0
-
-    // Clear any existing timer
     if (typingTimerRef.current) {
       clearTimeout(typingTimerRef.current)
     }
 
-    // Function to type each character
+    let charIndex = 0
+    const fullText = currentScene.text
+
     const typeNextChar = () => {
       if (charIndex < fullText.length) {
-        // Use substring to ensure we get the complete text up to the current index
         setDisplayedText(fullText.substring(0, charIndex + 1))
         charIndex++
-        typingTimerRef.current = setTimeout(typeNextChar, 30)
+        // Faster, more fluid typing speed
+        typingTimerRef.current = setTimeout(typeNextChar, 20)
       } else {
         setIsTyping(false)
+        setShowContinue(true)
       }
     }
 
-    // Start typing
-    typeNextChar()
+    // Start typing after a brief delay
+    typingTimerRef.current = setTimeout(typeNextChar, 300)
 
-    // Clean up on step change
     return () => {
       if (typingTimerRef.current) {
         clearTimeout(typingTimerRef.current)
       }
     }
-  }, [currentStep, dialogue])
+  }, [currentSceneIndex, currentScene.text])
 
-  const handleNext = () => {
+  const handleContinue = async () => {
     if (isTyping) {
-      // Skip typing animation
+      // Skip to end of current text
       if (typingTimerRef.current) {
         clearTimeout(typingTimerRef.current)
       }
-      setDisplayedText(dialogue[currentStep].text)
+      setDisplayedText(currentScene.text)
       setIsTyping(false)
-    } else if (currentStep < dialogue.length - 1) {
-      // Go to next dialogue step
-      setCurrentStep((prev) => prev + 1)
-    } else {
-      // Complete the intro
-      handleComplete()
+      setShowContinue(true)
+      return
     }
-  }
 
-  const handleComplete = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+    if (currentSceneIndex < storyScenes.length - 1) {
+      setCurrentSceneIndex((prev) => prev + 1)
+    } else {
+      // Story complete, mark as seen and redirect
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-      if (user) {
-        // Mark the intro as seen
-        await supabase.from("story_progress").upsert({
-          student_id: user.id,
-          has_seen_intro: true,
-        })
+        if (user) {
+          // First check if a record already exists for this student
+          const { data: existingProgress } = await supabase
+            .from("story_progress")
+            .select("*")
+            .eq("student_id", user.id)
+            .maybeSingle()
+
+          if (existingProgress) {
+            // Update existing record
+            await supabase
+              .from("story_progress")
+              .update({
+                has_seen_intro: true,
+                last_dialogue_index: storyScenes.length - 1,
+              })
+              .eq("student_id", user.id)
+          } else {
+            // Create new record only if one doesn't exist
+            await supabase.from("story_progress").insert({
+              student_id: user.id,
+              has_seen_intro: true,
+              last_dialogue_index: storyScenes.length - 1,
+            })
+          }
+        }
+      } catch (error) {
+        console.error("Error updating story progress:", error)
       }
 
-      // Redirect to the student map
-      router.push("/student/map")
-    } catch (error) {
-      console.error("Error updating story progress:", error)
-      router.push("/student/map")
+      router.push("/student/dashboard")
     }
   }
 
-  if (currentStep >= dialogue.length) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="text-center">
-          <h2 className="text-2xl font-pixel text-amber-900 mb-4">Your adventure begins!</h2>
-          <Button
-            onClick={() => router.push("/student/map")}
-            className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-          >
-            Start Your Quest
-          </Button>
-        </div>
-      </div>
-    )
+  // Handle click anywhere to continue
+  const handleClick = () => {
+    handleContinue()
   }
 
-  const currentDialogue = dialogue[currentStep]
-
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="border-2 border-amber-800 bg-amber-50 p-6 rounded-lg">
-        <h2 className="text-2xl font-pixel text-amber-900 mb-4">The Legend of FracQuest</h2>
+    <div className="min-h-screen w-full relative overflow-hidden cursor-pointer" onClick={handleClick}>
+      <style jsx>{`
+        @keyframes levitate {
+          0% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+          100% {
+            transform: translateY(0px);
+          }
+        }
+        
+        .levitate {
+          animation: levitate 3s ease-in-out infinite;
+        }
+      `}</style>
 
-        {/* Background - text only, no images */}
-        <div className="mb-4 bg-amber-200 p-4 rounded-lg">
-          <div className="text-center font-pixel text-amber-800">
-            {currentStep <= 1
-              ? "Kingdom of Numeria"
-              : currentStep <= 3
-                ? "The Decimal Phantom"
-                : currentStep <= 5
-                  ? "The Shattering"
-                  : currentStep <= 7
-                    ? "Royal Throne Room"
-                    : "The Hero's Call"}
+      {/* Background */}
+      {currentScene.background ? (
+        <div className="absolute inset-0">
+          <Image
+            src={currentScene.background || "/placeholder.svg"}
+            alt="Scene background"
+            fill
+            className="object-cover"
+            style={{ imageRendering: "pixelated" }}
+            priority
+          />
+        </div>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-900 via-blue-900 to-black" />
+      )}
+
+      {/* Character - positioned lower */}
+      {currentScene.character && (
+        <div className="absolute left-24 bottom-[320px] z-10">
+          <div className="relative">
+            <Image
+              src={currentScene.character || "/placeholder.svg"}
+              alt={currentScene.speaker}
+              width={200}
+              height={200}
+              style={{ imageRendering: "pixelated" }}
+            />
           </div>
         </div>
+      )}
 
-        <div className="bg-amber-100 border-2 border-amber-300 rounded-lg p-4">
-          <div className="font-pixel text-amber-900 text-lg mb-2">{currentDialogue.speaker}:</div>
-          <div className="font-pixel text-amber-800 min-h-[100px]">{displayedText}</div>
+      {/* Item (compass) with levitation animation */}
+      {currentScene.item && (
+        <div className="absolute left-[280px] bottom-[380px] z-10">
+          <div className="relative levitate">
+            <Image
+              src={currentScene.item || "/placeholder.svg"}
+              alt="Magical compass"
+              width={100}
+              height={100}
+              style={{ imageRendering: "pixelated" }}
+            />
+          </div>
         </div>
+      )}
 
-        <div className="flex justify-end mt-4">
-          <Button onClick={handleNext} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-            {isTyping ? "Skip" : currentStep < dialogue.length - 1 ? "Next" : "Begin Adventure"}
-          </Button>
+      {/* Dialogue Box - spans full width at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="relative w-full">
+          {/* Dialog paper background - increased height */}
+          <div className="relative w-full h-[280px]">
+            <Image
+              src="/pixel-ui/dialog-paper4.png"
+              alt="Dialog background"
+              fill
+              className="object-fill"
+              style={{ imageRendering: "pixelated" }}
+            />
+          </div>
+
+          {/* Content overlay with better spacing */}
+          <div className="absolute inset-0">
+            {/* Speaker name - bigger and bolder */}
+            <div className="absolute top-12 left-[196px] text-amber-800 font-pixel text-2xl font-black">
+              {currentScene.speaker}
+            </div>
+
+            {/* Dialogue text - normal size and weight */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black text-lg font-pixel leading-relaxed w-3/4 text-left pl-[196px]">
+              {displayedText}
+            </div>
+
+            {/* Continue indicator - positioned higher */}
+            {showContinue && (
+              <div className="absolute bottom-12 right-16">
+                <div className="flex items-center">
+                  <span className="text-amber-800 font-pixel text-sm">Click to continue</span>
+                  <span className="text-amber-800 ml-2">▼</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
