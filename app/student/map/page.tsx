@@ -1,5 +1,5 @@
-import InteractiveMapDemo from "./interactive-demo"
+import { redirect } from "next/navigation"
 
 export default function MapPage() {
-  return <InteractiveMapDemo />
+  redirect("/student/game")
 }

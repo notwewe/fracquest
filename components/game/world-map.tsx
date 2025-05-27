@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
 interface Waypoint {
@@ -104,10 +102,6 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     }
   }
 
-  const handleRefresh = () => {
-    window.location.reload()
-  }
-
   // If locations is undefined or empty, show a loading state
   if (!locations || locations.length === 0) {
     return (
@@ -122,14 +116,6 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
 
   return (
     <div className="w-full">
-      {/* Refresh button */}
-      <div className="flex justify-end mb-4">
-        <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Refresh Map
-        </Button>
-      </div>
-
       {/* Map with locations */}
       <div className="relative w-full h-[300px] md:h-[400px] bg-amber-100 rounded-lg border-4 border-amber-800 overflow-hidden mb-4">
         <div className="absolute inset-0 bg-[url('/fantasy-map-pixel-art.png')] bg-cover bg-center opacity-50"></div>

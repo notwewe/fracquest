@@ -11,6 +11,8 @@ interface StoryScene {
   background?: string
   character?: string
   item?: string
+  animation?: string
+  videoBackground?: string
 }
 
 const storyScenes: StoryScene[] = [
@@ -22,23 +24,30 @@ const storyScenes: StoryScene[] = [
   {
     speaker: "Decimal Phantom",
     text: "Hahaha! Finally, I have found the legendary Fraction Orb! With its power, I shall bring chaos to all mathematical order!",
+    background: "/auth/backgrounds/numeria-castle.png",
     character: "/pixel-characters/decimal-phantom-new.png",
+    animation:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/output-onlinegiftools-ezgif.com-speed-d3Q9ZtnjLe88ddvrekAl25Lgu1ir2s.gif",
   },
   {
     speaker: "King Equalis",
     text: "Oh no! The Decimal Phantom has shattered the Fraction Orb! Without it, our kingdom will fall into mathematical chaos! We need a hero to restore balance!",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
     character: "/pixel-characters/king-equalis-new.png",
   },
   {
     speaker: "Whiskers",
     text: "Your Majesty, I may be small, but I have a brave heart! I will journey across the land to collect the scattered orb fragments and restore peace to Numeria!",
-    background: "/auth/backgrounds/numeria-castle.png",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
     character: "/pixel-characters/whiskers-new.png",
   },
   {
     speaker: "King Equalis",
     text: "Brave Whiskers, take this magical compass! It will guide you to each fragment. Remember, understanding fractions is the key to defeating the Decimal Phantom. Good luck, young hero!",
-    background: "/auth/backgrounds/numeria-castle.png",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
     character: "/pixel-characters/king-equalis-new.png",
     item: "/pixel-items/magical-compass.png",
   },
@@ -52,8 +61,17 @@ export function OpeningCutscene() {
   const [isTyping, setIsTyping] = useState(true)
   const [showContinue, setShowContinue] = useState(false)
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const currentScene = storyScenes[currentSceneIndex]
+
+  // Handle video playback when scene changes
+  useEffect(() => {
+    if (currentScene.videoBackground && videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch((err) => console.error("Video playback failed:", err))
+    }
+  }, [currentSceneIndex, currentScene.videoBackground])
 
   // Clean up on unmount
   useEffect(() => {
@@ -177,13 +195,44 @@ export function OpeningCutscene() {
         .levitate {
           animation: levitate 3s ease-in-out infinite;
         }
+        
+        .orb-glow {
+          filter: drop-shadow(0 0 15px rgba(147, 51, 234, 0.7));
+        }
+        
+        @keyframes pulse {
+          0% {
+            opacity: 0.7;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0.7;
+          }
+        }
+        
+        .pulse {
+          animation: pulse 1.5s ease-in-out infinite;
+        }
       `}</style>
 
-      {/* Background */}
-      {currentScene.background ? (
+      {/* Background - either image or video */}
+      {currentScene.videoBackground ? (
+        <div className="absolute inset-0 bg-black">
+          <video
+            ref={videoRef}
+            src={currentScene.videoBackground}
+            className="absolute inset-0 w-full h-full object-cover"
+            muted
+            playsInline
+            loop
+          />
+        </div>
+      ) : (
         <div className="absolute inset-0">
           <Image
-            src={currentScene.background || "/placeholder.svg"}
+            src={currentScene.background || "/auth/backgrounds/numeria-castle.png"}
             alt="Scene background"
             fill
             className="object-cover"
@@ -191,19 +240,32 @@ export function OpeningCutscene() {
             priority
           />
         </div>
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900 via-blue-900 to-black" />
       )}
 
       {/* Character - positioned lower */}
       {currentScene.character && (
-        <div className="absolute left-24 bottom-[320px] z-10">
+        <div className="absolute left-24 bottom-[290px] z-10">
           <div className="relative">
             <Image
               src={currentScene.character || "/placeholder.svg"}
               alt={currentScene.speaker}
               width={200}
               height={200}
+              style={{ imageRendering: "pixelated" }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Animated Orb - centered and bigger */}
+      {currentScene.animation && (
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+          <div className="relative orb-glow">
+            <Image
+              src={currentScene.animation || "/placeholder.svg"}
+              alt="Fraction Orb"
+              width={350}
+              height={350}
               style={{ imageRendering: "pixelated" }}
             />
           </div>
@@ -226,9 +288,9 @@ export function OpeningCutscene() {
       )}
 
       {/* Dialogue Box - spans full width at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20">
+      <div className="absolute bottom-0 left-0 right-0 z-30">
         <div className="relative w-full">
-          {/* Dialog paper background - increased height */}
+          {/* Dialog paper background - original height */}
           <div className="relative w-full h-[280px]">
             <Image
               src="/pixel-ui/dialog-paper4.png"
@@ -241,8 +303,8 @@ export function OpeningCutscene() {
 
           {/* Content overlay with better spacing */}
           <div className="absolute inset-0">
-            {/* Speaker name - bigger and bolder */}
-            <div className="absolute top-12 left-[196px] text-amber-800 font-pixel text-2xl font-black">
+            {/* Speaker name - using Blaka font */}
+            <div className="absolute top-12 left-[196px] text-amber-800 font-blaka text-3xl">
               {currentScene.speaker}
             </div>
 
@@ -251,11 +313,11 @@ export function OpeningCutscene() {
               {displayedText}
             </div>
 
-            {/* Continue indicator - positioned higher */}
+            {/* Continue indicator - using Blaka font */}
             {showContinue && (
               <div className="absolute bottom-12 right-16">
                 <div className="flex items-center">
-                  <span className="text-amber-800 font-pixel text-sm">Click to continue</span>
+                  <span className="text-amber-800 font-blaka text-xl pulse">Click to continue</span>
                   <span className="text-amber-800 ml-2">▼</span>
                 </div>
               </div>

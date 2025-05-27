@@ -34,20 +34,10 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null)
-  const [skipNextLine, setSkipNextLine] = useState(false) // Add this to track if we should skip the next line
+  const [skipNextLine, setSkipNextLine] = useState(false)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const supabase = createClient()
-
-  // Debug logging
-  useEffect(() => {
-    console.log("Current line:", currentLine)
-    console.log("Dialogue length:", dialogue.length)
-    console.log("Is completed:", isCompleted)
-    console.log("Is button disabled:", isButtonDisabled)
-    console.log("Wrong attempts:", wrongAttempts)
-    console.log("Skip next line:", skipNextLine)
-  }, [currentLine, dialogue.length, isCompleted, isButtonDisabled, wrongAttempts, skipNextLine])
 
   // Load the saved progress when component mounts
   useEffect(() => {
@@ -174,7 +164,13 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
         // If there's a specific wrong answer line to jump to
         if (currentDialogue.wrongAnswerLine !== undefined) {
           setTimeout(() => {
-            setCurrentLine(currentDialogue.wrongAnswerLine)
+            // Fix: Ensure wrongAnswerLine is a number before setting state
+            if (typeof currentDialogue.wrongAnswerLine === "number") {
+              setCurrentLine(currentDialogue.wrongAnswerLine)
+            } else {
+              // Default to next line if wrongAnswerLine is undefined
+              setCurrentLine(currentLine + 1)
+            }
             setWrongAttempts(0)
             setSelectedChoice(null)
             setIsButtonDisabled(false)
@@ -214,8 +210,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
   }
 
   const handleNext = useCallback(() => {
-    console.log("Next button clicked")
-
     // Temporarily disable the button to prevent double-clicks
     setIsButtonDisabled(true)
 
@@ -239,7 +233,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
   }, [currentLine, dialogue.length])
 
   const handleComplete = async () => {
-    console.log("Handling completion")
     if (isCompleted || isLoading) return
 
     setIsLoading(true)
@@ -251,8 +244,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
       } = await supabase.auth.getUser()
 
       if (user) {
-        console.log("Marking level as completed for user:", user.id, "waypoint:", levelId)
-
         // First, check if a record already exists
         const { data: existingProgress } = await supabase
           .from("student_progress")
@@ -265,7 +256,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
 
         if (existingProgress) {
           // If record exists, use update instead of upsert
-          console.log("Existing progress found, updating...")
           result = await supabase
             .from("student_progress")
             .update({
@@ -278,7 +268,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
             .eq("waypoint_id", Number.parseInt(levelId))
         } else {
           // If no record exists, insert a new one
-          console.log("No existing progress, inserting new record...")
           result = await supabase.from("student_progress").insert({
             student_id: user.id,
             waypoint_id: Number.parseInt(levelId),
@@ -290,7 +279,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
         }
 
         if (result.error) {
-          console.error("Error saving completion status:", result.error)
           throw new Error(`Failed to save completion: ${result.error.message}`)
         }
 
@@ -317,20 +305,15 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
         }
 
         if (!progress || !progress.completed) {
-          console.error("Level not marked as completed after save")
-
           // Try one more time with a direct update using RPC
           try {
             await supabase.rpc("force_complete_waypoint", {
               p_student_id: user.id,
               p_waypoint_id: Number.parseInt(levelId),
             })
-            console.log("Forced completion via RPC")
           } catch (rpcError) {
             console.error("Error forcing completion via RPC:", rpcError)
           }
-        } else {
-          console.log("Level successfully marked as completed!")
         }
       }
 
@@ -452,23 +435,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
           </div>
         )}
       </div>
-
-      {/* Debug info - only visible in development */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="absolute top-0 right-0 bg-black bg-opacity-70 text-white p-2 text-xs">
-          <div>
-            Line: {currentLine + 1}/{dialogue.length}
-          </div>
-          <div>Button disabled: {isButtonDisabled ? "Yes" : "No"}</div>
-          <div>Loading: {isLoading ? "Yes" : "No"}</div>
-          <div>Saving: {isSaving ? "Yes" : "No"}</div>
-          <div>Wrong attempts: {wrongAttempts}/3</div>
-          <div>Selected choice: {selectedChoice !== null ? selectedChoice : "none"}</div>
-          <div>Level ID: {levelId}</div>
-          <div>Is Completed: {isCompleted ? "Yes" : "No"}</div>
-          <div>Skip next line: {skipNextLine ? "Yes" : "No"}</div>
-        </div>
-      )}
 
       {/* Emergency exit button - always visible */}
       <div className="absolute top-4 right-4">

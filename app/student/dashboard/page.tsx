@@ -29,11 +29,19 @@ export default async function StudentDashboard() {
 
   const isEnrolled = !!studentClass
 
-  return (
-    <PixelDashboard
-      username={profile.username || "Student"}
-      isEnrolled={isEnrolled}
-      className={studentClass?.classes?.name || ""}
-    />
-  )
+  // Fix: Extract class name properly from the nested structure
+  let className = ""
+  if (studentClass && studentClass.classes) {
+    // Handle both object and array formats
+    if (Array.isArray(studentClass.classes)) {
+      className = studentClass.classes[0]?.name || ""
+    } else {
+      className = studentClass.classes.name || ""
+    }
+  }
+
+  console.log("Class data:", studentClass) // Debug log
+  console.log("Class name:", className) // Debug log
+
+  return <PixelDashboard username={profile.username || "Student"} isEnrolled={isEnrolled} className={className} />
 }
