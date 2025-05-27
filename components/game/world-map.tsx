@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
-import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 interface Waypoint {
   id: number
@@ -32,56 +31,10 @@ interface WorldMapProps {
 export function WorldMap({ locations = [] }: WorldMapProps) {
   const router = useRouter()
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
-  const [studentProgress, setStudentProgress] = useState<Record<number, boolean>>({})
   const [isLoading, setIsLoading] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const supabase = createClient()
-
-  // Fetch student progress
-  const fetchStudentProgress = async () => {
-    setIsRefreshing(true)
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (user) {
-        // Force a refresh of the student_progress table
-        try {
-          await supabase.rpc("refresh_student_progress")
-        } catch (err) {
-          console.error("Error refreshing student progress:", err)
-        }
-
-        const { data } = await supabase.from("student_progress").select("*").eq("student_id", user.id)
-
-        if (data) {
-          const progressMap: Record<number, boolean> = {}
-          data.forEach((progress) => {
-            progressMap[progress.waypoint_id] = progress.completed
-          })
-          setStudentProgress(progressMap)
-          console.log("Student progress loaded:", progressMap)
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching student progress:", error)
-    } finally {
-      setIsRefreshing(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchStudentProgress()
-
-    // Set up a refresh interval to keep the map updated
-    const intervalId = setInterval(fetchStudentProgress, 5000)
-
-    return () => clearInterval(intervalId)
-  }, [])
 
   // Auto-select the first location when the component mounts
-  useEffect(() => {
+  useState(() => {
     if (locations && locations.length > 0 && !selectedLocation) {
       const firstUnlockedLocation = locations.find((loc) => loc.unlocked)
       if (firstUnlockedLocation) {
@@ -91,7 +44,7 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
         setSelectedLocation(locations[0])
       }
     }
-  }, [locations, selectedLocation])
+  })
 
   const handleLocationClick = (location: Location) => {
     if (!location.unlocked) {
@@ -111,20 +64,6 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     setIsLoading(true)
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        toast({
-          title: "Authentication Error",
-          description: "Please log in to continue.",
-          variant: "destructive",
-        })
-        setIsLoading(false)
-        return
-      }
-
       // Get all waypoints for the current location
       const currentLocationWaypoints = selectedLocation?.waypoints?.sort((a, b) => a.order_index - b.order_index) || []
 
@@ -134,7 +73,7 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
       // Check if all previous waypoints are completed
       const allPreviousCompleted =
         waypointIndex === 0 ||
-        (waypointIndex > 0 && currentLocationWaypoints.slice(0, waypointIndex).every((wp) => studentProgress[wp.id]))
+        (waypointIndex > 0 && currentLocationWaypoints.slice(0, waypointIndex).every((wp) => wp.completed))
 
       if (!allPreviousCompleted) {
         toast({
@@ -155,7 +94,6 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
         router.push(`/student/game/boss/${waypoint.id}`)
       }
     } catch (error) {
-      console.error("Error handling waypoint click:", error)
       toast({
         title: "Error",
         description: "An error occurred. Please try again.",
@@ -164,6 +102,10 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleRefresh = () => {
+    window.location.reload()
   }
 
   // If locations is undefined or empty, show a loading state
@@ -182,14 +124,9 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     <div className="w-full">
       {/* Refresh button */}
       <div className="flex justify-end mb-4">
-        <Button
-          onClick={fetchStudentProgress}
-          disabled={isRefreshing}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-          {isRefreshing ? "Refreshing..." : "Refresh Map"}
+        <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Refresh Map
         </Button>
       </div>
 
@@ -203,7 +140,7 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
           const allWaypointsCompleted =
             location.waypoints &&
             location.waypoints.length > 0 &&
-            location.waypoints.every((waypoint) => studentProgress[waypoint.id])
+            location.waypoints.every((waypoint) => waypoint.completed)
 
           return (
             <div
@@ -243,13 +180,13 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
                     .sort((a, b) => a.order_index - b.order_index)
 
                   const allPreviousCompleted =
-                    previousWaypoints.length === 0 || previousWaypoints.every((w) => studentProgress[w.id])
+                    previousWaypoints.length === 0 || previousWaypoints.every((w) => w.completed)
 
                   // Determine if this waypoint is available
                   const isAvailable = allPreviousCompleted
 
                   // Determine if this waypoint is completed
-                  const isCompleted = studentProgress[waypoint.id]
+                  const isCompleted = waypoint.completed
 
                   return (
                     <button
@@ -268,13 +205,6 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
                       <div className="text-xs">
                         {waypoint.type === "intro" || waypoint.type === "story" ? "Story" : "Game"}
                       </div>
-                      {process.env.NODE_ENV === "development" && (
-                        <>
-                          <div className="text-xs mt-1">ID: {waypoint.id}</div>
-                          <div className="text-xs">Completed: {isCompleted ? "Yes" : "No"}</div>
-                          <div className="text-xs">Available: {isAvailable ? "Yes" : "No"}</div>
-                        </>
-                      )}
                     </button>
                   )
                 })
@@ -284,14 +214,6 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Debug info - only visible in development */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="mt-4 bg-gray-100 p-4 rounded-lg">
-          <h3 className="font-bold mb-2">Debug Info</h3>
-          <div>Progress Data: {JSON.stringify(studentProgress)}</div>
         </div>
       )}
     </div>

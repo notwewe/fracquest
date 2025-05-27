@@ -18,26 +18,14 @@ export default async function GamePage() {
       redirect("/auth/login")
     }
 
-    // Check if student is enrolled in a class - do this first!
+    // Check if student is enrolled in a class
     const { data: studentClasses, error: classError } = await supabase
       .from("student_classes")
       .select("*")
       .eq("student_id", user.id)
 
     if (classError) {
-      console.error("Class error:", classError)
-      return (
-        <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading class data</h1>
-          <p className="mb-4">{classError.message}</p>
-          <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-            <Link href="/student/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      )
+      throw new Error("Error loading class data")
     }
 
     if (!studentClasses || studentClasses.length === 0) {
@@ -50,23 +38,7 @@ export default async function GamePage() {
       .eq("id", user.id)
       .single()
 
-    if (profileError) {
-      console.error("Profile error:", profileError)
-      return (
-        <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading profile</h1>
-          <p className="mb-4">{profileError.message}</p>
-          <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-            <Link href="/student/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      )
-    }
-
-    if (!profile || profile.role_id !== 1) {
+    if (profileError || !profile || profile.role_id !== 1) {
       redirect("/auth/login")
     }
 
@@ -74,7 +46,7 @@ export default async function GamePage() {
     try {
       await supabase.rpc("refresh_student_progress")
     } catch (error) {
-      console.error("Error refreshing student progress:", error)
+      // Continue even if refresh fails
     }
 
     // Get all sections (locations)
@@ -84,38 +56,14 @@ export default async function GamePage() {
       .order("order_index")
 
     if (sectionsError) {
-      console.error("Sections error:", sectionsError)
-      return (
-        <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading game sections</h1>
-          <p className="mb-4">{sectionsError.message}</p>
-          <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-            <Link href="/student/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      )
+      throw new Error("Error loading game sections")
     }
 
     // Get all waypoints
     const { data: waypoints, error: waypointsError } = await supabase.from("waypoints").select("*").order("order_index")
 
     if (waypointsError) {
-      console.error("Waypoints error:", waypointsError)
-      return (
-        <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading waypoints</h1>
-          <p className="mb-4">{waypointsError.message}</p>
-          <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-            <Link href="/student/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      )
+      throw new Error("Error loading waypoints")
     }
 
     // Get student progress
@@ -125,19 +73,7 @@ export default async function GamePage() {
       .eq("student_id", user.id)
 
     if (progressError) {
-      console.error("Progress error:", progressError)
-      return (
-        <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading progress</h1>
-          <p className="mb-4">{progressError.message}</p>
-          <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-            <Link href="/student/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-        </div>
-      )
+      throw new Error("Error loading progress")
     }
 
     // Create a map of completed waypoints
@@ -208,24 +144,13 @@ export default async function GamePage() {
     return (
       <div className="min-h-screen bg-amber-50 p-4">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-6 flex justify-between">
+          <div className="mb-6">
             <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
               <Link href="/student/dashboard">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Dashboard
               </Link>
             </Button>
-
-            {process.env.NODE_ENV === "development" && (
-              <div className="flex space-x-2">
-                <Button asChild variant="outline" className="font-pixel border-purple-600 text-purple-700">
-                  <Link href="/debug/progress">Debug Progress</Link>
-                </Button>
-                <Button asChild variant="outline" className="font-pixel border-purple-600 text-purple-700">
-                  <Link href="/debug/force-complete">Force Complete</Link>
-                </Button>
-              </div>
-            )}
           </div>
 
           <h1 className="text-3xl font-bold text-center mb-8 font-medieval text-amber-900">World of Numeria</h1>
@@ -270,11 +195,9 @@ export default async function GamePage() {
       </div>
     )
   } catch (error) {
-    console.error("Game page error:", error)
     return (
       <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">Error loading game</h1>
-        <p className="mb-4">{error instanceof Error ? error.message : "Unknown error"}</p>
+        <h1 className="text-2xl font-bold text-red-600 mb-4">Unable to load game</h1>
         <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
           <Link href="/student/dashboard">
             <ArrowLeft className="mr-2 h-4 w-4" />
