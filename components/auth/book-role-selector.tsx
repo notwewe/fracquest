@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
-import { Volume2, VolumeX } from "lucide-react"
 import Link from "next/link"
 import { BackgroundSlideshow } from "./background-slideshow"
 import { useRouter } from "next/navigation"
@@ -242,10 +241,6 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
   const [clouds, setClouds] = useState<Cloud[]>([])
   const [windowWidth, setWindowWidth] = useState(0)
   const [windowHeight, setWindowHeight] = useState(0)
-  const [isMuted, setIsMuted] = useState(true) // Start muted
-  const [audioEnabled, setAudioEnabled] = useState(true) // Track if audio is available
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const cloudIdCounter = useRef(0)
   const router = useRouter()
 
@@ -265,129 +260,6 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Initialize audio with error handling
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    try {
-      // Create audio element if it doesn't exist
-      if (!audioRef.current) {
-        const audio = new Audio()
-
-        // Set up event listeners before setting src to catch load errors
-        audio.addEventListener("error", (e) => {
-          console.error("Audio error details:", {
-            code: audio.error?.code,
-            message: audio.error?.message,
-          })
-          setAudioEnabled(false) // Disable audio functionality
-        })
-
-        // Set audio properties
-        audio.loop = true
-        audio.volume = 0 // Start with volume at 0
-        audio.preload = "auto"
-
-        // Set source last
-        audio.src = "/audio/auththeme.mp3"
-
-        audioRef.current = audio
-      }
-    } catch (error) {
-      console.error("Audio initialization error:", error)
-      setAudioEnabled(false) // Disable audio functionality
-    }
-
-    return () => {
-      // Clean up
-      if (fadeIntervalRef.current) {
-        clearInterval(fadeIntervalRef.current)
-        fadeIntervalRef.current = null
-      }
-
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause()
-          audioRef.current.src = ""
-          audioRef.current = null
-        } catch (error) {
-          console.error("Audio cleanup error:", error)
-        }
-      }
-    }
-  }, [])
-
-  // Handle mute state changes
-  useEffect(() => {
-    // Skip if audio is not enabled or ref doesn't exist
-    if (!audioEnabled || !audioRef.current) return
-
-    try {
-      if (isMuted) {
-        // When muted, pause the audio and reset volume
-        audioRef.current.pause()
-        audioRef.current.volume = 0
-
-        // Clear any fade interval
-        if (fadeIntervalRef.current) {
-          clearInterval(fadeIntervalRef.current)
-          fadeIntervalRef.current = null
-        }
-      } else {
-        // When unmuted, play the audio and fade in volume
-        const playPromise = audioRef.current.play()
-
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              // Clear any existing interval
-              if (fadeIntervalRef.current) {
-                clearInterval(fadeIntervalRef.current)
-                fadeIntervalRef.current = null
-              }
-
-              // Start fade in
-              fadeIntervalRef.current = setInterval(() => {
-                if (audioRef.current) {
-                  // Calculate new volume, ensuring it doesn't exceed 1.0
-                  const newVolume = Math.min(audioRef.current.volume + 0.1, 0.5) // Max volume 0.5
-                  audioRef.current.volume = newVolume
-
-                  // If we've reached target volume, clear the interval
-                  if (newVolume >= 0.5) {
-                    if (fadeIntervalRef.current) {
-                      clearInterval(fadeIntervalRef.current)
-                      fadeIntervalRef.current = null
-                    }
-                  }
-                } else {
-                  // Audio element no longer exists, clear interval
-                  if (fadeIntervalRef.current) {
-                    clearInterval(fadeIntervalRef.current)
-                    fadeIntervalRef.current = null
-                  }
-                }
-              }, 100)
-            })
-            .catch((error) => {
-              console.error("Audio play failed:", error)
-              // Reset to muted state if play fails
-              setIsMuted(true)
-            })
-        }
-      }
-    } catch (error) {
-      console.error("Audio control error:", error)
-      setAudioEnabled(false) // Disable audio functionality on error
-    }
-  }, [isMuted, audioEnabled])
-
-  // Toggle mute state
-  const toggleMute = () => {
-    if (!audioEnabled) return // Don't toggle if audio is disabled
-    setIsMuted(!isMuted)
-  }
-
   // Initialize clouds
   useEffect(() => {
     if (!windowWidth) return
@@ -396,7 +268,7 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
     const initialClouds: Cloud[] = []
 
     // Adjust number of clouds based on screen size
-    const cloudCount = windowWidth < 640 ? 5 : 8
+    const cloudCount = windowWidth < 640 ? 4 : 6 // Reduced count to accommodate larger clouds
 
     // Create clouds
     for (let i = 0; i < cloudCount; i++) {
@@ -436,9 +308,9 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
     // Randomly select cloud image (1, 2, or 3)
     const cloudNumber = Math.floor(Math.random() * 3) + 1
 
-    // Adjust cloud size based on screen width
-    const baseSize = windowWidth < 640 ? 120 : windowWidth < 1024 ? 150 : 180
-    const sizeVariation = windowWidth < 640 ? 60 : 100
+    // Adjust cloud size based on screen width - INCREASED SIZES
+    const baseSize = windowWidth < 640 ? 180 : windowWidth < 1024 ? 220 : 280 // Increased from 120/150/180
+    const sizeVariation = windowWidth < 640 ? 80 : 120 // Increased from 60/100
 
     // Random cloud size
     const size = Math.floor(Math.random() * sizeVariation) + baseSize
@@ -529,21 +401,6 @@ export function BookRoleSelector({ onRoleSelect }: RoleSelectorProps) {
           </div>
         ))}
       </div>
-
-      {/* Audio toggle button - only show if audio is enabled */}
-      {audioEnabled && (
-        <button
-          onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow shadow-md"
-          aria-label={isMuted ? "Unmute background music" : "Mute background music"}
-        >
-          {isMuted ? (
-            <VolumeX size={20} className="text-amber-100" /> // Show muted icon when muted (click to unmute)
-          ) : (
-            <Volume2 size={20} className="text-amber-100" /> // Show volume icon when not muted (click to mute)
-          )}
-        </button>
-      )}
 
       {/* Open Book Role Selector Form */}
       <div className="relative z-20 w-[92%] max-w-[900px] mx-auto">

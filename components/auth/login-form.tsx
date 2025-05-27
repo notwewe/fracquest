@@ -4,7 +4,6 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
-import { Volume2, VolumeX } from "lucide-react"
 
 // Add floating animation keyframes
 const floatingAnimation = `
@@ -69,10 +68,6 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [clouds, setClouds] = useState<Cloud[]>([])
   const [windowWidth, setWindowWidth] = useState(0)
-  const [isMuted, setIsMuted] = useState(true) // Start muted
-  const [audioEnabled, setAudioEnabled] = useState(true) // Track if audio is available
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const cloudIdCounter = useRef(0)
   const supabase = createClient()
 
@@ -89,130 +84,6 @@ export function LoginForm() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
-
-  // Initialize audio with error handling
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    try {
-      // Create audio element if it doesn't exist
-      if (!audioRef.current) {
-        const audio = new Audio()
-
-        // Set up event listeners before setting src to catch load errors
-        audio.addEventListener("error", (e) => {
-          console.error("Audio error details:", {
-            code: audio.error?.code,
-            message: audio.error?.message,
-            name: audio.error?.name,
-          })
-          setAudioEnabled(false) // Disable audio functionality
-        })
-
-        // Set audio properties
-        audio.loop = true
-        audio.volume = 0 // Start with volume at 0
-        audio.preload = "auto"
-
-        // Set source last
-        audio.src = "/audio/auththeme.mp3"
-
-        audioRef.current = audio
-      }
-    } catch (error) {
-      console.error("Audio initialization error:", error)
-      setAudioEnabled(false) // Disable audio functionality
-    }
-
-    return () => {
-      // Clean up
-      if (fadeIntervalRef.current) {
-        clearInterval(fadeIntervalRef.current)
-        fadeIntervalRef.current = null
-      }
-
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause()
-          audioRef.current.src = ""
-          audioRef.current = null
-        } catch (error) {
-          console.error("Audio cleanup error:", error)
-        }
-      }
-    }
-  }, [])
-
-  // Handle mute state changes
-  useEffect(() => {
-    // Skip if audio is not enabled or ref doesn't exist
-    if (!audioEnabled || !audioRef.current) return
-
-    try {
-      if (isMuted) {
-        // When muted, pause the audio and reset volume
-        audioRef.current.pause()
-        audioRef.current.volume = 0
-
-        // Clear any fade interval
-        if (fadeIntervalRef.current) {
-          clearInterval(fadeIntervalRef.current)
-          fadeIntervalRef.current = null
-        }
-      } else {
-        // When unmuted, play the audio and fade in volume
-        const playPromise = audioRef.current.play()
-
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              // Clear any existing interval
-              if (fadeIntervalRef.current) {
-                clearInterval(fadeIntervalRef.current)
-                fadeIntervalRef.current = null
-              }
-
-              // Start fade in
-              fadeIntervalRef.current = setInterval(() => {
-                if (audioRef.current) {
-                  // Calculate new volume, ensuring it doesn't exceed 1.0
-                  const newVolume = Math.min(audioRef.current.volume + 0.1, 0.5) // Max volume 0.5
-                  audioRef.current.volume = newVolume
-
-                  // If we've reached target volume, clear the interval
-                  if (newVolume >= 0.5) {
-                    if (fadeIntervalRef.current) {
-                      clearInterval(fadeIntervalRef.current)
-                      fadeIntervalRef.current = null
-                    }
-                  }
-                } else {
-                  // Audio element no longer exists, clear interval
-                  if (fadeIntervalRef.current) {
-                    clearInterval(fadeIntervalRef.current)
-                    fadeIntervalRef.current = null
-                  }
-                }
-              }, 100)
-            })
-            .catch((error) => {
-              console.error("Audio play failed:", error)
-              // Reset to muted state if play fails
-              setIsMuted(true)
-            })
-        }
-      }
-    } catch (error) {
-      console.error("Audio control error:", error)
-      setAudioEnabled(false) // Disable audio functionality on error
-    }
-  }, [isMuted, audioEnabled])
-
-  // Toggle mute state
-  const toggleMute = () => {
-    if (!audioEnabled) return // Don't toggle if audio is disabled
-    setIsMuted(!isMuted)
-  }
 
   // Initialize clouds
   useEffect(() => {
@@ -391,21 +262,6 @@ export function LoginForm() {
           </div>
         ))}
       </div>
-
-      {/* Audio toggle button - only show if audio is enabled */}
-      {audioEnabled && (
-        <button
-          onClick={toggleMute}
-          className="absolute top-4 right-4 z-30 bg-amber-800 hover:bg-amber-700 text-amber-100 p-2 rounded-full transition-all duration-200 animate-pulse-slow"
-          aria-label={isMuted ? "Unmute background music" : "Mute background music"}
-        >
-          {isMuted ? (
-            <VolumeX size={20} className="text-amber-100" /> // Show muted icon when muted (click to unmute)
-          ) : (
-            <Volume2 size={20} className="text-amber-100" /> // Show volume icon when not muted (click to mute)
-          )}
-        </button>
-      )}
 
       {/* Centered content container */}
       <div className="relative z-20 flex flex-col items-center justify-center w-full max-w-md mx-auto">
