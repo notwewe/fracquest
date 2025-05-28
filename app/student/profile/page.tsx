@@ -9,9 +9,8 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, ArrowLeft, Save, LogOut, Trophy, BookOpen, UserPlus } from "lucide-react"
+import { Loader2, Save, Trophy, BookOpen, UserPlus } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
 
 export default function StudentProfilePage() {
@@ -143,178 +142,276 @@ export default function StudentProfilePage() {
 
   if (isLoadingData) {
     return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-[60vh]">
+      <div
+        className="h-screen flex justify-center items-center"
+        style={{
+          backgroundImage: "url('/dashboard/castle-background.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
         <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-6">
-        <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+    <div
+      className="h-screen p-4 overflow-hidden flex flex-col justify-center"
+      style={{
+        backgroundImage: "url('/dashboard/castle-background.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Back to Dashboard Button */}
+      <div className="absolute top-4 left-4 z-10">
+        <Link href="/student/dashboard">
+          <div
+            className="relative w-64 h-20 cursor-pointer hover:scale-105 transition-transform"
+            style={{
+              backgroundImage: "url('/dashboard/logout.png')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center" style={{ marginTop: "-4px" }}>
+              <span className="text-amber-200 font-bold text-2xl" style={{ fontFamily: "var(--font-blaka)" }}>
+                Dashboard
+              </span>
+            </div>
+          </div>
+        </Link>
       </div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="flex flex-col items-center">
+        {/* Profile Title */}
+        <div
+          className="relative mb-6"
+          style={{
+            backgroundImage: "url('/dashboard/welcome.png')",
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            width: "500px",
+            height: "100px",
+          }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="text-4xl font-bold text-amber-900 font-blaka" style={{ fontFamily: "var(--font-blaka)" }}>
+              Profile
+            </h1>
+          </div>
+        </div>
+
         {!isEnrolled && (
-          <Alert className="mb-6 bg-amber-100 border-amber-300">
-            <AlertDescription className="text-amber-800 font-pixel">
+          <Alert className="mb-4 bg-amber-100 border-amber-300 max-w-2xl">
+            <AlertDescription className="text-amber-800">
               You need to join a class to play the game and see leaderboards. Join a class below!
             </AlertDescription>
           </Alert>
         )}
 
-        <Card className="border-2 border-amber-800 bg-amber-50 mb-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-pixel text-amber-900">Your Profile</CardTitle>
-            <CardDescription className="font-pixel text-amber-700">Update your profile information</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            {success && (
-              <Alert className="mb-4 bg-green-50 border-green-200">
-                <AlertDescription className="text-green-800">{success}</AlertDescription>
-              </Alert>
-            )}
-            {redirectMessage && (
-              <Alert className="mb-4 bg-amber-50 border-amber-200">
-                <AlertDescription className="text-amber-800">{redirectMessage}</AlertDescription>
-              </Alert>
-            )}
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="username" className="font-pixel text-amber-900">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="border-amber-300 bg-amber-100"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email" className="font-pixel text-amber-900">
-                    Email
-                  </Label>
-                  <Input id="email" value={email} disabled className="border-amber-300 bg-amber-100 opacity-70" />
-                  <p className="text-xs text-amber-600">Email cannot be changed</p>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="class" className="font-pixel text-amber-900">
-                    Class
-                  </Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      id="class"
-                      value={className || "Not enrolled in any class"}
-                      disabled
-                      className="border-amber-300 bg-amber-100 opacity-70"
-                    />
-                    {!isEnrolled && (
-                      <Button
-                        type="button"
-                        onClick={() => setShowJoinClass(true)}
-                        className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-                      >
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Join Class
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white mt-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </>
+        {/* Row layout with responsive sizing */}
+        <div className="flex flex-col lg:flex-row justify-center items-center gap-6 w-full max-w-[1400px] mx-auto">
+          {/* Profile Information Section */}
+          <div className="flex flex-col items-center w-full lg:w-3/5 max-w-full">
+            {/* Profile Information Container */}
+            <div
+              style={{
+                backgroundImage: "url('/dashboard/scroll-1.png')",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
+                width: "100%",
+                height: "550px",
+                position: "relative",
+                maxWidth: "800px",
+              }}
+            >
+              <div className="absolute inset-0 flex flex-col justify-center px-20 py-12">
+                <div className="max-w-md mx-auto w-full space-y-4">
+                  {error && (
+                    <Alert variant="destructive" className="mb-2">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
                   )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                  {success && (
+                    <Alert className="mb-2 bg-green-50 border-green-200">
+                      <AlertDescription className="text-green-800">{success}</AlertDescription>
+                    </Alert>
+                  )}
+                  {redirectMessage && (
+                    <Alert className="mb-2 bg-amber-50 border-amber-200">
+                      <AlertDescription className="text-amber-800">{redirectMessage}</AlertDescription>
+                    </Alert>
+                  )}
 
-        {showJoinClass && (
-          <Card className="border-2 border-amber-800 bg-amber-50 mb-6">
-            <CardHeader>
-              <CardTitle className="text-2xl font-pixel text-amber-900">Join a Class</CardTitle>
-              <CardDescription className="font-pixel text-amber-700">
-                Enter the class code provided by your teacher
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <JoinClassForm onSuccess={handleJoinClassSuccess} />
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setShowJoinClass(false)}
-                className="font-pixel border-amber-600 text-amber-700"
-              >
-                Cancel
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
-
-        <Card className="border-2 border-amber-800 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-2xl font-pixel text-amber-900">Your Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
-                <div className="flex items-center gap-3">
-                  <BookOpen className="h-6 w-6 text-amber-700" />
-                  <div>
-                    <p className="text-sm text-amber-700">Levels Completed</p>
-                    <p className="text-2xl font-bold font-pixel text-amber-900">{completedLevels}</p>
-                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="username"
+                        className="text-amber-900 font-bold text-xl"
+                        style={{ fontFamily: "var(--font-blaka)" }}
+                      >
+                        Username
+                      </Label>
+                      <Input
+                        id="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        className="border border-amber-600 bg-amber-50/80 text-amber-900 p-2 h-12 text-lg"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="email"
+                        className="text-amber-900 font-bold text-xl"
+                        style={{ fontFamily: "var(--font-blaka)" }}
+                      >
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        value={email}
+                        disabled
+                        className="border border-amber-400 bg-amber-100/80 opacity-70 text-amber-800 p-2 h-12 text-lg"
+                      />
+                      <p className="text-sm text-amber-700">Email cannot be changed</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="class"
+                        className="text-amber-900 font-bold text-xl"
+                        style={{ fontFamily: "var(--font-blaka)" }}
+                      >
+                        Class
+                      </Label>
+                      <div className="flex items-center gap-3">
+                        <Input
+                          id="class"
+                          value={className || "Not enrolled in any class"}
+                          disabled
+                          className="border border-amber-400 bg-amber-100/80 opacity-70 text-amber-800 p-2 h-12 text-lg flex-1"
+                        />
+                        {!isEnrolled && (
+                          <Button
+                            type="button"
+                            onClick={() => setShowJoinClass(true)}
+                            className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 h-10 text-sm"
+                          >
+                            <UserPlus className="mr-1 h-4 w-4" />
+                            Join
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-amber-800 hover:bg-amber-700 text-amber-100 font-blaka py-1.5 px-8 rounded-md transition-colors duration-200 text-base"
+                      style={{ fontFamily: "var(--font-blaka)" }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-5 w-5" />
+                          Save Changes
+                        </>
+                      )}
+                    </Button>
+                  </form>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
-                <div className="flex items-center gap-3">
-                  <Trophy className="h-6 w-6 text-amber-700" />
-                  <div>
-                    <p className="text-sm text-amber-700">Total Score</p>
-                    <p className="text-2xl font-bold font-pixel text-amber-900">{totalScore}</p>
+          {/* Progress Section */}
+          <div className="flex flex-col items-center w-full lg:w-2/5 max-w-full">
+            {/* Progress Container */}
+            <div
+              style={{
+                backgroundImage: "url('/dashboard/blank.png')",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
+                width: "100%",
+                height: "550px",
+                position: "relative",
+                maxWidth: "600px",
+              }}
+            >
+              <div className="absolute inset-0 flex flex-col justify-center px-16 py-12">
+                <div className="w-full max-w-[320px] mx-auto">
+                  <div className="space-y-8">
+                    {/* Progress items */}
+                    <div className="bg-amber-100/80 p-5 rounded-lg border border-amber-300">
+                      <div className="flex items-center gap-4">
+                        <BookOpen className="h-8 w-8 text-amber-700" />
+                        <div>
+                          <p
+                            className="text-lg text-amber-800 font-semibold"
+                            style={{ fontFamily: "var(--font-blaka)" }}
+                          >
+                            Levels Completed
+                          </p>
+                          <p className="text-3xl font-bold text-amber-900" style={{ fontFamily: "var(--font-blaka)" }}>
+                            {completedLevels}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-amber-100/80 p-5 rounded-lg border border-amber-300">
+                      <div className="flex items-center gap-4">
+                        <Trophy className="h-8 w-8 text-amber-700" />
+                        <div>
+                          <p
+                            className="text-lg text-amber-800 font-semibold"
+                            style={{ fontFamily: "var(--font-blaka)" }}
+                          >
+                            Total Score
+                          </p>
+                          <p className="text-3xl font-bold text-amber-900" style={{ fontFamily: "var(--font-blaka)" }}>
+                            {totalScore}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-              <Link href="/auth/logout">
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
+
+        {/* Join Class Form */}
+        {showJoinClass && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-amber-50 border-4 border-amber-800 rounded-xl p-8 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-amber-900 text-center mb-6">Join a Class</h2>
+              <p className="text-amber-700 text-center mb-6">Enter the class code provided by your teacher</p>
+              <JoinClassForm onSuccess={handleJoinClassSuccess} />
+              <div className="flex justify-end mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowJoinClass(false)}
+                  className="border-amber-600 text-amber-700"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
