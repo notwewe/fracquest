@@ -1,10 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ArrowLeft, Trophy, Medal } from "lucide-react"
+import { Trophy, Medal } from "lucide-react"
 
 export default async function StudentLeaderboardPage() {
   const supabase = createClient()
@@ -40,13 +37,13 @@ export default async function StudentLeaderboardPage() {
   const { data: classmates } = await supabase
     .from("student_classes")
     .select(`
-      student_id,
-      profiles:student_id (
-        id,
-        username,
-        avatar_url
-      )
-    `)
+student_id,
+profiles:student_id (
+  id,
+  username,
+  avatar_url
+)
+`)
     .eq("class_id", studentClass.class_id)
 
   // Get progress for all students in the class
@@ -90,105 +87,243 @@ export default async function StudentLeaderboardPage() {
   const currentUserRank = leaderboardData.findIndex((student) => student.id === user.id) + 1
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-6">
-        <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+    <div
+      className="min-h-screen p-4 overflow-y-auto flex flex-col items-center"
+      style={{
+        backgroundImage: "url('/dashboard/castle-background.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Back to Dashboard Button */}
+      <div className="absolute top-4 left-4 z-20">
+        <Link href="/student/dashboard">
+          <div
+            className="relative w-64 h-20 cursor-pointer hover:scale-105 transition-transform"
+            style={{
+              backgroundImage: "url('/dashboard/logout.png')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="absolute inset-0 flex items-center justify-center" style={{ marginTop: "-4px" }}>
+              <span className="text-amber-200 font-bold text-2xl" style={{ fontFamily: "var(--font-blaka)" }}>
+                Dashboard
+              </span>
+            </div>
+          </div>
+        </Link>
       </div>
 
-      <div className="grid gap-6">
-        <div>
-          <h1 className="text-3xl font-pixel text-amber-900">Class Leaderboard</h1>
-          <p className="text-amber-700">
-            {studentClass.classes?.name || "Your class"} - {leaderboardData.length} students
-          </p>
-        </div>
+      {/* Leaderboard Title */}
+      <h1
+        className="text-8xl font-bold text-center mt-8"
+        style={{
+          fontFamily: "var(--font-blaka)",
+          color: "#FFFFFF", // White color
+          WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
+          textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+          textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
+        }}
+      >
+        Leaderboard
+      </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Your Rank</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-amber-700">#{currentUserRank}</div>
-              <p className="text-sm text-amber-600">out of {leaderboardData.length} students</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Your Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-amber-700">
-                {leaderboardData.find((s) => s.id === user.id)?.totalScore || 0}
+      {/* Combined Stats and Leaderboard Container with Scroll Background */}
+      <div
+        className="w-full mt-0 flex flex-col lg:flex-row gap-2 justify-center"
+        style={{
+          backgroundImage: "url('/dashboard/scroll.png')",
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          minHeight: "800px",
+          minWidth: "1600px",
+          width: "1600px",
+          height: "800px",
+          paddingTop: "120px",
+          paddingLeft: "64px",
+          paddingRight: "64px",
+          paddingBottom: "64px",
+        }}
+      >
+        {/* Left Column: Stats */}
+        <div className="w-full p-6 flex flex-col gap-6" style={{ width: "20%" }}>
+          {" "}
+          {/* Set to 15% width */}
+          {/* Class info */}
+          <div className="bg-amber-100/70 p-4 rounded-md border border-amber-200">
+            <h2 className="text-2xl font-normal mb-2" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
+              {studentClass.classes?.name || "Your class"}
+            </h2>
+            <p className="text-xl font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}>
+              {leaderboardData.length} students
+            </p>
+          </div>
+          {/* Your Rank */}
+          <div className="bg-amber-100/70 p-4 rounded-md border border-amber-200">
+            <div className="flex items-center gap-3">
+              <Trophy className="h-10 w-10" style={{ color: "#784D1B" }} />
+              <div>
+                <p className="text-2xl font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
+                  Your Rank
+                </p>
+                <p className="text-4xl font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
+                  #{currentUserRank}
+                </p>
+                <p className="text-lg font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}>
+                  out of {leaderboardData.length} students
+                </p>
               </div>
-              <p className="text-sm text-amber-600">total points earned</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-amber-800 bg-amber-50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-pixel text-amber-900">Levels Completed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-amber-700">
-                {leaderboardData.find((s) => s.id === user.id)?.completedLevels || 0}
-              </div>
-              <p className="text-sm text-amber-600">challenges finished</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="border-2 border-amber-800 bg-amber-50">
-          <CardHeader>
-            <CardTitle className="text-xl font-pixel text-amber-900">Top Students</CardTitle>
-            <CardDescription className="font-pixel text-amber-700">Students ranked by total score</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="font-pixel w-16">Rank</TableHead>
-                    <TableHead className="font-pixel">Student</TableHead>
-                    <TableHead className="font-pixel text-right">Score</TableHead>
-                    <TableHead className="font-pixel text-right">Levels</TableHead>
-                    <TableHead className="font-pixel text-right">Mistakes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leaderboardData.map((student, index) => (
-                    <TableRow key={student.id} className={student.isCurrentUser ? "bg-amber-100" : ""}>
-                      <TableCell className="font-medium">
-                        {index === 0 ? (
-                          <Trophy className="h-5 w-5 text-yellow-500" />
-                        ) : index === 1 ? (
-                          <Medal className="h-5 w-5 text-gray-400" />
-                        ) : index === 2 ? (
-                          <Medal className="h-5 w-5 text-amber-700" />
-                        ) : (
-                          `#${index + 1}`
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {student.username}
-                        {student.isCurrentUser && " (You)"}
-                      </TableCell>
-                      <TableCell className="text-right">{student.totalScore}</TableCell>
-                      <TableCell className="text-right">{student.completedLevels}</TableCell>
-                      <TableCell className="text-right">{student.totalMistakes}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          {/* Your Score */}
+          <div className="bg-amber-100/70 p-4 rounded-md border border-amber-200">
+            <div className="flex items-center gap-3">
+              <Medal className="h-10 w-10" style={{ color: "#784D1B" }} />
+              <div>
+                <p className="text-2xl font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
+                  Your Score
+                </p>
+                <p className="text-4xl font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
+                  {leaderboardData.find((s) => s.id === user.id)?.totalScore || 0}
+                </p>
+                <p className="text-lg font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}>
+                  total points earned
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Leaderboard Table */}
+        <div className="w-full p-6" style={{ width: "40%" }}>
+          {" "}
+          {/* Set to 40% width */}
+          <div className="overflow-auto max-h-[650px] rounded-md border border-amber-200">
+            {" "}
+            {/* Increased max-h from 450px to 650px */}
+            <table className="w-full border-collapse" style={{ borderSpacing: 0 }}>
+              <thead className="bg-amber-100/70 sticky top-0 z-10">
+                <tr>
+                  <th
+                    className="font-normal text-3xl w-16 px-2 py-3 text-left" // Adjusted font size and width
+                    style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
+                  >
+                    Rank
+                  </th>
+                  <th
+                    className="font-normal text-3xl pl-2 pr-0 py-3 text-left" // Adjusted font size
+                    style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
+                  >
+                    Student
+                  </th>
+                  <th
+                    className="font-normal text-3xl text-right w-12 pl-0 pr-2 py-3" // Adjusted font size
+                    style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
+                  >
+                    Score
+                  </th>
+                  <th
+                    className="font-normal text-3xl text-right w-16 px-2 py-3" // Adjusted font size and width
+                    style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
+                  >
+                    Levels
+                  </th>
+                  <th
+                    className="font-normal text-3xl text-right w-16 px-2 py-3" // Adjusted font size and width
+                    style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
+                  >
+                    Mistakes
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaderboardData.map((student, index) => (
+                  <tr key={student.id} className={student.isCurrentUser ? "bg-amber-100/70" : ""}>
+                    <td
+                      className="font-normal text-2xl px-2 py-2" // Adjusted font size
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      {index === 0 ? (
+                        <Trophy className="h-8 w-8 text-yellow-400" /> // Adjusted icon size
+                      ) : index === 1 ? (
+                        <Medal className="h-8 w-8 text-slate-400" /> // Adjusted icon size
+                      ) : index === 2 ? (
+                        <Medal className="h-8 w-8 text-orange-400" /> // Adjusted icon size
+                      ) : (
+                        `#${index + 1}`
+                      )}
+                    </td>
+                    <td
+                      className="font-normal text-2xl pl-2 pr-0 py-2" // Adjusted font size
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      {student.username}
+                      {student.isCurrentUser && " (You)"}
+                    </td>
+                    <td
+                      className="text-right font-normal text-2xl pl-0 pr-2 py-2" // Adjusted font size
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      {student.totalScore}
+                    </td>
+                    <td
+                      className="text-right font-normal text-2xl px-2 py-2" // Adjusted font size
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      {student.completedLevels}
+                    </td>
+                    <td
+                      className="text-right font-normal text-2xl px-2 py-2" // Adjusted font size
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      {student.totalMistakes}
+                    </td>
+                  </tr>
+                ))}
+                {/* Placeholder rows for testing height with 10 students */}
+                {Array.from({ length: Math.max(0, 10 - leaderboardData.length) }).map((_, i) => (
+                  <tr key={`placeholder-${i}`}>
+                    <td
+                      className="font-normal text-2xl px-2 py-2"
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      #{leaderboardData.length + i + 1}
+                    </td>
+                    <td
+                      className="font-normal text-2xl pl-2 pr-0 py-2"
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      Placeholder
+                    </td>
+                    <td
+                      className="text-right font-normal text-2xl pl-0 pr-2 py-2"
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      0
+                    </td>
+                    <td
+                      className="text-right font-normal text-2xl px-2 py-2"
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      0
+                    </td>
+                    <td
+                      className="text-right font-normal text-2xl px-2 py-2"
+                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
+                    >
+                      0
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   )
