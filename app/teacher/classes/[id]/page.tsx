@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ArrowLeft, Edit, BarChart } from "lucide-react"
+import { ArrowLeft, Edit, BarChart, Users } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
 import { RemoveStudentButton } from "@/components/ui/remove-student-button"
 
@@ -16,215 +16,223 @@ export default async function ClassDetailPage({ params }: { params: { id: string
     return notFound()
   }
 
-  // Check if user is authenticated and is a teacher
   const {
     data: { user },
   } = await supabase.auth.getUser()
+  if (!user) redirect("/auth/login")
 
-  if (!user) {
-    redirect("/auth/login")
-  }
-
-  // Get class details
   const { data: classData, error: classError } = await supabase.from("classes").select("*").eq("id", classId).single()
-
   if (classError || !classData) {
     console.error("Error fetching class:", classError)
     return notFound()
   }
-
-  // Verify the user is the teacher of this class
   if (classData.teacher_id !== user.id) {
     console.error("User is not the teacher of this class")
     redirect("/teacher/dashboard")
   }
 
-  // Get students in this class
-  const { data: students, error: studentsError } = await supabase
+  // Fetch students enrolled in the class with their profiles
+  const { data: studentClasses, error: studentsError } = await supabase
     .from("student_classes")
-    .select(`
-      id,
-      joined_at,
-      profiles:student_id (
-        id,
-        username,
-        avatar_url
-      )
-    `)
+    .select("id, student_id")
     .eq("class_id", classId)
 
   if (studentsError) {
     console.error("Error fetching students:", studentsError)
   }
 
-  // Get student progress
-  const studentIds = students?.map((s) => s.profiles.id) || []
+  // Get student IDs from student_classes
+  const studentIds = studentClasses?.map((sc) => sc.student_id) || []
 
-  let progressData: any[] = []
+  // Fetch profile information for these students
+  const { data: profiles } = await supabase.from("profiles").select("id, username").in("id", studentIds)
 
-  if (studentIds.length > 0) {
-    const { data: progress, error: progressError } = await supabase
-      .from("student_progress")
-      .select(`
-        student_id,
-        waypoint_id,
-        completed,
-        score,
-        mistakes,
-        attempts,
-        time_spent,
-        waypoints:waypoint_id (
-          name,
-          section_id,
-          game_sections:section_id (
-            name
-          )
-        )
-      `)
-      .in("student_id", studentIds)
-      .eq("completed", true)
+  // Create a map of student IDs to their profiles for easy lookup
+  const profileMap = new Map()
+  profiles?.forEach((profile) => {
+    profileMap.set(profile.id, profile)
+  })
 
-    if (progressError) {
-      console.error("Error fetching progress:", progressError)
-    } else {
-      progressData = progress || []
+  // Fetch ALL progress data for these students
+  const { data: progressData } = await supabase
+    .from("student_progress")
+    .select("student_id, score, mistakes, completed, waypoint_id")
+    .in("student_id", studentIds)
+
+  // Group progress data by student_id
+  const progressByStudent = new Map()
+  progressData?.forEach((progress) => {
+    if (!progressByStudent.has(progress.student_id)) {
+      progressByStudent.set(progress.student_id, [])
     }
-  }
+    progressByStudent.get(progress.student_id).push(progress)
+  })
 
-  // Process student data with progress
+  // Combine student_classes with profiles and progress data
   const studentsWithProgress =
-    students?.map((student) => {
-      const studentProgress = progressData.filter((p) => p.student_id === student.profiles.id)
-      const totalScore = studentProgress.reduce((sum, p) => sum + p.score, 0)
-      const totalMistakes = studentProgress.reduce((sum, p) => sum + p.mistakes, 0)
-      const completedLevels = studentProgress.length
+    studentClasses?.map((sc) => {
+      const profile = profileMap.get(sc.student_id)
+      const progressEntries = progressByStudent.get(sc.student_id) || []
 
-      // Find the current section/level
-      let currentSection = "Not started"
-      let currentLevel = "Not started"
+      // Calculate total score, mistakes, and completed levels
+      const totalScore = progressEntries.reduce((sum, entry) => sum + (entry.score || 0), 0)
+      const totalMistakes = progressEntries.reduce((sum, entry) => sum + (entry.mistakes || 0), 0)
+      const completedLevels = progressEntries.filter((entry) => entry.completed).length
 
-      if (studentProgress.length > 0) {
-        // Sort by most recent
-        const sortedProgress = [...studentProgress].sort((a, b) => {
-          return new Date(b.completed_at || 0).getTime() - new Date(a.completed_at || 0).getTime()
-        })
-
-        const latest = sortedProgress[0]
-        if (latest.waypoints && latest.waypoints.game_sections) {
-          currentSection = latest.waypoints.game_sections.name
-          currentLevel = latest.waypoints.name
-        }
-      }
+      // Determine current level (just use "In Progress" if they have any entries)
+      const currentLevel = progressEntries.length > 0 ? "In Progress" : "Not started"
 
       return {
-        ...student,
+        id: sc.id,
+        student_id: sc.student_id,
+        profiles: profile || { username: "Unknown" },
         progress: {
           totalScore,
           totalMistakes,
           completedLevels,
-          currentSection,
           currentLevel,
         },
       }
     }) || []
 
-  return (
-    <div className="container mx-auto p-4">
-      <div className="mb-6">
-        <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-          <Link href="/teacher/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-      </div>
+  // Fetch all students in the class
+  const { data: students } = await supabase.from("student_classes").select("student_id").eq("class_id", classId)
 
-      <div className="grid gap-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-pixel text-amber-900">{classData.name}</h1>
-            {classData.description && <p className="text-amber-700 mt-1">{classData.description}</p>}
-          </div>
-          <Button asChild className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-            <Link href={`/teacher/classes/${classId}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Class
+  return (
+    <div className="min-h-screen bg-[#FAF7F0] p-4 font-sans">
+      <div className="container mx-auto">
+        <div className="mb-6">
+          <Button
+            asChild
+            variant="outline"
+            className="border-[#a0522d] text-[#8B4513] hover:bg-[#f5e9d0] hover:text-[#8B4513] font-semibold"
+          >
+            <Link href="/teacher/dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
             </Link>
           </Button>
         </div>
 
-        <Card className="border-2 border-amber-800 bg-amber-50">
-          <CardHeader>
-            <div className="flex justify-between items-center">
+        <div className="grid gap-6">
+          <Card className="border-2 border-[#a0522d] bg-[#f5e9d0] shadow-lg">
+            <CardHeader className="flex flex-col md:flex-row justify-between md:items-center gap-4">
               <div>
-                <CardTitle className="text-xl font-pixel text-amber-900">Class Code</CardTitle>
-                <CardDescription className="font-pixel text-amber-700">
-                  Share this code with your students to join the class
-                </CardDescription>
+                <CardTitle className="text-2xl md:text-3xl font-bold text-[#8B4513]">{classData.name}</CardTitle>
+                {classData.description && (
+                  <CardDescription className="text-[#a0522d] mt-1">{classData.description}</CardDescription>
+                )}
               </div>
-              <CopyButton text={classData.class_code} className="font-pixel border-amber-600 text-amber-700" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-amber-100 p-4 rounded-md border-2 border-amber-300">
-              <p className="text-2xl font-pixel text-center text-amber-900 tracking-wider">{classData.class_code}</p>
-            </div>
-          </CardContent>
-        </Card>
+              <Button
+                asChild
+                className="font-semibold bg-[#8B4513] hover:bg-[#a0522d] text-[#f5e9d0] self-start md:self-center"
+              >
+                <Link href={`/teacher/classes/${classId}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Class
+                </Link>
+              </Button>
+            </CardHeader>
+          </Card>
 
-        <Card className="border-2 border-amber-800 bg-amber-50">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-xl font-pixel text-amber-900">Students</CardTitle>
-              <CardDescription className="font-pixel text-amber-700">
-                {studentsWithProgress?.length || 0} students enrolled in this class
-              </CardDescription>
-            </div>
-            <Button asChild className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-              <Link href={`/teacher/classes/${classId}/analytics`}>
-                <BarChart className="mr-2 h-4 w-4" />
-                View Analytics
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {studentsWithProgress && studentsWithProgress.length > 0 ? (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="font-pixel">Student</TableHead>
-                      <TableHead className="font-pixel">Current Level</TableHead>
-                      <TableHead className="font-pixel">Score</TableHead>
-                      <TableHead className="font-pixel">Mistakes</TableHead>
-                      <TableHead className="font-pixel">Completed</TableHead>
-                      <TableHead className="font-pixel">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {studentsWithProgress.map((student) => (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-medium">{student.profiles.username}</TableCell>
-                        <TableCell>{student.progress.currentLevel}</TableCell>
-                        <TableCell>{student.progress.totalScore}</TableCell>
-                        <TableCell>{student.progress.totalMistakes}</TableCell>
-                        <TableCell>{student.progress.completedLevels} levels</TableCell>
-                        <TableCell>
-                          <RemoveStudentButton studentClassId={student.id} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="font-pixel text-amber-700 mb-4">No students have joined this class yet.</p>
-                <p className="text-sm text-amber-600">Share the class code with your students so they can join.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-1 border-2 border-[#a0522d] bg-[#f5e9d0] shadow-lg">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-xl font-bold text-[#8B4513]">Class Code</CardTitle>
+                    <CardDescription className="text-[#a0522d]">Share this code with students</CardDescription>
+                  </div>
+                  <CopyButton
+                    text={classData.class_code}
+                    className="border-[#a0522d] text-[#8B4513] hover:bg-[#e5d9c0]"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-[#FAF7F0] p-4 rounded-md border border-[#d9c8a9]">
+                  <p className="text-2xl font-bold text-center text-[#8B4513] tracking-wider">{classData.class_code}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2 border-2 border-[#a0522d] bg-[#f5e9d0] shadow-lg">
+              <CardHeader className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div>
+                  <CardTitle className="text-xl font-bold text-[#8B4513]">Students</CardTitle>
+                  <CardDescription className="text-[#a0522d]">
+                    {studentsWithProgress?.length || 0} students enrolled
+                  </CardDescription>
+                </div>
+                <Button
+                  asChild
+                  className="font-semibold bg-[#8B4513] hover:bg-[#a0522d] text-[#f5e9d0] self-start md:self-center"
+                >
+                  <Link href={`/teacher/classes/${classId}/analytics`}>
+                    <BarChart className="mr-2 h-4 w-4" />
+                    View Analytics
+                  </Link>
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {studentsWithProgress && studentsWithProgress.length > 0 ? (
+                  <div className="rounded-md border border-[#d9c8a9] overflow-x-auto">
+                    <Table>
+                      <TableHeader className="bg-[#e5d9c0]">
+                        <TableRow>
+                          <TableHead className="font-semibold text-[#8B4513]">Student</TableHead>
+                          <TableHead className="font-semibold text-[#8B4513]">Current Level</TableHead>
+                          <TableHead className="font-semibold text-[#8B4513] text-right">Score</TableHead>
+                          <TableHead className="font-semibold text-[#8B4513] text-right">Mistakes</TableHead>
+                          <TableHead className="font-semibold text-[#8B4513] text-right">Levels Completed</TableHead>
+                          <TableHead className="font-semibold text-[#8B4513] text-center">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {studentsWithProgress.map((studentItem, index) => (
+                          <TableRow key={studentItem.id} className={index % 2 === 0 ? "bg-[#FAF7F0]" : "bg-[#f5e9d0]"}>
+                            <TableCell className="font-medium text-[#8B4513]">
+                              {studentItem.profiles?.username || "N/A"}
+                            </TableCell>
+                            <TableCell className="text-[#a0522d]">{studentItem.progress.currentLevel}</TableCell>
+                            <TableCell className="text-right text-[#a0522d]">
+                              {studentItem.progress.totalScore}
+                            </TableCell>
+                            <TableCell className="text-right text-[#a0522d]">
+                              {studentItem.progress.totalMistakes}
+                            </TableCell>
+                            <TableCell className="text-right text-[#a0522d]">
+                              {studentItem.progress.completedLevels} levels
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <RemoveStudentButton
+                                studentClassId={studentItem.id}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-100"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-[#FAF7F0] rounded-md border border-[#d9c8a9]">
+                    <Users className="mx-auto h-12 w-12 text-[#a0522d] mb-3" />
+                    <p className="font-semibold text-[#8B4513] mb-2">
+                      {students && students.length > 0
+                        ? "No progress data found for enrolled students."
+                        : "No students have joined this class yet."}
+                    </p>
+                    <p className="text-sm text-[#a0522d]">
+                      {!(students && students.length > 0) &&
+                        "Share the class code with your students so they can join."}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

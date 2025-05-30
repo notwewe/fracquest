@@ -6,7 +6,6 @@ export async function middleware(request: NextRequest) {
   const res = NextResponse.next()
   const pathname = request.nextUrl.pathname
 
-  // Skip middleware for static assets and API routes
   if (
     pathname.includes("/_next") ||
     pathname.includes("/api/") ||
@@ -20,7 +19,6 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  // Always allow access to these public pages without any auth checks
   if (
     pathname === "/" ||
     pathname === "/auth/login" ||
@@ -31,29 +29,37 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  // Create a Supabase client configured to use cookies
   const supabase = createMiddlewareClient({ req: request, res })
 
-  // Refresh session if expired
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // If no session and trying to access protected routes
   if (!session) {
-    // Allow access to other auth routes
     if (pathname.startsWith("/auth/")) {
       return res
     }
-
-    // Redirect to login for protected routes
     return NextResponse.redirect(new URL("/auth/login", request.url))
   }
 
-  // User is authenticated, check role-based access
-  const { data: profile } = await supabase.from("profiles").select("role_id").eq("id", session.user.id).single()
+  // User is authenticated, check role-based access and account status
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role_id, is_active") // Select is_active
+    .eq("id", session.user.id)
+    .single()
 
   const role = profile?.role_id || 0
+  const isActive = profile?.is_active !== false // Default to true if null or undefined
+
+  // Check if account is deactivated
+  if (!isActive) {
+    // Sign out the user and redirect to login
+    await supabase.auth.signOut()
+    const loginUrl = new URL("/auth/login", request.url)
+    loginUrl.searchParams.set("message", "account-deactivated")
+    return NextResponse.redirect(loginUrl)
+  }
 
   // Admin routes
   if (pathname.startsWith("/admin")) {
