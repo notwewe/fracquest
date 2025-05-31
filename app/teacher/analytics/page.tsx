@@ -24,7 +24,6 @@ import {
 
 // Define a type for overall analytics data
 interface OverallAnalyticsData {
-  totalTeachers: number
   totalStudents: number
   totalClasses: number
   averageStudentsPerClass: number
@@ -56,30 +55,67 @@ export default function OverallAnalyticsPage() {
         }
         // Add role check if necessary, e.g., only admin or specific teacher roles can see this
 
-        // Fetching data - these are example queries, adjust based on your actual schema and needs
-        const { count: totalTeachers, error: teachersError } = await supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true })
-          .eq("role_id", 2) // Assuming role_id 2 is for teachers
-
-        const { count: totalStudents, error: studentsError } = await supabase
-          .from("profiles")
-          .select("*", { count: "exact", head: true })
-          .eq("role_id", 1) // Assuming role_id 1 is for students
-
-        const { count: totalClasses, error: classesError } = await supabase
+        // Get current teacher's classes first
+        const { data: teacherClasses, error: teacherClassesError } = await supabase
           .from("classes")
-          .select("*", { count: "exact", head: true })
+          .select("id")
+          .eq("teacher_id", user.id)
 
+        if (teacherClassesError) {
+          throw new Error("Failed to fetch teacher's classes.")
+        }
+
+        const classIds = teacherClasses?.map((c) => c.id) || []
+
+        if (classIds.length === 0) {
+          // Teacher has no classes, set all counts to 0
+          setAnalyticsData({
+            totalStudents: 0,
+            totalClasses: 0,
+            averageStudentsPerClass: 0,
+            totalWaypointsCompleted: 0,
+            mostPopularSection: null,
+            leastPopularSection: null,
+            sectionCompletionDistribution: [],
+          })
+          return
+        }
+
+        // Count teacher's classes
+        const totalClasses = classIds.length
+
+        // Count students in teacher's classes
+        const { count: totalStudents, error: studentsError } = await supabase
+          .from("student_classes")
+          .select("*", { count: "exact", head: true })
+          .in("class_id", classIds)
+
+        // Get student class counts for teacher's classes only
         const { data: studentClassCounts, error: studentClassError } = await supabase
           .from("student_classes")
           .select("class_id, student_id")
+          .in("class_id", classIds)
 
+        // Get students in teacher's classes for progress filtering
+        const { data: teacherStudents, error: teacherStudentsError } = await supabase
+          .from("student_classes")
+          .select("student_id")
+          .in("class_id", classIds)
+
+        if (teacherStudentsError) {
+          throw new Error("Failed to fetch teacher's students.")
+        }
+
+        const studentIds = teacherStudents?.map((s) => s.student_id) || []
+
+        // Count waypoints completed by teacher's students
         const { count: totalWaypointsCompleted, error: waypointsError } = await supabase
           .from("student_progress")
           .select("*", { count: "exact", head: true })
           .eq("completed", true)
+          .in("student_id", studentIds)
 
+        // Get section progress for teacher's students only
         const { data: sectionProgress, error: sectionProgressError } = await supabase
           .from("student_progress")
           .select(`
@@ -89,15 +125,9 @@ export default function OverallAnalyticsPage() {
             )
           `)
           .eq("completed", true)
+          .in("student_id", studentIds)
 
-        if (
-          teachersError ||
-          studentsError ||
-          classesError ||
-          waypointsError ||
-          sectionProgressError ||
-          studentClassError
-        ) {
+        if (studentsError || studentClassError || waypointsError || sectionProgressError) {
           throw new Error("Failed to fetch some analytics data.")
         }
 
@@ -129,7 +159,6 @@ export default function OverallAnalyticsPage() {
         }
 
         setAnalyticsData({
-          totalTeachers: totalTeachers || 0,
           totalStudents: totalStudents || 0,
           totalClasses: totalClasses || 0,
           averageStudentsPerClass: Number.parseFloat(averageStudentsPerClass.toFixed(1)) || 0,
@@ -193,7 +222,6 @@ export default function OverallAnalyticsPage() {
   const chartLegendStyle = { fontFamily: "Inter, sans-serif", color: "#8B4513", fontSize: "0.875rem" }
 
   const {
-    totalTeachers,
     totalStudents,
     totalClasses,
     averageStudentsPerClass,
@@ -204,9 +232,8 @@ export default function OverallAnalyticsPage() {
   } = analyticsData
 
   const statsCards = [
-    { title: "Total Teachers", value: totalTeachers, icon: Users },
-    { title: "Total Students", value: totalStudents, icon: Users },
-    { title: "Total Classes", value: totalClasses, icon: Award },
+    { title: "My Classes", value: totalClasses, icon: Award },
+    { title: "My Students", value: totalStudents, icon: Users },
     { title: "Avg. Students/Class", value: averageStudentsPerClass, icon: BarChart2 },
     { title: "Waypoints Completed", value: totalWaypointsCompleted, icon: Award },
   ]
@@ -233,8 +260,8 @@ export default function OverallAnalyticsPage() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#8B4513]">Overall Platform Analytics</h1>
-          <p className="text-[#a0522d] mt-1">A high-level overview of platform usage and performance.</p>
+          <h1 className="text-3xl font-bold text-[#8B4513]">My Classes Analytics</h1>
+          <p className="text-[#a0522d] mt-1">Overview of your classes' performance and student progress.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">

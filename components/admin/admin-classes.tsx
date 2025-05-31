@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -180,25 +179,32 @@ export function AdminClasses() {
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#8B4513]" />
       </div>
     )
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="border-2 border-amber-800 bg-amber-50">
-        <CardHeader>
-          <CardTitle className="text-2xl font-pixel text-amber-900">Classes Management</CardTitle>
-          <CardDescription className="text-amber-700">View and manage all classes in the system</CardDescription>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="h-full"
+    >
+      <Card className="border-2 border-[#a0522d] bg-[#f5e9d0] h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle className="text-2xl font-sans text-[#8B4513]">Classes Management</CardTitle>
+          <CardDescription className="text-[#8B4513] font-sans">
+            View and manage all classes in the system
+          </CardDescription>
 
           <div className="mt-4 relative">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-500" />
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B4513]" />
             <Input
               placeholder="Search classes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-amber-300 bg-amber-100 pl-8"
+              className="border-[#a0522d] bg-white pl-8 font-sans"
             />
           </div>
 
@@ -223,189 +229,188 @@ export function AdminClasses() {
           )}
         </CardHeader>
 
-        <CardContent>
-          <div className="rounded-md border border-amber-300">
-            <Table>
-              <TableHeader className="bg-amber-100">
-                <TableRow>
-                  <TableHead className="font-pixel text-amber-900">Name</TableHead>
-                  <TableHead className="font-pixel text-amber-900">Code</TableHead>
-                  <TableHead className="font-pixel text-amber-900">Teacher</TableHead>
-                  <TableHead className="font-pixel text-amber-900">Students</TableHead>
-                  <TableHead className="font-pixel text-amber-900">Created</TableHead>
-                  <TableHead className="font-pixel text-amber-900 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredClasses.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-amber-700">
-                      No classes found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredClasses.map((classItem, index) => (
-                    <motion.tr
-                      key={classItem.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                      className="border-b transition-colors hover:bg-muted/50"
-                    >
-                      <TableCell className="font-medium text-amber-900">{classItem.name}</TableCell>
-                      <TableCell className="text-amber-700">
-                        <code className="bg-amber-100 px-2 py-1 rounded">{classItem.class_code}</code>
-                      </TableCell>
-                      <TableCell className="text-amber-700">{classItem.teacher_name}</TableCell>
-                      <TableCell className="text-amber-700">{classItem.student_count}</TableCell>
-                      <TableCell className="text-amber-700">
-                        {new Date(classItem.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-amber-300 text-amber-700 hover:bg-amber-100 h-8 w-8 p-0"
-                                onClick={() => setEditClass(classItem)}
+        <CardContent className="flex-1 overflow-hidden p-0">
+          <div className="h-full border-2 border-[#a0522d] bg-white mx-6 mb-6 rounded-md flex flex-col">
+            {/* Fixed Header */}
+            <div className="bg-[#8B4513] rounded-t-md">
+              <div className="grid grid-cols-6 gap-4 px-4 py-3">
+                <div className="font-sans text-[#f5e9d0] font-bold">Name</div>
+                <div className="font-sans text-[#f5e9d0] font-bold">Code</div>
+                <div className="font-sans text-[#f5e9d0] font-bold">Teacher</div>
+                <div className="font-sans text-[#f5e9d0] font-bold">Students</div>
+                <div className="font-sans text-[#f5e9d0] font-bold">Created</div>
+                <div className="font-sans text-[#f5e9d0] font-bold text-right">Actions</div>
+              </div>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredClasses.length === 0 ? (
+                <div className="text-center py-8 text-[#8B4513] font-sans">No classes found</div>
+              ) : (
+                filteredClasses.map((classItem, index) => (
+                  <motion.div
+                    key={classItem.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    className="grid grid-cols-6 gap-4 px-4 py-4 border-b border-[#a0522d]/20 transition-colors hover:bg-[#FAF7F0]"
+                  >
+                    <div className="font-medium text-[#8B4513] font-sans">{classItem.name}</div>
+                    <div className="text-[#8B4513]">
+                      <code className="bg-[#FAF7F0] px-2 py-1 rounded border border-[#a0522d]/30 font-sans text-sm">
+                        {classItem.class_code}
+                      </code>
+                    </div>
+                    <div className="text-[#8B4513] font-sans">{classItem.teacher_name}</div>
+                    <div className="text-[#8B4513] font-sans">{classItem.student_count}</div>
+                    <div className="text-[#8B4513] font-sans">
+                      {new Date(classItem.created_at).toLocaleDateString()}
+                    </div>
+                    <div className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#a0522d] text-[#8B4513] hover:bg-[#FAF7F0] h-8 w-8 p-0"
+                              onClick={() => setEditClass(classItem)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </motion.button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-[#f5e9d0] border-2 border-[#a0522d]">
+                            <DialogHeader>
+                              <DialogTitle className="font-sans text-[#8B4513]">Edit Class</DialogTitle>
+                              <DialogDescription className="text-[#8B4513] font-sans">
+                                Make changes to the class details.
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            {error && (
+                              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                                {error}
+                              </div>
+                            )}
+
+                            {success && (
+                              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                                {success}
+                              </div>
+                            )}
+
+                            {editClass && (
+                              <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                  <Label htmlFor="edit-name" className="font-sans text-[#8B4513]">
+                                    Class Name
+                                  </Label>
+                                  <Input
+                                    id="edit-name"
+                                    value={editClass.name}
+                                    onChange={(e) => setEditClass({ ...editClass, name: e.target.value })}
+                                    className="border-[#a0522d] bg-white font-sans"
+                                  />
+                                </div>
+
+                                <div className="grid gap-2">
+                                  <Label htmlFor="edit-code" className="font-sans text-[#8B4513]">
+                                    Class Code
+                                  </Label>
+                                  <Input
+                                    id="edit-code"
+                                    value={editClass.class_code}
+                                    disabled
+                                    className="border-[#a0522d] bg-gray-100 opacity-70 font-sans"
+                                  />
+                                  <p className="text-xs text-[#8B4513]">Class code cannot be changed</p>
+                                </div>
+
+                                <div className="grid gap-2">
+                                  <Label htmlFor="edit-description" className="font-sans text-[#8B4513]">
+                                    Description
+                                  </Label>
+                                  <Input
+                                    id="edit-description"
+                                    value={editClass.description}
+                                    onChange={(e) => setEditClass({ ...editClass, description: e.target.value })}
+                                    className="border-[#a0522d] bg-white font-sans"
+                                  />
+                                </div>
+
+                                <div className="grid gap-2">
+                                  <Label htmlFor="edit-teacher" className="font-sans text-[#8B4513]">
+                                    Teacher
+                                  </Label>
+                                  <Input
+                                    id="edit-teacher"
+                                    value={editClass.teacher_name}
+                                    disabled
+                                    className="border-[#a0522d] bg-gray-100 opacity-70 font-sans"
+                                  />
+                                  <p className="text-xs text-[#8B4513]">Teacher cannot be changed here</p>
+                                </div>
+                              </div>
+                            )}
+
+                            <DialogFooter>
+                              <Button
+                                type="submit"
+                                onClick={handleEditClass}
+                                disabled={isSubmitting}
+                                className="bg-[#8B4513] hover:bg-[#a0522d] font-sans"
                               >
-                                <Pencil className="h-4 w-4" />
-                              </motion.button>
-                            </DialogTrigger>
-                            <DialogContent className="bg-amber-50 border-2 border-amber-800">
-                              <DialogHeader>
-                                <DialogTitle className="font-pixel text-amber-900">Edit Class</DialogTitle>
-                                <DialogDescription className="text-amber-700">
-                                  Make changes to the class details.
-                                </DialogDescription>
-                              </DialogHeader>
+                                {isSubmitting ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  "Save Changes"
+                                )}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
 
-                              {error && (
-                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                                  {error}
-                                </div>
-                              )}
-
-                              {success && (
-                                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                                  {success}
-                                </div>
-                              )}
-
-                              {editClass && (
-                                <div className="grid gap-4 py-4">
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="edit-name" className="font-pixel text-amber-900">
-                                      Class Name
-                                    </Label>
-                                    <Input
-                                      id="edit-name"
-                                      value={editClass.name}
-                                      onChange={(e) => setEditClass({ ...editClass, name: e.target.value })}
-                                      className="border-amber-300 bg-amber-100"
-                                    />
-                                  </div>
-
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="edit-code" className="font-pixel text-amber-900">
-                                      Class Code
-                                    </Label>
-                                    <Input
-                                      id="edit-code"
-                                      value={editClass.class_code}
-                                      disabled
-                                      className="border-amber-300 bg-amber-100 opacity-70"
-                                    />
-                                    <p className="text-xs text-amber-600">Class code cannot be changed</p>
-                                  </div>
-
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="edit-description" className="font-pixel text-amber-900">
-                                      Description
-                                    </Label>
-                                    <Input
-                                      id="edit-description"
-                                      value={editClass.description}
-                                      onChange={(e) => setEditClass({ ...editClass, description: e.target.value })}
-                                      className="border-amber-300 bg-amber-100"
-                                    />
-                                  </div>
-
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="edit-teacher" className="font-pixel text-amber-900">
-                                      Teacher
-                                    </Label>
-                                    <Input
-                                      id="edit-teacher"
-                                      value={editClass.teacher_name}
-                                      disabled
-                                      className="border-amber-300 bg-amber-100 opacity-70"
-                                    />
-                                    <p className="text-xs text-amber-600">Teacher cannot be changed here</p>
-                                  </div>
-                                </div>
-                              )}
-
-                              <DialogFooter>
-                                <Button
-                                  type="submit"
-                                  onClick={handleEditClass}
-                                  disabled={isSubmitting}
-                                  className="bg-amber-600 hover:bg-amber-700 font-pixel"
-                                >
-                                  {isSubmitting ? (
-                                    <>
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                      Saving...
-                                    </>
-                                  ) : (
-                                    "Save Changes"
-                                  )}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-red-300 text-red-700 hover:bg-red-100 h-8 w-8 p-0"
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-red-300 text-red-700 hover:bg-red-100 h-8 w-8 p-0"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </motion.button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-[#f5e9d0] border-2 border-[#a0522d]">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="font-sans text-[#8B4513]">Delete Class</AlertDialogTitle>
+                              <AlertDialogDescription className="text-[#8B4513] font-sans">
+                                Are you sure you want to delete this class? This will remove all student enrollments.
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="border-[#a0522d] text-[#8B4513] font-sans">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-600 hover:bg-red-700 text-white font-sans"
+                                onClick={() => handleDeleteClass(classItem.id)}
                               >
-                                <Trash className="h-4 w-4" />
-                              </motion.button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-amber-50 border-2 border-amber-800">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="font-pixel text-amber-900">Delete Class</AlertDialogTitle>
-                                <AlertDialogDescription className="text-amber-700">
-                                  Are you sure you want to delete this class? This will remove all student enrollments.
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="border-amber-300 text-amber-700">
-                                  Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-red-600 hover:bg-red-700 text-white font-pixel"
-                                  onClick={() => handleDeleteClass(classItem.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </motion.tr>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

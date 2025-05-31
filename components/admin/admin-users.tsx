@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,6 +48,12 @@ export function AdminUsers() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const supabase = createClient()
+  const [showRoleConfirmation, setShowRoleConfirmation] = useState(false)
+  const [pendingRoleChange, setPendingRoleChange] = useState<{
+    userId: string
+    newRoleId: number
+    newRoleName: string
+  } | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -62,29 +67,27 @@ export function AdminUsers() {
         if (rolesError) throw rolesError
         setRoles(rolesData || [])
 
-        // Get all profiles
+        // Get all profiles except admins (role_id 3)
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
           .select("*")
+          .not("role_id", "eq", 3)
           .order("username")
 
         if (profilesError) throw profilesError
 
         // Map profiles to users with role names
-        const usersWithDetails = profilesData
-          .map((profile) => {
-            const roleName = rolesData?.find((r) => r.id === profile.role_id)?.name || "unknown"
+        const usersWithDetails = profilesData.map((profile) => {
+          const roleName = rolesData?.find((r) => r.id === profile.role_id)?.name || "unknown"
 
-            return {
-              id: profile.id,
-              username: profile.username || "Unknown",
-              role_id: profile.role_id,
-              role_name: roleName,
-              created_at: profile.created_at,
-            }
-          })
-          // Filter out admin users
-          .filter((user) => user.role_id !== 3)
+          return {
+            id: profile.id,
+            username: profile.username || "Unknown",
+            role_id: profile.role_id,
+            role_name: roleName,
+            created_at: profile.created_at,
+          }
+        })
 
         setUsers(usersWithDetails)
       } catch (error: any) {
@@ -97,6 +100,33 @@ export function AdminUsers() {
 
     fetchUsers()
   }, [supabase])
+
+  const handleRoleChange = (newRoleId: string) => {
+    if (!editUser) return
+
+    const newRole = roles.find((r) => r.id === Number(newRoleId))
+    if (!newRole) return
+
+    setPendingRoleChange({
+      userId: editUser.id,
+      newRoleId: Number(newRoleId),
+      newRoleName: newRole.name,
+    })
+    setShowRoleConfirmation(true)
+  }
+
+  const confirmRoleChange = () => {
+    if (!editUser || !pendingRoleChange) return
+
+    setEditUser({ ...editUser, role_id: pendingRoleChange.newRoleId })
+    setShowRoleConfirmation(false)
+    setPendingRoleChange(null)
+  }
+
+  const cancelRoleChange = () => {
+    setShowRoleConfirmation(false)
+    setPendingRoleChange(null)
+  }
 
   const handleEditUser = async () => {
     if (!editUser) return
@@ -168,34 +198,42 @@ export function AdminUsers() {
       user.role_name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
+  // Filter out admin roles from the dropdown
+  const nonAdminRoles = roles.filter((role) => role.id !== 3)
+
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#8B4513]" />
       </div>
     )
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="border-2 border-amber-800 bg-amber-50">
-        <CardHeader>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="h-full"
+    >
+      <Card className="border-2 border-[#a0522d] bg-[#f5e9d0] h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl font-pixel text-amber-900">Users Management</CardTitle>
+            <CardTitle className="text-2xl font-sans text-[#8B4513]">Users Management</CardTitle>
           </div>
 
-          <CardDescription className="flex items-center text-amber-700 mt-2">
+          <CardDescription className="flex items-center text-[#8B4513] mt-2">
             <Info className="h-4 w-4 mr-2" />
-            Note: Email display is not available due to permission restrictions. Only students and teachers are shown.
+            Note: Email display is not available due to permission restrictions.
           </CardDescription>
 
           <div className="mt-4 relative">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-500" />
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8B4513]" />
             <Input
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-amber-300 bg-amber-100 pl-8"
+              className="border-[#a0522d] bg-white pl-8 font-sans"
             />
           </div>
 
@@ -220,173 +258,202 @@ export function AdminUsers() {
           )}
         </CardHeader>
 
-        <CardContent>
-          <div className="rounded-md border border-amber-300">
-            <Table>
-              <TableHeader className="bg-amber-100">
-                <TableRow>
-                  <TableHead className="font-pixel text-amber-900">Username</TableHead>
-                  <TableHead className="font-pixel text-amber-900">Role</TableHead>
-                  <TableHead className="font-pixel text-amber-900">Created</TableHead>
-                  <TableHead className="font-pixel text-amber-900 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-4 text-amber-700">
-                      No users found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredUsers.map((user, index) => (
-                    <motion.tr
-                      key={user.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                      className="border-b transition-colors hover:bg-muted/50"
-                    >
-                      <TableCell className="font-medium">{user.username}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            user.role_name === "teacher" ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {user.role_name}
-                        </span>
-                      </TableCell>
-                      <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-amber-300 text-amber-700 hover:bg-amber-100 h-8 w-8 p-0"
-                                onClick={() => setEditUser(user)}
+        <CardContent className="flex-1 overflow-hidden p-0">
+          <div className="h-full border-2 border-[#a0522d] bg-white mx-6 mb-6 rounded-md flex flex-col">
+            {/* Fixed Header */}
+            <div className="bg-[#8B4513] rounded-t-md">
+              <div className="grid grid-cols-4 gap-4 px-4 py-3">
+                <div className="font-sans text-[#f5e9d0] font-bold">Username</div>
+                <div className="font-sans text-[#f5e9d0] font-bold">Role</div>
+                <div className="font-sans text-[#f5e9d0] font-bold">Created</div>
+                <div className="font-sans text-[#f5e9d0] font-bold text-right">Actions</div>
+              </div>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center py-8 text-[#8B4513] font-sans">No users found</div>
+              ) : (
+                filteredUsers.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    className="grid grid-cols-4 gap-4 px-4 py-4 border-b border-[#a0522d]/20 transition-colors hover:bg-[#FAF7F0]"
+                  >
+                    <div className="font-medium font-sans text-[#8B4513]">{user.username}</div>
+                    <div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-semibold font-sans ${
+                          user.role_name === "teacher"
+                            ? "bg-blue-100 text-blue-800"
+                            : user.role_name === "admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {user.role_name}
+                      </span>
+                    </div>
+                    <div className="font-sans text-[#8B4513]">{new Date(user.created_at).toLocaleDateString()}</div>
+                    <div className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-[#a0522d] text-[#8B4513] hover:bg-[#FAF7F0] h-8 w-8 p-0"
+                              onClick={() => setEditUser(user)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </motion.button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-[#f5e9d0] border-2 border-[#a0522d]">
+                            <DialogHeader>
+                              <DialogTitle className="font-sans text-[#8B4513]">Edit User</DialogTitle>
+                              <DialogDescription className="text-[#8B4513] font-sans">
+                                Make changes to the user account.
+                              </DialogDescription>
+                            </DialogHeader>
+
+                            {error && (
+                              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                                {error}
+                              </div>
+                            )}
+
+                            {success && (
+                              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                                {success}
+                              </div>
+                            )}
+
+                            {editUser && (
+                              <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                  <Label htmlFor="edit-username" className="font-sans text-[#8B4513]">
+                                    Username
+                                  </Label>
+                                  <Input
+                                    id="edit-username"
+                                    value={editUser.username}
+                                    onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
+                                    className="border-[#a0522d] bg-white font-sans"
+                                  />
+                                </div>
+
+                                <div className="grid gap-2">
+                                  <Label htmlFor="edit-role" className="font-sans text-[#8B4513]">
+                                    Role
+                                  </Label>
+                                  <Select onValueChange={handleRoleChange} value={editUser.role_id.toString()}>
+                                    <SelectTrigger className="border-[#a0522d] bg-white font-sans">
+                                      <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#f5e9d0] border-[#a0522d]">
+                                      {roles.map((role) => (
+                                        <SelectItem key={role.id} value={role.id.toString()} className="font-sans">
+                                          {role.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+
+                            <DialogFooter>
+                              <Button
+                                type="submit"
+                                onClick={handleEditUser}
+                                disabled={isSubmitting}
+                                className="bg-[#8B4513] hover:bg-[#a0522d] font-sans"
                               >
-                                <Pencil className="h-4 w-4" />
-                              </motion.button>
-                            </DialogTrigger>
-                            <DialogContent className="bg-amber-50 border-2 border-amber-800">
-                              <DialogHeader>
-                                <DialogTitle className="font-pixel text-amber-900">Edit User</DialogTitle>
-                                <DialogDescription className="text-amber-700">
-                                  Make changes to the user account.
-                                </DialogDescription>
-                              </DialogHeader>
-
-                              {error && (
-                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                                  {error}
-                                </div>
-                              )}
-
-                              {success && (
-                                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                                  {success}
-                                </div>
-                              )}
-
-                              {editUser && (
-                                <div className="grid gap-4 py-4">
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="edit-username" className="font-pixel text-amber-900">
-                                      Username
-                                    </Label>
-                                    <Input
-                                      id="edit-username"
-                                      value={editUser.username}
-                                      onChange={(e) => setEditUser({ ...editUser, username: e.target.value })}
-                                      className="border-amber-300 bg-amber-100"
-                                    />
-                                  </div>
-
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="edit-role" className="font-pixel text-amber-900">
-                                      Role
-                                    </Label>
-                                    <Select
-                                      onValueChange={(value) => setEditUser({ ...editUser, role_id: Number(value) })}
-                                      value={editUser.role_id.toString()}
-                                    >
-                                      <SelectTrigger className="border-amber-300 bg-amber-100">
-                                        <SelectValue placeholder="Select a role" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-amber-50 border-amber-300">
-                                        {roles
-                                          .filter((role) => role.id !== 3) // Filter out admin role
-                                          .map((role) => (
-                                            <SelectItem key={role.id} value={role.id.toString()}>
-                                              {role.name}
-                                            </SelectItem>
-                                          ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                              )}
-
-                              <DialogFooter>
-                                <Button
-                                  type="submit"
-                                  onClick={handleEditUser}
-                                  disabled={isSubmitting}
-                                  className="bg-amber-600 hover:bg-amber-700 font-pixel"
-                                >
-                                  {isSubmitting ? (
-                                    <>
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                      Saving...
-                                    </>
-                                  ) : (
-                                    "Save Changes"
-                                  )}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-red-300 text-red-700 hover:bg-red-100 h-8 w-8 p-0"
-                              >
-                                <Trash className="h-4 w-4" />
-                              </motion.button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="bg-amber-50 border-2 border-amber-800">
+                                {isSubmitting ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  "Save Changes"
+                                )}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                          {/* Role Change Confirmation Dialog */}
+                          <AlertDialog open={showRoleConfirmation} onOpenChange={setShowRoleConfirmation}>
+                            <AlertDialogContent className="bg-[#f5e9d0] border-2 border-[#a0522d]">
                               <AlertDialogHeader>
-                                <AlertDialogTitle className="font-pixel text-amber-900">Delete User</AlertDialogTitle>
-                                <AlertDialogDescription className="text-amber-700">
-                                  Are you sure you want to delete this user? This action cannot be undone.
+                                <AlertDialogTitle className="font-sans text-[#8B4513]">
+                                  Confirm Role Change
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-[#8B4513] font-sans">
+                                  Are you sure you want to change this user's role to{" "}
+                                  <span className="font-semibold">{pendingRoleChange?.newRoleName}</span>?
+                                  {pendingRoleChange?.newRoleName === "admin" && (
+                                    <div className="mt-2 p-2 bg-yellow-100 border border-yellow-400 rounded text-yellow-800">
+                                      <strong>Warning:</strong> This will grant administrative privileges to this user.
+                                    </div>
+                                  )}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel className="border-amber-300 text-amber-700">
+                                <AlertDialogCancel
+                                  className="border-[#a0522d] text-[#8B4513] font-sans"
+                                  onClick={cancelRoleChange}
+                                >
                                   Cancel
                                 </AlertDialogCancel>
                                 <AlertDialogAction
-                                  className="bg-red-600 hover:bg-red-700 text-white font-pixel"
-                                  onClick={() => handleDeleteUser(user.id)}
+                                  className="bg-[#8B4513] hover:bg-[#a0522d] text-white font-sans"
+                                  onClick={confirmRoleChange}
                                 >
-                                  Delete
+                                  Yes, Change Role
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </motion.tr>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                        </Dialog>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-red-300 text-red-700 hover:bg-red-100 h-8 w-8 p-0"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </motion.button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-[#f5e9d0] border-2 border-[#a0522d]">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="font-sans text-[#8B4513]">Delete User</AlertDialogTitle>
+                              <AlertDialogDescription className="text-[#8B4513] font-sans">
+                                Are you sure you want to delete this user? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="border-[#a0522d] text-[#8B4513] font-sans">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-600 hover:bg-red-700 text-white font-sans"
+                                onClick={() => handleDeleteUser(user.id)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
