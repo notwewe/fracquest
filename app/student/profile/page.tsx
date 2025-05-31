@@ -34,7 +34,7 @@ export default function StudentProfilePage() {
   useEffect(() => {
     const message = searchParams.get("message")
     if (message === "join-class-required") {
-      setRedirectMessage("You need to join a class to access this feature.")
+      // Only show the join class modal without the message
       setShowJoinClass(true)
     }
   }, [searchParams])
@@ -136,8 +136,46 @@ export default function StudentProfilePage() {
 
   const handleJoinClassSuccess = () => {
     setShowJoinClass(false)
-    // Refresh the page to show the updated class info
-    window.location.reload()
+    setIsEnrolled(true)
+
+    // Remove the query parameter from the URL
+    const params = new URLSearchParams(window.location.search)
+    params.delete("message")
+
+    // Update the URL without the message parameter
+    const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : "")
+    window.history.replaceState({}, "", newUrl)
+
+    // Fetch updated class info without full page reload
+    const fetchUpdatedClassInfo = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+
+        if (user) {
+          // Get updated class info
+          const { data: studentClass } = await supabase
+            .from("student_classes")
+            .select("classes(name)")
+            .eq("student_id", user.id)
+            .single()
+
+          if (studentClass && studentClass.classes) {
+            // Handle both object and array formats
+            if (Array.isArray(studentClass.classes)) {
+              setClassName(studentClass.classes[0]?.name || "")
+            } else {
+              setClassName(studentClass.classes.name || "")
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching updated class info:", error)
+      }
+    }
+
+    fetchUpdatedClassInfo()
   }
 
   if (isLoadingData) {
@@ -223,7 +261,7 @@ export default function StudentProfilePage() {
             {/* Profile Information Container */}
             <div
               style={{
-                backgroundImage: "url('/dashboard/scroll-1.png')",
+                backgroundImage: "url('/dashboard/scroll.png')",
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
@@ -243,11 +281,6 @@ export default function StudentProfilePage() {
                   {success && (
                     <Alert className="mb-2 bg-green-50 border-green-200">
                       <AlertDescription className="text-green-800">{success}</AlertDescription>
-                    </Alert>
-                  )}
-                  {redirectMessage && (
-                    <Alert className="mb-2 bg-amber-50 border-amber-200">
-                      <AlertDescription className="text-amber-800">{redirectMessage}</AlertDescription>
                     </Alert>
                   )}
 

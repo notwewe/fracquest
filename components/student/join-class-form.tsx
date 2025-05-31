@@ -82,9 +82,8 @@ export function JoinClassForm({ onSuccess }: { onSuccess?: () => void }) {
 
       // Call the success callback if provided
       if (onSuccess) {
-        setTimeout(() => {
-          onSuccess()
-        }, 1500)
+        // Clear the URL query parameter and call the success callback immediately
+        onSuccess()
       }
     } catch (error: any) {
       setError(error.message || "An error occurred while joining the class")
