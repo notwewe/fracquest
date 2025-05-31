@@ -50,6 +50,8 @@ profiles:student_id (
   const studentIds = classmates?.map((c) => c.student_id) || []
 
   let leaderboardData: any[] = []
+  let currentUserRank = 0
+  let allStudentsSorted: any[] = []
 
   if (studentIds.length > 0) {
     // Get all student progress
@@ -79,12 +81,16 @@ profiles:student_id (
       }
     })
 
-    // Sort by score (descending)
-    leaderboardData = studentScores.sort((a, b) => b.totalScore - a.totalScore)
+    // Calculate current user's rank among ALL students before slicing to top 5
+    allStudentsSorted = studentScores.sort((a, b) => b.totalScore - a.totalScore)
+    currentUserRank = allStudentsSorted.findIndex((student) => student.id === user.id) + 1
+
+    // Sort by score (descending) and take only top 5
+    leaderboardData = allStudentsSorted.slice(0, 5)
   }
 
-  // Find current user's rank
-  const currentUserRank = leaderboardData.findIndex((student) => student.id === user.id) + 1
+  // Get current user's score for display
+  const currentUserData = allStudentsSorted.find((s) => s.id === user.id)
 
   return (
     <div
@@ -142,37 +148,35 @@ profiles:student_id (
           backgroundPosition: "center",
           minHeight: "600px", // Reduced height
           minWidth: "1200px", // Reduced width
-          width: "1200px", // Reduced width
+          width: "1400px", // Reduced width
           height: "600px", // Reduced height
           paddingTop: "80px", // Reduced top padding
           paddingLeft: "48px", // Reduced left padding
           paddingRight: "48px", // Reduced right padding
-          paddingBottom: "48px", // Reduced bottom padding
+          paddingBottom: "60px", // Reduced bottom padding
         }}
       >
         {/* Left Column: Stats */}
-        <div className="w-full p-4 flex flex-col gap-4" style={{ width: "20%" }}>
+        <div className="w-full p-4 flex flex-col gap-4" style={{ width: "15%" }}>
           {" "}
           {/* Reduced padding and gap */}
           {/* Class info */}
-          <div className="bg-amber-100/70 p-3 rounded-md border border-amber-200">
+          <div className="bg-amber-100/70 p-3 rounded-md border-2 border-amber-800">
             {" "}
-            {/* Reduced padding */}
+            {/* Changed border color */}
             <h2 className="text-xl font-normal mb-1" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
               {" "}
               {/* Reduced font size from 2xl to xl */}
               {studentClass.classes?.name || "Your class"}
             </h2>
             <p className="text-lg font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}>
-              {" "}
-              {/* Reduced font size from xl to lg */}
-              {leaderboardData.length} students
+              Top 5 students
             </p>
           </div>
           {/* Your Rank */}
-          <div className="bg-amber-100/70 p-3 rounded-md border border-amber-200">
+          <div className="bg-amber-100/70 p-3 rounded-md border-2 border-amber-800">
             {" "}
-            {/* Reduced padding */}
+            {/* Changed border color */}
             <div className="flex items-center gap-2">
               {" "}
               {/* Reduced gap */}
@@ -190,15 +194,15 @@ profiles:student_id (
                 <p className="text-base font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}>
                   {" "}
                   {/* Reduced font size from lg to base */}
-                  out of {leaderboardData.length} students
+                  out of {allStudentsSorted.length} students
                 </p>
               </div>
             </div>
           </div>
           {/* Your Score */}
-          <div className="bg-amber-100/70 p-3 rounded-md border border-amber-200">
+          <div className="bg-amber-100/70 p-3 rounded-md border-2 border-amber-800">
             {" "}
-            {/* Reduced padding */}
+            {/* Changed border color */}
             <div className="flex items-center gap-2">
               {" "}
               {/* Reduced gap */}
@@ -210,14 +214,12 @@ profiles:student_id (
                   Your Score
                 </p>
                 <p className="text-3xl font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}>
-                  {" "}
-                  {/* Reduced font size from 4xl to 3xl */}
-                  {leaderboardData.find((s) => s.id === user.id)?.totalScore || 0}
+                  {currentUserData?.totalScore || 0}
                 </p>
                 <p className="text-base font-normal" style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}>
                   {" "}
                   {/* Reduced font size from lg to base */}
-                  total points earned
+                  total points
                 </p>
               </div>
             </div>
@@ -225,41 +227,41 @@ profiles:student_id (
         </div>
 
         {/* Right Column: Leaderboard Table */}
-        <div className="w-full p-4" style={{ width: "40%" }}>
+        <div className="w-full p-4" style={{ width: "45%" }}>
           {" "}
           {/* Reduced padding */}
-          <div className="overflow-auto max-h-[410px] rounded-md border border-amber-200">
+          <div className="overflow-auto max-h-[450px] rounded-md border-2 border-amber-800">
             {" "}
-            {/* Increased max-h by 1px */}
+            {/* Changed border color */}
             <table className="w-full border-collapse" style={{ borderSpacing: 0 }}>
               <thead className="bg-amber-100/70 sticky top-0 z-10">
                 <tr>
                   <th
-                    className="font-normal text-xl w-16 px-2 py-2 text-left" // Reduced font size from 3xl to xl
+                    className="font-normal text-3xl w-16 px-4 py-3 text-left"
                     style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
                   >
                     Rank
                   </th>
                   <th
-                    className="font-normal text-xl pl-2 pr-0 py-2 text-left" // Reduced font size from 3xl to xl
+                    className="font-normal text-3xl pl-4 pr-0 py-3 text-left"
                     style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
                   >
                     Student
                   </th>
                   <th
-                    className="font-normal text-xl text-right w-12 pl-0 pr-2 py-2" // Reduced font size from 3xl to xl
+                    className="font-normal text-3xl text-center w-24 pl-0 pr-4 py-3"
                     style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
                   >
                     Score
                   </th>
                   <th
-                    className="font-normal text-xl text-right w-16 px-2 py-2" // Reduced font size from 3xl to xl
+                    className="font-normal text-3xl text-center w-24 px-4 py-3"
                     style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
                   >
                     Levels
                   </th>
                   <th
-                    className="font-normal text-xl text-right w-16 px-2 py-2" // Reduced font size from 3xl to xl
+                    className="font-normal text-3xl text-center w-24 px-4 py-3"
                     style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
                   >
                     Mistakes
@@ -270,78 +272,43 @@ profiles:student_id (
                 {leaderboardData.map((student, index) => (
                   <tr key={student.id} className={student.isCurrentUser ? "bg-amber-100/70" : ""}>
                     <td
-                      className="font-normal text-lg px-2 py-1" // Reduced font size from 2xl to lg
+                      className="font-normal text-xl px-4 py-3"
                       style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
                     >
                       {index === 0 ? (
-                        <Trophy className="h-6 w-6 text-yellow-400" /> // Reduced icon size
+                        <Trophy className="h-8 w-8 text-yellow-400" />
                       ) : index === 1 ? (
-                        <Medal className="h-6 w-6 text-slate-400" /> // Reduced icon size
+                        <Medal className="h-8 w-8 text-slate-400" />
                       ) : index === 2 ? (
-                        <Medal className="h-6 w-6 text-orange-400" /> // Reduced icon size
+                        <Medal className="h-8 w-8 text-orange-400" />
                       ) : (
                         `#${index + 1}`
                       )}
                     </td>
                     <td
-                      className="font-normal text-lg pl-2 pr-0 py-1" // Reduced font size from 2xl to lg
+                      className="font-normal text-xl pl-4 pr-0 py-3"
                       style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
                     >
                       {student.username}
                       {student.isCurrentUser && " (You)"}
                     </td>
                     <td
-                      className="text-right font-normal text-lg pl-0 pr-2 py-1" // Reduced font size from 2xl to lg
+                      className="text-center font-normal text-xl pl-0 pr-4 py-3"
                       style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
                     >
                       {student.totalScore}
                     </td>
                     <td
-                      className="text-right font-normal text-lg px-2 py-1" // Reduced font size from 2xl to lg
+                      className="text-center font-normal text-xl px-4 py-3"
                       style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
                     >
                       {student.completedLevels}
                     </td>
                     <td
-                      className="text-right font-normal text-lg px-2 py-1" // Reduced font size from 2xl to lg
+                      className="text-center font-normal text-xl px-4 py-3"
                       style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
                     >
                       {student.totalMistakes}
-                    </td>
-                  </tr>
-                ))}
-                {/* Placeholder rows for testing height with 10 students */}
-                {Array.from({ length: Math.max(0, 10 - leaderboardData.length) }).map((_, i) => (
-                  <tr key={`placeholder-${i}`}>
-                    <td
-                      className="font-normal text-lg px-2 py-1" // Reduced font size from 2xl to lg
-                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
-                    >
-                      #{leaderboardData.length + i + 1}
-                    </td>
-                    <td
-                      className="font-normal text-lg pl-2 pr-0 py-1" // Reduced font size from 2xl to lg
-                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
-                    >
-                      Placeholder
-                    </td>
-                    <td
-                      className="text-right font-normal text-lg pl-0 pr-2 py-1" // Reduced font size from 2xl to lg
-                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
-                    >
-                      0
-                    </td>
-                    <td
-                      className="text-right font-normal text-lg px-2 py-1" // Reduced font size from 2xl to lg
-                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
-                    >
-                      0
-                    </td>
-                    <td
-                      className="text-right font-normal text-lg px-2 py-1" // Reduced font size from 2xl to lg
-                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
-                    >
-                      0
                     </td>
                   </tr>
                 ))}
