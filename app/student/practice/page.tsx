@@ -39,23 +39,25 @@ export default async function StudentPracticePage() {
 
       <div className="grid gap-6">
         <div>
-          <h1 className="text-3xl font-pixel text-amber-900">Practice Area</h1>
-          <p className="text-amber-700">Practice your fraction skills without affecting your game progress</p>
+          <h1 className="text-3xl font-blaka text-amber-900">Practice Area</h1>
+          <p className="font-blaka text-amber-700">
+            Practice your fraction skills without affecting your game progress
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sections?.map((section) => (
             <Card key={section.id} className="border-2 border-amber-800 bg-amber-50">
               <CardHeader>
-                <CardTitle className="text-xl font-pixel text-amber-900">{section.name}</CardTitle>
-                <CardDescription className="font-pixel text-amber-700">{section.description}</CardDescription>
+                <CardTitle className="text-xl font-blaka text-amber-900">{section.name}</CardTitle>
+                <CardDescription className="font-blaka text-amber-700">{section.description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-2">
-                  <Button asChild className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+                  <Button asChild className="w-full font-blaka bg-amber-600 hover:bg-amber-700 text-white">
                     <Link href={`/student/practice/${section.id}/intro`}>Review Lesson</Link>
                   </Button>
-                  <Button asChild className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+                  <Button asChild className="w-full font-blaka bg-amber-600 hover:bg-amber-700 text-white">
                     <Link href={`/student/practice/${section.id}/game`}>Practice Game</Link>
                   </Button>
                 </div>
