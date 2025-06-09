@@ -1,115 +1,286 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
-interface Waypoint {
+type Waypoint = {
   id: number
   name: string
   description: string
-  type: string
-  completed: boolean
   section_id: number
   order_index: number
+  waypoint_type: "story" | "game"
+  is_unlocked_by_default: boolean
 }
 
-interface Location {
+type Progress = {
+  waypoint_id: number
+  completed: boolean
+  can_revisit: boolean
+}
+
+type Location = {
   id: number
   name: string
-  position: string
-  unlocked: boolean
-  completed: boolean
   waypoints: Waypoint[]
+  position: string
+  isUnlocked: boolean
+  completedCount: number
+  totalCount: number
 }
 
-interface WorldMapProps {
-  locations: Location[]
-}
+export function WorldMapClean() {
+  const [locations, setLocations] = useState<Location[]>([])
+  const [progress, setProgress] = useState<Progress[]>([])
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
 
-export function WorldMap({ locations }: WorldMapProps) {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-  const handleRefresh = () => {
-    window.location.reload()
+        if (!user) return
+
+        // Fetch waypoints
+        const { data: waypoints } = await supabase.from("waypoints").select("*").order("section_id, order_index")
+
+        // Fetch user progress
+        const { data: userProgress } = await supabase
+          .from("student_progress")
+          .select("waypoint_id, completed, can_revisit")
+          .eq("student_id", user.id)
+
+        if (waypoints && userProgress) {
+          setProgress(userProgress)
+
+          // Group waypoints by section
+          const locationMap = new Map<number, Location>()
+
+          waypoints.forEach((waypoint) => {
+            if (!locationMap.has(waypoint.section_id)) {
+              locationMap.set(waypoint.section_id, {
+                id: waypoint.section_id,
+                name: getSectionName(waypoint.section_id),
+                waypoints: [],
+                position: getSectionPosition(waypoint.section_id),
+                isUnlocked: false,
+                completedCount: 0,
+                totalCount: 0,
+              })
+            }
+
+            const location = locationMap.get(waypoint.section_id)!
+            location.waypoints.push(waypoint)
+            location.totalCount++
+
+            // Check if waypoint is completed
+            const waypointProgress = userProgress.find((p) => p.waypoint_id === waypoint.id)
+            if (waypointProgress?.completed) {
+              location.completedCount++
+            }
+
+            // Check if location is unlocked (has any progress or is first level)
+            if (waypoint.is_unlocked_by_default || waypointProgress) {
+              location.isUnlocked = true
+            }
+          })
+
+          setLocations(Array.from(locationMap.values()))
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [supabase])
+
+  const getSectionName = (sectionId: number): string => {
+    const names = {
+      1: "Arithmetown",
+      2: "Lessmore Bridge",
+      3: "Fraction Forest",
+      4: "Realm of Balance",
+      5: "Dreadpoint Hollow",
+    }
+    return names[sectionId as keyof typeof names] || `Section ${sectionId}`
+  }
+
+  const getSectionPosition = (sectionId: number): string => {
+    const positions = {
+      1: "top-20 left-20",
+      2: "top-32 right-32",
+      3: "bottom-40 left-16",
+      4: "bottom-32 right-20",
+      5: "bottom-8 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
+    }
+    return positions[sectionId as keyof typeof positions] || "top-1/2 left-1/2"
+  }
+
+  const isWaypointUnlocked = (waypoint: Waypoint): boolean => {
+    // First waypoint is always unlocked
+    if (waypoint.is_unlocked_by_default) return true
+
+    // Check if user has progress for this waypoint (either completed or in progress)
+    const waypointProgress = progress.find((p) => p.waypoint_id === waypoint.id)
+    if (waypointProgress) return true
+
+    // Check if previous waypoint in same section is completed
+    const location = locations.find((l) => l.id === waypoint.section_id)
+    if (location) {
+      const waypointIndex = location.waypoints.findIndex((w) => w.id === waypoint.id)
+      if (waypointIndex > 0) {
+        const previousWaypoint = location.waypoints[waypointIndex - 1]
+        const previousProgress = progress.find((p) => p.waypoint_id === previousWaypoint.id)
+        return previousProgress?.completed || false
+      }
+    }
+
+    // Check if previous section is completed (for first waypoint of new section)
+    if (waypoint.order_index === 1 && waypoint.section_id > 1) {
+      const previousSection = locations.find((l) => l.id === waypoint.section_id - 1)
+      if (previousSection) {
+        return previousSection.completedCount === previousSection.totalCount
+      }
+    }
+
+    return false
+  }
+
+  const isWaypointCompleted = (waypointId: number): boolean => {
+    const waypointProgress = progress.find((p) => p.waypoint_id === waypointId)
+    return waypointProgress?.completed || false
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="text-white text-2xl font-pixel">Loading world map...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="relative">
-      {/* Map background */}
-      <div className="relative w-full h-[400px] overflow-hidden rounded-lg">
-        <Image src="/fantasy-map-pixel-art.png" alt="Fantasy Map" fill className="object-cover" priority />
+    <div className="relative h-screen w-full bg-black overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-900 via-blue-900 to-black"></div>
 
-        {/* Location markers */}
-        {locations.map((location) => (
-          <button
-            key={location.id}
-            className={`absolute ${location.position} transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-              location.completed
-                ? "bg-green-500 border-4 border-green-700"
-                : location.unlocked
-                  ? "bg-amber-500 border-4 border-amber-700"
-                  : "bg-gray-400 border-4 border-gray-600 cursor-not-allowed opacity-70"
-            }`}
-            onClick={() => setSelectedLocation(location)}
-            disabled={!location.unlocked}
-          >
-            <span className="text-white font-pixel text-xs text-center px-1">{location.name}</span>
-          </button>
-        ))}
-
-        {/* Refresh button */}
-        <Button
-          variant="outline"
-          size="sm"
-          className="absolute top-2 right-2 bg-white bg-opacity-80 hover:bg-white"
-          onClick={handleRefresh}
-        >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Refresh Map
+      {/* Back to Dashboard Button */}
+      <div className="absolute top-8 left-8 z-20">
+        <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-200 bg-black/50">
+          <Link href="/student/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
         </Button>
       </div>
 
-      {/* Selected location details */}
-      {selectedLocation && (
-        <div className="mt-4 p-4 bg-amber-800 text-amber-50 rounded-md">
-          <h2 className="text-xl font-bold mb-4">{selectedLocation.name}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {selectedLocation.waypoints
-              .sort((a, b) => a.order_index - b.order_index)
-              .map((waypoint) => {
-                const isAvailable =
-                  waypoint.order_index === 1 ||
-                  selectedLocation.waypoints.find((w) => w.order_index === waypoint.order_index - 1)?.completed
+      {/* Title */}
+      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20">
+        <h1 className="text-4xl font-pixel text-amber-200">World of Numeria</h1>
+      </div>
 
-                return (
-                  <div
-                    key={waypoint.id}
-                    className={`p-4 rounded-md ${
-                      waypoint.completed ? "bg-green-600" : isAvailable ? "bg-amber-600" : "bg-gray-600"
-                    }`}
-                  >
-                    <h3 className="font-pixel text-lg mb-2">{waypoint.name}</h3>
-                    <div className="text-sm mb-2">{waypoint.type === "story" ? "Story" : "Game"}</div>
-                    <div className="text-xs mb-2">ID: {waypoint.id}</div>
-                    <div className="text-xs mb-2">Completed: {waypoint.completed ? "Yes" : "No"}</div>
-                    <div className="text-xs mb-4">Available: {isAvailable ? "Yes" : "No"}</div>
-                    {(waypoint.completed || isAvailable) && (
-                      <Link
-                        href={`/student/game/${waypoint.id}`}
-                        className="inline-block w-full text-center bg-amber-900 hover:bg-amber-950 text-white py-1 px-2 rounded text-sm transition-colors"
-                      >
-                        {waypoint.completed ? "Replay" : "Start"}
-                      </Link>
-                    )}
-                  </div>
-                )
-              })}
+      {/* Locations */}
+      {locations.map((location) => (
+        <div key={location.id} className={`absolute ${location.position} z-10`}>
+          <div className="relative">
+            {/* Location Button */}
+            <Button
+              className={`w-32 h-32 rounded-full font-pixel text-sm ${
+                location.isUnlocked
+                  ? location.completedCount === location.totalCount
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : "bg-amber-600 hover:bg-amber-700 text-white"
+                  : "bg-gray-600 text-gray-400 cursor-not-allowed"
+              }`}
+              disabled={!location.isUnlocked}
+            >
+              <div className="text-center">
+                <div className="text-xs">{location.name}</div>
+                <div className="text-xs mt-1">
+                  {location.completedCount}/{location.totalCount}
+                </div>
+              </div>
+            </Button>
+
+            {/* Waypoint List */}
+            {location.isUnlocked && (
+              <div className="absolute top-36 left-1/2 transform -translate-x-1/2 bg-black/80 rounded-lg p-4 min-w-64">
+                <h3 className="text-amber-200 font-pixel text-lg mb-2 text-center">{location.name}</h3>
+                <div className="space-y-2">
+                  {location.waypoints.map((waypoint) => {
+                    const unlocked = isWaypointUnlocked(waypoint)
+                    const completed = isWaypointCompleted(waypoint.id)
+
+                    return (
+                      <div key={waypoint.id} className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="text-white font-pixel text-sm">{waypoint.name}</div>
+                          <div className="text-gray-400 text-xs">
+                            {waypoint.waypoint_type === "story" ? "📖 Story" : "🎮 Game"}
+                          </div>
+                        </div>
+                        <div className="ml-2">
+                          {unlocked ? (
+                            <Button
+                              asChild
+                              size="sm"
+                              className={`font-pixel ${
+                                completed ? "bg-green-600 hover:bg-green-700" : "bg-amber-600 hover:bg-amber-700"
+                              } text-white`}
+                            >
+                              <Link
+                                href={
+                                  waypoint.waypoint_type === "story"
+                                    ? `/student/game/level/${waypoint.id}`
+                                    : `/student/game/play/${waypoint.id}`
+                                }
+                              >
+                                {completed ? "Replay" : "Play"}
+                              </Link>
+                            </Button>
+                          ) : (
+                            <Button size="sm" disabled className="font-pixel bg-gray-600 text-gray-400">
+                              Locked
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      ))}
+
+      {/* Legend */}
+      <div className="absolute bottom-8 right-8 bg-black/80 rounded-lg p-4">
+        <h3 className="text-amber-200 font-pixel text-lg mb-2">Legend</h3>
+        <div className="space-y-1 text-sm font-pixel">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-green-600 rounded mr-2"></div>
+            <span className="text-white">Completed</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-amber-600 rounded mr-2"></div>
+            <span className="text-white">Available</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-gray-600 rounded mr-2"></div>
+            <span className="text-gray-400">Locked</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,198 +9,120 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
-import { DialogueBox } from "../dialogue-box"
 
-type ConversionGameProps = {
-  levelId: string
-  onComplete?: () => void
+type ConversionProblem = {
+  type: "improper-to-mixed" | "mixed-to-improper"
+  question: string
+  answer: string
+  improperFraction?: string
+  mixedNumber?: string
 }
 
-export function ConversionGame({ levelId, onComplete }: ConversionGameProps) {
+const problems: ConversionProblem[] = [
+  // Improper to Mixed
+  { type: "improper-to-mixed", question: "9/4", answer: "2 1/4", improperFraction: "9/4" },
+  { type: "improper-to-mixed", question: "11/3", answer: "3 2/3", improperFraction: "11/3" },
+  { type: "improper-to-mixed", question: "13/5", answer: "2 3/5", improperFraction: "13/5" },
+  { type: "improper-to-mixed", question: "17/6", answer: "2 5/6", improperFraction: "17/6" },
+  { type: "improper-to-mixed", question: "15/4", answer: "3 3/4", improperFraction: "15/4" },
+
+  // Mixed to Improper
+  { type: "mixed-to-improper", question: "3 2/5", answer: "17/5", mixedNumber: "3 2/5" },
+  { type: "mixed-to-improper", question: "2 3/4", answer: "11/4", mixedNumber: "2 3/4" },
+  { type: "mixed-to-improper", question: "4 1/3", answer: "13/3", mixedNumber: "4 1/3" },
+  { type: "mixed-to-improper", question: "1 5/6", answer: "11/6", mixedNumber: "1 5/6" },
+  { type: "mixed-to-improper", question: "5 2/7", answer: "37/7", mixedNumber: "5 2/7" },
+]
+
+export default function ConversionGame() {
   const router = useRouter()
-  const [gameState, setGameState] = useState<"intro" | "tutorial" | "playing" | "completed">("intro")
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [currentProblem, setCurrentProblem] = useState(0)
+  const [userAnswer, setUserAnswer] = useState("")
   const [score, setScore] = useState(0)
-  const [answer, setAnswer] = useState("")
-  const [feedback, setFeedback] = useState<"" | "correct" | "incorrect">("")
-  const [timer, setTimer] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(60)
+  const [gameStarted, setGameStarted] = useState(false)
+  const [gameEnded, setGameEnded] = useState(false)
+  const [streak, setStreak] = useState(0)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
-  const [currentDialogue, setCurrentDialogue] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
-  // Introduction dialogue
-  const introDialogue = [
-    {
-      character: "Elder Pebble",
-      text: "Welcome to Arithmetown, young adventurer! I am Elder Pebble, guardian of the ancient knowledge of fractions.",
-    },
-    {
-      character: "Elder Pebble",
-      text: "The first challenge you'll face is understanding improper fractions and mixed numbers.",
-    },
-    {
-      character: "Elder Pebble",
-      text: "Improper fractions have a numerator larger than the denominator, like 5/3. Mixed numbers combine a whole number with a fraction, like 1 2/3.",
-    },
-    {
-      character: "Elder Pebble",
-      text: "These two forms represent the same value, just written differently. Let me show you how to convert between them.",
-    },
-    {
-      character: "Whiskers",
-      text: "I'm ready to learn, Elder Pebble! Show me how to master these conversions.",
-    },
-  ]
+  // Shuffle problems for variety
+  const [shuffledProblems, setShuffledProblems] = useState<ConversionProblem[]>([])
 
-  // Tutorial dialogue
-  const tutorialContent = [
-    {
-      title: "Converting Improper Fractions to Mixed Numbers",
-      steps: [
-        "Divide the numerator by the denominator",
-        "The quotient becomes the whole number",
-        "The remainder becomes the new numerator",
-        "The denominator stays the same",
-      ],
-      example: {
-        problem: "Convert 7/3 to a mixed number",
-        solution: [
-          "Divide 7 ÷ 3 = 2 with remainder 1",
-          "The whole number is 2",
-          "The remainder 1 becomes the new numerator",
-          "The denominator stays as 3",
-          "So 7/3 = 2 1/3",
-        ],
-      },
-    },
-    {
-      title: "Converting Mixed Numbers to Improper Fractions",
-      steps: [
-        "Multiply the whole number by the denominator",
-        "Add the result to the numerator",
-        "This becomes your new numerator",
-        "The denominator stays the same",
-      ],
-      example: {
-        problem: "Convert 2 1/3 to an improper fraction",
-        solution: [
-          "Multiply 2 × 3 = 6",
-          "Add 6 + 1 = 7",
-          "The new numerator is 7",
-          "The denominator stays as 3",
-          "So 2 1/3 = 7/3",
-        ],
-      },
-    },
-  ]
-
-  // Game questions
-  const questions = [
-    {
-      type: "improperToMixed",
-      question: "Convert 11/4 to a mixed number",
-      answer: "2 3/4",
-      hint: "Divide 11 by 4. The quotient is the whole number, and the remainder is the new numerator.",
-    },
-    {
-      type: "mixedToImproper",
-      question: "Convert 3 2/5 to an improper fraction",
-      answer: "17/5",
-      hint: "Multiply 3 by 5, then add 2. This becomes your new numerator over the same denominator.",
-    },
-    {
-      type: "improperToMixed",
-      question: "Convert 23/6 to a mixed number",
-      answer: "3 5/6",
-      hint: "Divide 23 by 6. The quotient is the whole number, and the remainder is the new numerator.",
-    },
-    {
-      type: "mixedToImproper",
-      question: "Convert 2 4/7 to an improper fraction",
-      answer: "18/7",
-      hint: "Multiply 2 by 7, then add 4. This becomes your new numerator over the same denominator.",
-    },
-    {
-      type: "improperToMixed",
-      question: "Convert 19/5 to a mixed number",
-      answer: "3 4/5",
-      hint: "Divide 19 by 5. The quotient is the whole number, and the remainder is the new numerator.",
-    },
-  ]
+  useEffect(() => {
+    const shuffled = [...problems].sort(() => Math.random() - 0.5)
+    setShuffledProblems(shuffled)
+  }, [])
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
-
-    if (gameState === "playing") {
-      interval = setInterval(() => {
-        setTimer((prev) => prev + 1)
-      }, 1000)
+    if (gameStarted && !gameEnded && timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
+      return () => clearTimeout(timer)
+    } else if (timeLeft === 0) {
+      endGame()
     }
+  }, [gameStarted, gameEnded, timeLeft])
 
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [gameState])
-
-  // Handle dialogue progression
-  const handleDialogueComplete = () => {
-    if (currentDialogue < introDialogue.length - 1) {
-      setCurrentDialogue((prev) => prev + 1)
-    } else {
-      setGameState("tutorial")
-    }
+  const startGame = () => {
+    setGameStarted(true)
+    setCurrentProblem(0)
+    setScore(0)
+    setStreak(0)
+    setTimeLeft(60)
+    setUserAnswer("")
   }
 
-  // Handle tutorial completion
-  const handleTutorialComplete = () => {
-    setGameState("playing")
-  }
-
-  // Handle answer submission
-  const handleSubmit = () => {
-    const currentQ = questions[currentQuestion]
-    const userAnswer = answer.trim()
-    const isCorrect = userAnswer === currentQ.answer
+  const checkAnswer = () => {
+    const problem = shuffledProblems[currentProblem]
+    const isCorrect = userAnswer.trim() === problem.answer
 
     if (isCorrect) {
-      setFeedback("correct")
-      setScore((prev) => prev + 20)
-      toast({
-        title: "Correct!",
-        description: "Great job! You got it right.",
-        variant: "default",
-      })
+      setScore(score + 10)
+      setStreak(streak + 1)
 
-      // Move to next question or complete game
-      setTimeout(() => {
-        setFeedback("")
-        setAnswer("")
-
-        if (currentQuestion < questions.length - 1) {
-          setCurrentQuestion((prev) => prev + 1)
-        } else {
-          completeGame()
-        }
-      }, 1500)
+      // Bonus for streak
+      if (streak >= 4) {
+        setScore(score + 20) // Bonus points
+        setTimeLeft(timeLeft + 5) // Bonus time
+        toast({
+          title: "Perfect Streak!",
+          description: "5 in a row! +5 seconds bonus time!",
+          variant: "default",
+        })
+      } else {
+        toast({
+          title: "Correct!",
+          description: "Great job converting that fraction!",
+          variant: "default",
+        })
+      }
     } else {
-      setFeedback("incorrect")
+      setStreak(0)
       toast({
-        title: "Not quite right",
-        description: currentQ.hint,
+        title: "Incorrect",
+        description: `The correct answer was ${problem.answer}. Try the next one!`,
         variant: "destructive",
       })
+    }
 
-      // Clear feedback after a delay
-      setTimeout(() => {
-        setFeedback("")
-      }, 2000)
+    // Move to next problem
+    if (currentProblem < shuffledProblems.length - 1) {
+      setCurrentProblem(currentProblem + 1)
+      setUserAnswer("")
+    } else {
+      // Restart with new shuffled problems
+      const newShuffled = [...problems].sort(() => Math.random() - 0.5)
+      setShuffledProblems(newShuffled)
+      setCurrentProblem(0)
+      setUserAnswer("")
     }
   }
 
-  // Complete the game
-  const completeGame = async () => {
-    setGameState("completed")
+  const endGame = async () => {
+    setGameEnded(true)
+    setIsLoading(true)
 
     try {
       const {
@@ -206,190 +130,166 @@ export function ConversionGame({ levelId, onComplete }: ConversionGameProps) {
       } = await supabase.auth.getUser()
 
       if (user) {
-        // Calculate final score (max 100)
-        const finalScore = Math.min(100, score)
+        // Check if record exists first
+        const { data: existingProgress } = await supabase
+          .from("student_progress")
+          .select("*")
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 3)
+          .maybeSingle()
 
-        // Save progress to database
-        await supabase.from("student_progress").upsert({
-          student_id: user.id,
-          waypoint_id: Number.parseInt(levelId),
-          completed: true,
-          score: finalScore,
-          time_spent: timer,
-          last_updated: new Date().toISOString(),
-        })
+        if (existingProgress) {
+          // Update existing record only if new score is higher
+          const newScore = Math.max(existingProgress.score || 0, score)
+          const { error: updateError } = await supabase
+            .from("student_progress")
+            .update({
+              completed: true,
+              score: newScore,
+              can_revisit: true,
+              last_updated: new Date().toISOString(),
+            })
+            .eq("student_id", user.id)
+            .eq("waypoint_id", 3)
 
-        // Show completion popup
-        setShowCompletionPopup(true)
+          if (updateError) {
+            console.error("Error updating progress:", updateError)
+          }
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase.from("student_progress").insert({
+            student_id: user.id,
+            waypoint_id: 3,
+            completed: true,
+            score: score,
+            can_revisit: true,
+            last_updated: new Date().toISOString(),
+          })
+
+          if (insertError) {
+            console.error("Error inserting progress:", insertError)
+          }
+        }
       }
-    } catch (error) {
-      console.error("Error saving game progress:", error)
-      toast({
-        title: "Error",
-        description: "There was a problem saving your progress.",
-        variant: "destructive",
-      })
+
+      setShowCompletionPopup(true)
+    } catch (error: any) {
+      console.error("Error saving game progress:", error.message || error)
+      // Still show completion popup even if save fails
+      setShowCompletionPopup(true)
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  // Render intro dialogue
-  if (gameState === "intro") {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && userAnswer.trim() && !gameEnded) {
+      checkAnswer()
+    }
+  }
+
+  if (shuffledProblems.length === 0) {
     return (
       <div className="relative h-screen w-full bg-black overflow-hidden">
-        {/* Background */}
+        {/* Background - same as story levels */}
         <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
           <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-            Arithmetown
+            Loading...
           </div>
-        </div>
-
-        {/* Dialogue */}
-        <div className="absolute bottom-4 left-0 right-0 px-4">
-          <DialogueBox
-            text={introDialogue[currentDialogue].text}
-            characterName={introDialogue[currentDialogue].character}
-            onComplete={handleDialogueComplete}
-          />
         </div>
       </div>
     )
   }
 
-  // Render tutorial
-  if (gameState === "tutorial") {
-    return (
-      <div className="min-h-screen bg-amber-50 p-6">
-        <h1 className="text-3xl font-pixel text-amber-800 mb-6 text-center">Fraction Conversion Tutorial</h1>
-
-        {tutorialContent.map((section, index) => (
-          <div key={index} className="mb-8 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-pixel text-amber-700 mb-4">{section.title}</h2>
-
-            <div className="mb-4">
-              <h3 className="text-lg font-pixel text-amber-600 mb-2">Steps:</h3>
-              <ul className="list-disc pl-6 space-y-2">
-                {section.steps.map((step, stepIndex) => (
-                  <li key={stepIndex} className="text-amber-900">
-                    {step}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="bg-amber-100 p-4 rounded-md">
-              <h3 className="text-lg font-pixel text-amber-600 mb-2">Example:</h3>
-              <p className="font-bold mb-2">{section.example.problem}</p>
-              <ol className="list-decimal pl-6 space-y-1">
-                {section.example.solution.map((step, stepIndex) => (
-                  <li key={stepIndex}>{step}</li>
-                ))}
-              </ol>
-            </div>
-          </div>
-        ))}
-
-        <div className="flex justify-center mt-6">
-          <Button
-            onClick={handleTutorialComplete}
-            className="font-pixel bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 text-lg"
-          >
-            Start Practice
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  // Render game
-  if (gameState === "playing") {
-    const currentQ = questions[currentQuestion]
-
-    return (
-      <div className="min-h-screen bg-amber-50 p-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div className="text-xl font-pixel text-amber-800">
-              Question {currentQuestion + 1} of {questions.length}
-            </div>
-            <div className="text-xl font-pixel text-amber-800">Score: {score}/100</div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-2xl font-pixel text-amber-700 mb-6 text-center">{currentQ.question}</h2>
-
-            <div className="flex flex-col items-center space-y-4">
-              <Input
-                type="text"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Enter your answer"
-                className={`text-center text-xl w-48 ${
-                  feedback === "correct"
-                    ? "border-green-500 bg-green-50"
-                    : feedback === "incorrect"
-                      ? "border-red-500 bg-red-50"
-                      : ""
-                }`}
-              />
-
-              <Button
-                onClick={handleSubmit}
-                className="font-pixel bg-amber-600 hover:bg-amber-700 text-white px-6 py-2"
-                disabled={feedback !== ""}
-              >
-                Submit
-              </Button>
-            </div>
-
-            {feedback === "correct" && (
-              <div className="mt-4 text-center text-green-600 font-pixel">Correct! Well done!</div>
-            )}
-            {feedback === "incorrect" && (
-              <div className="mt-4 text-center text-red-600 font-pixel">
-                Not quite right. Try again!
-                <div className="text-amber-600 mt-2 text-sm">{currentQ.hint}</div>
-              </div>
-            )}
-          </div>
-
-          <div className="text-center text-amber-700">
-            <div className="font-pixel">
-              Time: {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}
-            </div>
-          </div>
-        </div>
-
-        <LevelCompletionPopup
-          isOpen={showCompletionPopup}
-          onClose={() => {
-            setShowCompletionPopup(false)
-            router.push("/student/game")
-          }}
-          levelId={levelId}
-          levelName="Improper/Mixed Fractions"
-          score={score}
-        />
-      </div>
-    )
-  }
-
-  // Render completion
   return (
-    <div className="min-h-screen bg-amber-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-3xl font-pixel text-amber-800 mb-4">Game Completed!</h1>
-        <p className="text-xl text-amber-700 mb-6">
-          Final Score: {score}/100
-          <br />
-          Time: {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}
-        </p>
+    <div className="relative h-screen w-full bg-black overflow-hidden">
+      {/* Background - same as story levels */}
+      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
+        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+          Squeaks' Sorting Table
+        </div>
+      </div>
+
+      {!gameStarted ? (
+        // Start Screen - styled like dialogue box
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+          <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
+          <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+            Welcome to the Sorting Table! Test your knowledge by converting fractions.
+            {"\n\n"}• Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)
+            {"\n"}• Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)
+            {"\n"}• You have 60 seconds to score as many points as possible
+            {"\n"}• Get 5 in a row for bonus time!
+          </div>
+          <div className="flex justify-between">
+            <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+              Start the Challenge!
+            </Button>
+          </div>
+        </div>
+      ) : (
+        // Game Screen - styled like dialogue box
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+          <div className="text-amber-300 font-pixel text-lg mb-2">
+            Score: {score} | Time: {timeLeft}s | Streak: {streak}
+          </div>
+          <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+            {shuffledProblems[currentProblem]?.type === "improper-to-mixed"
+              ? "Convert to Mixed Number:"
+              : "Convert to Improper Fraction:"}
+            {"\n\n"}
+            <span className="text-3xl text-amber-300">{shuffledProblems[currentProblem]?.question}</span>
+            {"\n\n"}
+            {shuffledProblems[currentProblem]?.type === "improper-to-mixed" && (
+              <span className="text-sm text-amber-400">
+                Hint: Divide {shuffledProblems[currentProblem]?.question.split("/")[0]} by{" "}
+                {shuffledProblems[currentProblem]?.question.split("/")[1]}
+              </span>
+            )}
+          </div>
+          <div className="flex justify-between items-center gap-4">
+            <Input
+              type="text"
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Enter your answer (e.g., 2 1/4 or 17/5)"
+              className="text-lg max-w-md bg-gray-800 border-amber-600 text-white"
+              disabled={gameEnded}
+            />
+            <Button
+              onClick={checkAnswer}
+              disabled={!userAnswer.trim() || gameEnded}
+              className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              Submit
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency exit button - always visible */}
+      <div className="absolute top-4 right-4">
         <Button
           onClick={() => router.push("/student/game")}
-          className="font-pixel bg-amber-600 hover:bg-amber-700 text-white px-6 py-2"
+          className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
-          Return to Map
+          Exit
         </Button>
       </div>
+
+      {/* Completion Popup */}
+      <LevelCompletionPopup
+        isOpen={showCompletionPopup}
+        onClose={() => {
+          setShowCompletionPopup(false)
+          router.push("/student/game")
+        }}
+        levelId="3"
+        levelName="Conversion Game"
+        score={score}
+        isStory={false}
+      />
     </div>
   )
 }

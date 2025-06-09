@@ -56,14 +56,20 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
             .eq("waypoint_id", Number.parseInt(levelId))
             .maybeSingle()
 
-          // If there's saved progress, set the current line
-          if (progress && progress.current_line !== null && progress.current_line !== undefined) {
+          // If there's saved progress and not completed, set the current line
+          if (
+            progress &&
+            progress.current_line !== null &&
+            progress.current_line !== undefined &&
+            !progress.completed
+          ) {
             setCurrentLine(progress.current_line)
           }
 
-          // If the level is already completed, mark it as such
+          // If the level is already completed, start from beginning but mark as completed
           if (progress && progress.completed) {
             setIsCompleted(true)
+            setCurrentLine(0) // Always start from beginning for completed levels
           }
         }
       } catch (error) {
@@ -74,10 +80,10 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
     loadProgress()
   }, [levelId, supabase])
 
-  // Save progress whenever the current line changes
+  // Save progress whenever the current line changes (only if not completed)
   useEffect(() => {
     const saveProgress = async () => {
-      if (isSaving) return
+      if (isSaving || isCompleted) return
 
       setIsSaving(true)
       try {
@@ -102,8 +108,8 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
       }
     }
 
-    // Only save progress if we're not at the beginning
-    if (currentLine > 0) {
+    // Only save progress if we're not at the beginning and not completed
+    if (currentLine > 0 && !isCompleted) {
       saveProgress()
     }
   }, [currentLine, isCompleted, levelId, supabase, isSaving])
@@ -233,93 +239,73 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
   }, [currentLine, dialogue.length])
 
   const handleComplete = async () => {
-    if (isCompleted || isLoading) return
+    if (isLoading) return
 
     setIsLoading(true)
 
     try {
-      // Mark level as completed in the database
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      // Mark level as completed in the database (only if not already completed)
+      if (!isCompleted) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-      if (user) {
-        // First, check if a record already exists
-        const { data: existingProgress } = await supabase
-          .from("student_progress")
-          .select("*")
-          .eq("student_id", user.id)
-          .eq("waypoint_id", Number.parseInt(levelId))
-          .maybeSingle()
-
-        let result
-
-        if (existingProgress) {
-          // If record exists, use update instead of upsert
-          result = await supabase
+        if (user) {
+          // Check if record exists first
+          const { data: existingProgress } = await supabase
             .from("student_progress")
-            .update({
+            .select("*")
+            .eq("student_id", user.id)
+            .eq("waypoint_id", Number.parseInt(levelId))
+            .maybeSingle()
+
+          if (existingProgress) {
+            // Update existing record
+            const { error: updateError } = await supabase
+              .from("student_progress")
+              .update({
+                completed: true,
+                current_line: dialogue.length,
+                score: 100,
+                last_updated: new Date().toISOString(),
+              })
+              .eq("student_id", user.id)
+              .eq("waypoint_id", Number.parseInt(levelId))
+
+            if (updateError) {
+              console.error("Error updating progress:", updateError)
+            }
+          } else {
+            // Insert new record
+            const { error: insertError } = await supabase.from("student_progress").insert({
+              student_id: user.id,
+              waypoint_id: Number.parseInt(levelId),
               completed: true,
               current_line: dialogue.length,
               score: 100,
               last_updated: new Date().toISOString(),
             })
-            .eq("student_id", user.id)
-            .eq("waypoint_id", Number.parseInt(levelId))
-        } else {
-          // If no record exists, insert a new one
-          result = await supabase.from("student_progress").insert({
-            student_id: user.id,
-            waypoint_id: Number.parseInt(levelId),
-            completed: true,
-            current_line: dialogue.length,
-            score: 100,
-            last_updated: new Date().toISOString(),
-          })
-        }
 
-        if (result.error) {
-          throw new Error(`Failed to save completion: ${result.error.message}`)
-        }
+            if (insertError) {
+              console.error("Error inserting progress:", insertError)
+            }
+          }
 
-        // Wait a moment to ensure the database has time to update
-        await new Promise((resolve) => setTimeout(resolve, 500))
+          // Wait a moment to ensure the database has time to update
+          await new Promise((resolve) => setTimeout(resolve, 500))
 
-        // Try to refresh the student_progress table
-        try {
-          await supabase.rpc("refresh_student_progress")
-        } catch (error) {
-          console.error("Error refreshing student progress:", error)
-        }
-
-        // Double-check that the level is marked as completed
-        const { data: progress, error: checkError } = await supabase
-          .from("student_progress")
-          .select("*")
-          .eq("student_id", user.id)
-          .eq("waypoint_id", Number.parseInt(levelId))
-          .single()
-
-        if (checkError) {
-          console.error("Error checking completion status:", checkError)
-        }
-
-        if (!progress || !progress.completed) {
-          // Try one more time with a direct update using RPC
+          // Try to refresh the student_progress table
           try {
-            await supabase.rpc("force_complete_waypoint", {
-              p_student_id: user.id,
-              p_waypoint_id: Number.parseInt(levelId),
-            })
-          } catch (rpcError) {
-            console.error("Error forcing completion via RPC:", rpcError)
+            await supabase.rpc("refresh_student_progress")
+          } catch (error) {
+            console.error("Error refreshing student progress:", error)
           }
         }
       }
 
       setIsCompleted(true)
 
-      // Show completion popup instead of toast
+      // Show completion popup
       setShowCompletionPopup(true)
     } catch (error) {
       console.error("Error marking level as completed:", error)
@@ -333,6 +319,13 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleRestart = () => {
+    setCurrentLine(0)
+    setIsCompleted(false)
+    setWrongAttempts(0)
+    setSelectedChoice(null)
   }
 
   // Add keyboard event listener for spacebar and enter

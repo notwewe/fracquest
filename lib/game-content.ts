@@ -1,3 +1,53 @@
+import { FractionIntroduction } from "@/components/game/levels/fraction-introduction"
+import { ImproperFractionsStory } from "@/components/game/levels/improper-fractions-story"
+import { AdditionIntroductionStory } from "@/components/game/levels/addition-introduction-story"
+import { SubtractionIntroductionStory } from "@/components/game/levels/subtraction-introduction-story"
+import ConversionGame from "@/components/game/levels/conversion-game"
+import AdditionGame from "@/components/game/levels/addition-game"
+import BridgeBuilderGame from "@/components/game/levels/bridge-builder-game"
+import FractionForestGame from "@/components/game/levels/fraction-forest-game"
+import RealmOfBalanceGame from "@/components/game/levels/realm-of-balance-game"
+import DreadpointHollowGame from "@/components/game/levels/dreadpoint-hollow-game"
+
+export const gameContent = {
+  // Arithmetown
+  1: FractionIntroduction,
+  2: ImproperFractionsStory,
+  3: ConversionGame,
+  4: AdditionIntroductionStory,
+  5: AdditionGame,
+
+  // Lessmore Bridge
+  6: SubtractionIntroductionStory,
+  7: BridgeBuilderGame,
+
+  // Fraction Forest
+  8: FractionForestGame,
+
+  // Realm of Balance
+  9: RealmOfBalanceGame,
+
+  // Dreadpoint Hollow
+  10: DreadpointHollowGame,
+
+  // Epilogue (handled within Dreadpoint Hollow game)
+  11: DreadpointHollowGame,
+}
+
+export const levelNames = {
+  1: "Fraction Introduction",
+  2: "Improper and Mixed Fractions",
+  3: "Conversion Game",
+  4: "Addition Introduction",
+  5: "Addition Game",
+  6: "Subtraction Introduction",
+  7: "Bridge Builder Game",
+  8: "Fraction Forest",
+  9: "Realm of Balance",
+  10: "Dreadpoint Hollow",
+  11: "Epilogue",
+}
+
 export function getLevelDialogue(levelId: string) {
   // Default dialogue if level-specific dialogue is not found
   const defaultDialogue = [
@@ -18,7 +68,7 @@ export function getLevelDialogue(levelId: string) {
     },
   ]
 
-  // Level-specific dialogue based on the script
+  // Level-specific dialogue based on the storyboard PDF
   const levelDialogues: Record<string, any> = {
     // Opening Cutscene
     "0": [
@@ -301,8 +351,22 @@ export function getLevelDialogue(levelId: string) {
       },
     ],
 
-    // Arithmetown - Addition Intro (Level 3)
+    // Arithmetown - Conversion Game (Level 3)
     "3": [
+      {
+        speaker: "Squeaks",
+        text: "Welcome to the Sorting Table! Here, you'll test your knowledge by converting fractions. Don't worry—I'll guide you through the first round!",
+        background: "Squeaks' Sorting Table",
+      },
+      {
+        speaker: "Squeaks",
+        text: "You'll need to convert between improper fractions and mixed numbers. Remember: divide to go from improper to mixed, multiply and add to go from mixed to improper!",
+        background: "Squeaks' Sorting Table",
+      },
+    ],
+
+    // Arithmetown - Addition Intro (Level 4)
+    "4": [
       {
         speaker: "Narrator",
         text: "The back room of the Emporium. A floating pedestal glows, waiting for the compass pieces to be placed.",
@@ -385,8 +449,8 @@ export function getLevelDialogue(levelId: string) {
       },
     ],
 
-    // Compass Game (Level 4)
-    "4": [
+    // Addition Game (Level 5)
+    "5": [
       {
         speaker: "Narrator",
         text: "After learning about fraction addition, Whiskers is ready to assemble the Fraction Compass.",
@@ -412,100 +476,10 @@ export function getLevelDialogue(levelId: string) {
         text: "I'm ready to restore the compass!",
         background: "Compass Chamber",
       },
-      {
-        speaker: "Squeaks",
-        text: "Let's begin! What is 1/4 + 3/4?",
-        background: "Compass Challenge",
-        isChoice: true,
-        choices: ["4/4", "1", "4/8", "1/2"],
-        correctChoice: 1, // 1 is the correct answer (index 1)
-        wrongAnswerText:
-          "Not quite. When adding fractions with the same denominator, you just add the numerators. So 1/4 + 3/4 = 4/4 = 1.",
-      },
-      {
-        speaker: "Squeaks",
-        text: "Excellent! 1/4 + 3/4 = 4/4 = 1. The first compass piece is restored!",
-        background: "Compass Challenge",
-      },
-      {
-        speaker: "Squeaks",
-        text: "Now, what is 1/3 + 1/6?",
-        background: "Compass Challenge",
-        isChoice: true,
-        choices: ["2/9", "1/2", "2/6", "3/6"],
-        correctChoice: 1, // 1/2 is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not right. To add 1/3 + 1/6, we need a common denominator. The LCD is 6. Convert 1/3 to 2/6, then add: 2/6 + 1/6 = 3/6 = 1/2.",
-      },
-      {
-        speaker: "Squeaks",
-        text: "Perfect! 1/3 + 1/6 = 1/2. The second compass piece is restored!",
-        background: "Compass Challenge",
-      },
-      {
-        speaker: "Squeaks",
-        text: "For the third piece, what is 2/5 + 1/10?",
-        background: "Compass Challenge",
-        isChoice: true,
-        choices: ["3/15", "1/2", "3/10", "5/10"],
-        correctChoice: 2, // 3/10 is the correct answer (index 2)
-        wrongAnswerText:
-          "Not quite. To add 2/5 + 1/10, we need a common denominator. The LCD is 10. Convert 2/5 to 4/10, then add: 4/10 + 1/10 = 5/10 = 1/2.",
-      },
-      {
-        speaker: "Squeaks",
-        text: "Excellent! 2/5 + 1/10 = 1/2. The third compass piece is restored!",
-        background: "Compass Challenge",
-      },
-      {
-        speaker: "Squeaks",
-        text: "For the fourth piece, what is 3/8 + 1/4?",
-        background: "Compass Challenge",
-        isChoice: true,
-        choices: ["4/12", "5/8", "1/2", "3/4"],
-        correctChoice: 1, // 5/8 is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not right. To add 3/8 + 1/4, we need a common denominator. The LCD is 8. Convert 1/4 to 2/8, then add: 3/8 + 2/8 = 5/8.",
-      },
-      {
-        speaker: "Squeaks",
-        text: "Perfect! 3/8 + 1/4 = 5/8. The fourth compass piece is restored!",
-        background: "Compass Challenge",
-      },
-      {
-        speaker: "Squeaks",
-        text: "For the final piece, what is 2/3 + 1/6?",
-        background: "Compass Challenge",
-        isChoice: true,
-        choices: ["3/9", "5/6", "2/6", "3/6"],
-        correctChoice: 1, // 5/6 is the correct answer (index 1)
-        wrongAnswerText:
-          "Not quite. To add 2/3 + 1/6, we need a common denominator. The LCD is 6. Convert 2/3 to 4/6, then add: 4/6 + 1/6 = 5/6.",
-      },
-      {
-        speaker: "Squeaks",
-        text: "Excellent! 2/3 + 1/6 = 5/6. The final compass piece is restored!",
-        background: "Compass Challenge",
-      },
-      {
-        speaker: "Narrator",
-        text: "The compass pieces begin to glow and assemble themselves. The Fraction Compass is restored!",
-        background: "Compass Restored",
-      },
-      {
-        speaker: "Squeaks",
-        text: "You've done it, Whiskers! The Fraction Compass is complete. It will now guide you to the next piece of the Fraction Orb.",
-        background: "Compass Restored",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Thank you, Squeaks! I'll continue my journey to save Numeria!",
-        background: "Compass Restored",
-      },
     ],
 
-    // Transition to Lessmore Bridge (Level 5)
-    "5": [
+    // Transition to Lessmore Bridge (Level 6)
+    "6": [
       {
         speaker: "Squeaks",
         text: "You've got the compass, Whiskers! It'll guide you to the lost pieces of the orb, but remember—fractions aren't just about knowing... they're about doing.",
@@ -550,35 +524,6 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Elder Pebble",
         text: "Only those who understand taking away can rebuild what was lost. You must master the art of fraction subtraction to restore the bridge.",
         background: "Lessmore Bridge",
-      },
-    ],
-
-    // Lessmore Bridge - Subtraction Intro (Level 6)
-    "6": [
-      {
-        speaker: "Narrator",
-        text: "Whiskers arrives at the edge of a misty ravine. A grand, glowing bridge once stood here—but now, parts of it are missing.",
-        background: "LESSMORE BRIDGE",
-      },
-      {
-        speaker: "Narrator",
-        text: "The compass pulses and glows. Whiskers steps cautiously to the ravine's edge.",
-        background: "LESSMORE BRIDGE",
-      },
-      {
-        speaker: "Whiskers",
-        text: "The compass brought me here... but the bridge is broken!",
-        background: "LESSMORE BRIDGE",
-      },
-      {
-        speaker: "Narrator",
-        text: "A gentle rumble echoes as an ancient figure rises from the stone—Elder Pebble, the guardian of understanding.",
-        background: "LESSMORE BRIDGE",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Only those who understand taking away can rebuild what was lost. You must master the art of fraction subtraction to restore the bridge.",
-        background: "LESSMORE BRIDGE",
       },
       {
         speaker: "Narrator",
@@ -699,95 +644,6 @@ export function getLevelDialogue(levelId: string) {
         text: "I'm ready to rebuild the bridge!",
         background: "Bridge Builder Challenge",
       },
-      {
-        speaker: "Elder Pebble",
-        text: "Let's begin. What is 7/8 - 3/8?",
-        background: "Bridge Builder Challenge",
-        isChoice: true,
-        choices: ["4/8", "4/16", "1/2", "5/8"],
-        correctChoice: 0, // 4/8 is the correct answer (index 0)
-        wrongAnswerText:
-          "That's not correct. When subtracting fractions with the same denominator, you just subtract the numerators. So 7/8 - 3/8 = 4/8, which can be simplified to 1/2.",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Correct! 7/8 - 3/8 = 4/8, which can be simplified to 1/2. The first stone appears on the bridge!",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Now, what is 5/6 - 1/3?",
-        background: "Bridge Builder Challenge",
-        isChoice: true,
-        choices: ["4/6", "2/3", "1/2", "3/6"],
-        correctChoice: 1, // 2/3 is the correct answer (index 1)
-        wrongAnswerText:
-          "Not quite. To subtract 5/6 - 1/3, we need a common denominator. Convert 1/3 to 2/6, then subtract: 5/6 - 2/6 = 3/6, which simplifies to 1/2.",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Excellent! 5/6 - 1/3 = 5/6 - 2/6 = 3/6, which simplifies to 1/2. The second stone appears!",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "For the third stone, what is 4/5 - 1/10?",
-        background: "Bridge Builder Challenge",
-        isChoice: true,
-        choices: ["3/5", "7/10", "3/10", "1/2"],
-        correctChoice: 1, // 7/10 is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not right. To subtract 4/5 - 1/10, we need a common denominator. Convert 4/5 to 8/10, then subtract: 8/10 - 1/10 = 7/10.",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Perfect! 4/5 - 1/10 = 8/10 - 1/10 = 7/10. The third stone materializes!",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "For the fourth stone, what is 1 - 1/4?",
-        background: "Bridge Builder Challenge",
-        isChoice: true,
-        choices: ["3/4", "4/4", "0", "1/4"],
-        correctChoice: 0, // 3/4 is the correct answer (index 0)
-        wrongAnswerText: "Not quite. To subtract 1 - 1/4, convert 1 to 4/4, then subtract: 4/4 - 1/4 = 3/4.",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Excellent! 1 - 1/4 = 4/4 - 1/4 = 3/4. The fourth stone appears!",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "For the final stone, what is 2/3 - 1/6?",
-        background: "Bridge Builder Challenge",
-        isChoice: true,
-        choices: ["1/3", "1/2", "1/6", "3/6"],
-        correctChoice: 1, // 1/2 is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not correct. To subtract 2/3 - 1/6, we need a common denominator. Convert 2/3 to 4/6, then subtract: 4/6 - 1/6 = 3/6, which simplifies to 1/2.",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Perfect! 2/3 - 1/6 = 4/6 - 1/6 = 3/6, which simplifies to 1/2. The final stone appears, completing the bridge!",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "Congratulations, Whiskers! You've successfully rebuilt the Lessmore Bridge. Your understanding of fraction subtraction has restored what was lost.",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Thank you, Elder Pebble! I'll continue my journey to find the missing pieces of the Fraction Orb and save Numeria!",
-        background: "Bridge Builder Challenge",
-      },
-      {
-        speaker: "Elder Pebble",
-        text: "May your journey be successful, young adventurer. Remember, in mathematics as in life, sometimes we must take away to find what truly matters.",
-        background: "Bridge Builder Challenge",
-      },
     ],
 
     // Fraction Forest (Level 8)
@@ -837,91 +693,6 @@ export function getLevelDialogue(levelId: string) {
         text: "I understand. Let me try to arrange these fraction trees!",
         background: "Fraction Forest",
       },
-      {
-        speaker: "Elder Barkroot",
-        text: "Let's start with a simple arrangement. Arrange these fractions from smallest to largest: 2/3, 1/2, 5/6, 3/8",
-        background: "Tree Arrangement",
-        isChoice: true,
-        choices: ["1/2, 2/3, 3/8, 5/6", "3/8, 1/2, 2/3, 5/6", "3/8, 2/3, 1/2, 5/6", "1/2, 3/8, 2/3, 5/6"],
-        correctChoice: 1, // 3/8, 1/2, 2/3, 5/6 is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not the correct order. Try converting all fractions to a common denominator to compare them properly.",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "Excellent! The correct order is 3/8, 1/2, 2/3, 5/6. The first set of trees begins to flourish!",
-        background: "Tree Arrangement",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "Now, arrange these fractions from smallest to largest: 4/5, 7/10, 3/4, 2/3",
-        background: "Tree Arrangement",
-        isChoice: true,
-        choices: ["2/3, 3/4, 7/10, 4/5", "3/4, 2/3, 7/10, 4/5", "2/3, 7/10, 3/4, 4/5", "7/10, 2/3, 3/4, 4/5"],
-        correctChoice: 0, // 2/3, 3/4, 7/10, 4/5 is the correct answer (index 0)
-        wrongAnswerText:
-          "That's not the correct order. Try converting all fractions to a common denominator to compare them properly.",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "Perfect! The correct order is 2/3, 3/4, 7/10, 4/5. More trees begin to flourish!",
-        background: "Tree Arrangement",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "For the final arrangement, arrange these fractions from smallest to largest: 5/12, 3/8, 7/12, 1/3",
-        background: "Tree Arrangement",
-        isChoice: true,
-        choices: ["1/3, 3/8, 5/12, 7/12", "1/3, 5/12, 3/8, 7/12", "5/12, 1/3, 3/8, 7/12", "5/12, 1/3, 7/12, 3/8"],
-        correctChoice: 1, // 1/3, 5/12, 3/8, 7/12 is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not the correct order. Try converting all fractions to a common denominator to compare them properly.",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "Excellent! The correct order is 1/3, 5/12, 3/8, 7/12. The final set of trees flourishes!",
-        background: "Tree Arrangement",
-      },
-      {
-        speaker: "Narrator",
-        text: "As the last tree is placed in the correct order, the entire forest begins to transform. The dull, dry landscape bursts with color and life.",
-        background: "Flourishing Forest",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "Beautiful! The grove stands tall and true. The balance is restored. You have a gift for order, young one.",
-        background: "Flourishing Forest",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "You've done well, brave traveler. The roots are aligned, but the forest is only the beginning. Beyond these woods lies the Realm of Balance, where harmony isn't just found in order... but in comparison.",
-        background: "Flourishing Forest",
-      },
-      {
-        speaker: "Whiskers",
-        text: "The Realm of Balance? Sounds... important. And serious.",
-        background: "Flourishing Forest",
-      },
-      {
-        speaker: "Elder Barkroot",
-        text: "Indeed. There, numbers don't just stand—they face each other. You must see what outweighs, what falls short... and what stands equal.",
-        background: "Flourishing Forest",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Alright then. No more hiding in the shadows, fractions. I'm ready to see who's greater... and who's not.",
-        background: "Flourishing Forest",
-      },
-      {
-        speaker: "Narrator",
-        text: "Whiskers pads forward. The forest fades behind, replaced by floating stones beneath his paws. A still silence hangs in the air as a golden scale gleams in the distance, perfectly balanced.",
-        background: "Path to Realm of Balance",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Balance, huh? Let's find out which numbers tip the truth.",
-        background: "Path to Realm of Balance",
-      },
     ],
 
     // Realm of Balance (Level 9)
@@ -945,100 +716,6 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Whiskers",
         text: "I need to compare fractions and choose the correct symbol? I can do that!",
         background: "Realm of Balance",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Let's begin. Compare 3/4 and 2/3. Which symbol is correct?",
-        background: "Scale of Judgment",
-        isChoice: true,
-        choices: [">", "<", "="],
-        correctChoice: 0, // > is the correct answer (index 0)
-        wrongAnswerText:
-          "That's not correct. To compare 3/4 and 2/3, find a common denominator. The LCD is 12. Convert 3/4 to 9/12 and 2/3 to 8/12. Since 9 > 8, we know that 3/4 > 2/3.",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Correct! 3/4 > 2/3. 3 parts of 4 outweigh 2 of 3. Well judged.",
-        background: "Scale of Judgment",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Now, compare 5/10 and 1/2. Which symbol is correct?",
-        background: "Scale of Judgment",
-        isChoice: true,
-        choices: [">", "<", "="],
-        correctChoice: 2, // = is the correct answer (index 2)
-        wrongAnswerText: "That's not correct. 5/10 simplifies to 1/2, so 5/10 = 1/2. They are equivalent fractions.",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Excellent! 5/10 = 1/2. Half and half. Nice try, scales.",
-        background: "Scale of Judgment",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Now, compare 4/9 and 5/9. Which symbol is correct?",
-        background: "Scale of Judgment",
-        isChoice: true,
-        choices: [">", "<", "="],
-        correctChoice: 1, // < is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not correct. Since 4/9 and 5/9 have the same denominator, we can directly compare the numerators. Since 4 < 5, we know that 4/9 < 5/9.",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Correct! 4/9 < 5/9. You tip the scales with truth.",
-        background: "Scale of Judgment",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Now, compare 2/5 and 3/8. Which symbol is correct?",
-        background: "Scale of Judgment",
-        isChoice: true,
-        choices: [">", "<", "="],
-        correctChoice: 0, // > is the correct answer (index 0)
-        wrongAnswerText:
-          "That's not correct. To compare 2/5 and 3/8, find a common denominator. The LCD is 40. Convert 2/5 to 16/40 and 3/8 to 15/40. Since 16 > 15, we know that 2/5 > 3/8.",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Perfect! 2/5 > 3/8. The scales tip in your favor.",
-        background: "Scale of Judgment",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "For the final comparison, compare 7/12 and 3/5. Which symbol is correct?",
-        background: "Scale of Judgment",
-        isChoice: true,
-        choices: [">", "<", "="],
-        correctChoice: 1, // < is the correct answer (index 1)
-        wrongAnswerText:
-          "That's not correct. To compare 7/12 and 3/5, find a common denominator. The LCD is 60. Convert 7/12 to 35/60 and 3/5 to 36/60. Since 35 < 36, we know that 7/12 < 3/5.",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "Excellent! 7/12 < 3/5. You have judged with wisdom. The scales are balanced.",
-        background: "Scale of Judgment",
-      },
-      {
-        speaker: "Narrator",
-        text: "The floating scale splits in two, revealing a crystal bridge leading to the final realm...",
-        background: "Crystal Bridge",
-      },
-      {
-        speaker: "Guardian of Equilibrium",
-        text: "You have proven your mastery of fraction comparison. Proceed, Whiskers, to the final challenge: Dreadpoint Hollow, where the Decimal Phantom awaits.",
-        background: "Crystal Bridge",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Thank you, Guardian. I'm ready to face the Decimal Phantom and restore the Fraction Orb!",
-        background: "Crystal Bridge",
-      },
-      {
-        speaker: "Narrator",
-        text: "Whiskers crosses the crystal bridge, his heart racing with determination. The final confrontation awaits...",
-        background: "Path to Dreadpoint Hollow",
       },
     ],
 
@@ -1074,155 +751,14 @@ export function getLevelDialogue(levelId: string) {
         text: "Let's twist your mind with forms—mixed or improper, you decide.",
         background: "Conversion Challenge",
       },
-      {
-        speaker: "Decimal Phantom",
-        text: "Convert 9/4 to a mixed number.",
-        background: "Conversion Challenge",
-        isChoice: true,
-        choices: ["2 1/4", "2 1/2", "2 1/3", "2 1/5"],
-        correctChoice: 0, // 2 1/4 is the correct answer (index 0)
-        wrongAnswerText:
-          "You stumble already? Your memory fails you... To convert 9/4 to a mixed number, divide 9 by 4. You get 2 with a remainder of 1, so it's 2 1/4.",
-      },
-      {
-        speaker: "Whiskers",
-        text: "I see through your tricks. Mixed or not, they're still fractions.",
-        background: "Conversion Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Convert 2 3/5 to an improper fraction.",
-        background: "Conversion Challenge",
-        isChoice: true,
-        choices: ["5/2", "13/5", "7/5", "11/5"],
-        correctChoice: 1, // 13/5 is the correct answer (index 1)
-        wrongAnswerText:
-          "Your answers crumble... just like your confidence. To convert 2 3/5 to an improper fraction, multiply 2 by 5 to get 10, then add 3 to get 13. So it's 13/5.",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Fractions unite—like my focus!",
-        background: "Conversion Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Two become one—but which two? Only balance will reveal the answer.",
-        background: "Addition Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Which pair of fractions adds up to 5/6?",
-        background: "Addition Challenge",
-        isChoice: true,
-        choices: ["1/2 + 1/3", "2/3 + 1/6", "1/4 + 1/2"],
-        correctChoice: 1, // 2/3 + 1/6 is the correct answer (index 1)
-        wrongAnswerText:
-          "You add your doubt to your downfall. Let's check: 1/2 + 1/3 = 3/6 + 2/6 = 5/6. 2/3 + 1/6 = 4/6 + 1/6 = 5/6. 1/4 + 1/2 = 1/4 + 2/4 = 3/4.",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Fractions unite—like my focus!",
-        background: "Addition Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Let's take something precious away...",
-        background: "Subtraction Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "What is 7/8 - 3/8?",
-        background: "Subtraction Challenge",
-        isChoice: true,
-        choices: ["4/8", "1/2", "4/16", "5/8"],
-        correctChoice: 1, // 1/2 is the correct answer (index 1)
-        wrongAnswerText:
-          "Your answers crumble... just like your confidence. When subtracting fractions with the same denominator, you just subtract the numerators. So 7/8 - 3/8 = 4/8, which simplifies to 1/2.",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Take all you want—I'll always find what remains!",
-        background: "Subtraction Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Trees once stood tall—arranged in perfect order. Now they grow wild. Can you bring order to chaos?",
-        background: "Arrangement Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Arrange these fractions from least to greatest: 3/4, 2/3, 5/6, 1/2",
-        background: "Arrangement Challenge",
-        isChoice: true,
-        choices: ["1/2, 2/3, 3/4, 5/6", "1/2, 3/4, 2/3, 5/6", "5/6, 3/4, 2/3, 1/2", "2/3, 1/2, 3/4, 5/6"],
-        correctChoice: 0, // 1/2, 2/3, 3/4, 5/6 is the correct answer (index 0)
-        wrongAnswerText:
-          "Lost in the woods again, kitty? Try converting all fractions to a common denominator to compare them properly.",
-      },
-      {
-        speaker: "Whiskers",
-        text: "The tallest tree isn't always the first to grow.",
-        background: "Arrangement Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "You've seen the pieces—but can you compare the whole?",
-        background: "Comparison Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "Compare 4/5 and 3/4. Which symbol is correct?",
-        background: "Comparison Challenge",
-        isChoice: true,
-        choices: [">", "<", "="],
-        correctChoice: 0, // > is the correct answer (index 0)
-        wrongAnswerText:
-          "Off-balance. As expected. To compare 4/5 and 3/4, find a common denominator. The LCD is 20. Convert 4/5 to 16/20 and 3/4 to 15/20. Since 16 > 15, we know that 4/5 > 3/4.",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Balance is more than sight—it's sense.",
-        background: "Comparison Challenge",
-      },
-      {
-        speaker: "Whiskers",
-        text: "I've learned. I've failed. I've grown. Now let's end this!",
-        background: "Final Challenge",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "For the final challenge, what is 2/3 + 1/6?",
-        background: "Final Challenge",
-        isChoice: true,
-        choices: ["3/9", "5/6", "2/6", "3/6"],
-        correctChoice: 1, // 5/6 is the correct answer (index 1)
-        wrongAnswerText:
-          "So close, yet so far... To add 2/3 + 1/6, find a common denominator. The LCD is 6. Convert 2/3 to 4/6, then add: 4/6 + 1/6 = 5/6.",
-      },
-      {
-        speaker: "Narrator",
-        text: "Whiskers lands the final answer. A beam of golden light pierces the Decimal Phantom.",
-        background: "Phantom Defeated",
-      },
-      {
-        speaker: "Decimal Phantom",
-        text: "How... how could you balance what I made to break?",
-        background: "Phantom Defeated",
-      },
-      {
-        speaker: "Whiskers",
-        text: "Fractions aren't just numbers... they're pieces of the whole. And so am I.",
-        background: "Phantom Defeated",
-      },
-      {
-        speaker: "Narrator",
-        text: "Light floods Dreadpoint Hollow. The fog lifts. Balance returns to Numeria.",
-        background: "Numeria Restored",
-      },
+    ],
+
+    // Epilogue (Level 11) - Victory and Credits
+    "11": [
       {
         speaker: "Narrator",
         text: "And so, with courage in his paws and fractions in his heart, Whiskers the Brave stood atop the cliffs of Dreadpoint Hollow.",
-        background: "Epilogue",
+        background: "Victory Scene",
       },
       {
         speaker: "Narrator",
@@ -1231,38 +767,28 @@ export function getLevelDialogue(levelId: string) {
       },
       {
         speaker: "Narrator",
-        text: "As its light spread across the land, Numeria began to heal.",
-        background: "Healing Numeria",
+        text: "As its light spread across the land, Numeria began to heal. The trees of Fraction Forest straightened their branches.",
+        background: "Healing Land",
       },
       {
         speaker: "Narrator",
-        text: "The trees of Fraction Forest straightened their branches. The scales of the Realm of Balance shimmered with harmony. Even the once-shadowed paths of Dreadpoint Hollow grew warm with morning light.",
-        background: "Restored Lands",
-      },
-      {
-        speaker: "Narrator",
-        text: "Whiskers returns to the village where the journey began. The villagers — rabbits, owls, hedgehogs, and more — gather in awe and cheer.",
-        background: "Arithmetown Celebration",
+        text: "The scales of the Realm of Balance shimmered with harmony. Even the once-shadowed paths of Dreadpoint Hollow grew warm with morning light.",
+        background: "Restored Kingdom",
       },
       {
         speaker: "King Equalis",
         text: "You've done more than defeat the Decimal Phantom, young Whiskers. You've restored knowledge, courage, and clarity to all corners of our world.",
-        background: "King's Speech",
-      },
-      {
-        speaker: "Narrator",
-        text: "A grand festival is held: Lanterns shaped like fractions float into the night sky. Children play games balancing equal parts of pie. Whiskers is crowned Guardian of the Fraction Orb.",
-        background: "Celebration Festival",
+        background: "King's Gratitude",
       },
       {
         speaker: "Whiskers",
         text: "Fractions helped me see the world in parts... but they also taught me how everything fits together.",
-        background: "Whiskers' Speech",
+        background: "Wise Whiskers",
       },
       {
         speaker: "Narrator",
-        text: "The screen zooms out slowly on a magical storybook closing. On its cover: 'FracQuest: The Tale of Whiskers and the Fraction Orb'",
-        background: "Book Closing",
+        text: "A grand festival is held with lanterns shaped like fractions floating into the night sky, and Whiskers is crowned Guardian of the Fraction Orb.",
+        background: "Celebration",
       },
       {
         speaker: "Narrator",
