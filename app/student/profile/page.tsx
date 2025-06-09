@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Save, Trophy, BookOpen, UserPlus } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
+import { isMobileDevice } from "@/lib/utils/deviceDetection"
 
 export default function StudentProfilePage() {
   const router = useRouter()
@@ -26,6 +27,7 @@ export default function StudentProfilePage() {
   const [isLoadingData, setIsLoadingData] = useState(true)
   const [showJoinClass, setShowJoinClass] = useState(false)
   const [isEnrolled, setIsEnrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const supabase = createClient()
 
   const searchParams = useSearchParams()
@@ -176,6 +178,38 @@ export default function StudentProfilePage() {
     }
 
     fetchUpdatedClassInfo()
+  }
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(isMobileDevice())
+    }
+
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  if (isMobile) {
+    return (
+      <MobileProfileView
+        username={username}
+        email={email}
+        className={className}
+        completedLevels={completedLevels}
+        totalScore={totalScore}
+        isEnrolled={isEnrolled}
+        isLoading={isLoading}
+        error={error}
+        success={success}
+        showJoinClass={showJoinClass}
+        onUsernameChange={setUsername}
+        onSubmit={handleSubmit}
+        onJoinClassClick={() => setShowJoinClass(true)}
+        onJoinClassSuccess={handleJoinClassSuccess}
+        onCloseJoinClass={() => setShowJoinClass(false)}
+      />
+    )
   }
 
   if (isLoadingData) {

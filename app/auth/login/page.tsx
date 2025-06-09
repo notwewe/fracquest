@@ -1,19 +1,26 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react" // Added useEffect, useState
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { BookLoginForm } from "@/components/auth/book-login-form"
 import { BackgroundSlideshow } from "@/components/auth/background-slideshow"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert" // Added AlertTitle
-import { InfoIcon } from "lucide-react" // Changed to InfoIcon for consistency
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { InfoIcon } from "lucide-react"
+import { MobileLoginView } from "@/components/auth/mobile-login-view"
+import { useMobileDetect } from "@/lib/utils/deviceDetection"
 
 function LoginContent() {
   const searchParams = useSearchParams()
   const [message, setMessage] = useState<string | null>(null)
+  const isMobile = useMobileDetect()
 
   useEffect(() => {
     setMessage(searchParams.get("message"))
   }, [searchParams])
+
+  if (isMobile) {
+    return <MobileLoginView message={message} />
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -30,7 +37,7 @@ function LoginContent() {
               </AlertDescription>
             </Alert>
           )}
-          {message === "account-deleted" && ( // Handling the old message for a bit, can be removed later
+          {message === "account-deleted" && (
             <Alert className="mb-6 bg-green-100 border-green-400 text-green-700">
               <InfoIcon className="h-5 w-5" />
               <AlertTitle>Account Deleted</AlertTitle>
@@ -45,6 +52,18 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
+  const isMobile = useMobileDetect()
+  const searchParams = useSearchParams()
+  const [message, setMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    setMessage(searchParams.get("message"))
+  }, [searchParams])
+
+  if (isMobile) {
+    return <MobileLoginView message={message} />
+  }
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LoginContent />
