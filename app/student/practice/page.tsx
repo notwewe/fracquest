@@ -9,14 +9,14 @@ import Image from "next/image"
 // Location data with descriptions
 const locationData = {
   1: {
-    name: "Arithmetown",
+    name: "Arithmetown Castle",
     image: "/Prac_Arithmetown.png",
     description:
       "Welcome to Arithmetown, the bustling heart of Numeria Kingdom! Here, the citizens have mastered the art of fraction manipulation. Learn how to convert improper fractions into mixed numbers, add fractions with different denominators, and solve puzzles that challenge your understanding of parts and wholes. The town's mathematicians are eager to share their knowledge with brave adventurers like you!",
   },
   2: {
     name: "Lessmore Bridge",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_Lessmore.png",
     description:
       "Cross the ancient Lessmore Bridge, where the guardians of comparison dwell! This mystical bridge teaches travelers the sacred art of comparing fractions. Learn to determine which fraction is greater or lesser, master the symbols of inequality, and discover the secrets of ordering fractions from smallest to largest. Only those who understand the true relationships between fractions may safely cross to the other side!",
   },
@@ -78,7 +78,7 @@ export default async function StudentPracticePage({
   const nextSection = currentIndex < (sections?.length || 0) - 1 ? sections?.[currentIndex + 1] : null
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div className="h-screen flex items-center justify-center relative overflow-hidden">
       {/* Background Slideshow */}
       <BackgroundSlideshow />
 
@@ -94,8 +94,22 @@ export default async function StudentPracticePage({
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-4xl mx-auto">
+        {/* Title - Added above the book */}
+        <h1
+          className="text-8xl font-bold text-center mb-0 mt-20"
+          style={{
+            fontFamily: "var(--font-blaka)",
+            color: "#FFFFFF", // White color
+            WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
+            textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+            textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
+          }}
+        >
+          Practice
+        </h1>
+
         {/* Book Container - Same size as login */}
-        <div className="relative">
+        <div className="relative -mt-5">
           <Image src="/book.png" alt="Open Book" width={800} height={600} className="w-full h-auto max-w-4xl mx-auto" />
 
           {/* Book Content - Positioned inside the book */}
@@ -133,7 +147,7 @@ export default async function StudentPracticePage({
               <div className="flex-1 flex justify-center pr-6">
                 <Button
                   asChild
-                  className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3"
+                  className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3 shadow-md shadow-amber-950/40"
                 >
                   <Link href={currentSection ? `/student/practice/${currentSection.id}/intro` : "#"}>
                     Review Lesson
@@ -145,7 +159,7 @@ export default async function StudentPracticePage({
               <div className="flex-1 flex justify-center pl-6">
                 <Button
                   asChild
-                  className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3"
+                  className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3 shadow-md shadow-amber-950/40"
                 >
                   <Link href={currentSection ? `/student/practice/${currentSection.id}/game` : "#"}>Practice Game</Link>
                 </Button>
