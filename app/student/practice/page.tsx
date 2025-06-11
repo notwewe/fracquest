@@ -152,44 +152,44 @@ export default async function StudentPracticePage({
               </div>
             </div>
           </div>
-
-          {/* Previous Button - Left side of left content */}
-          <div className="absolute bottom-[12%] left-[8%]">
-            {previousSection ? (
-              <Link href={`/student/practice?location=${previousSection.id}`} className="block w-12 h-12">
-                <Image
-                  src="/nav-arrow.png"
-                  alt="Previous"
-                  width={48}
-                  height={48}
-                  className="hover:opacity-80 transition-opacity"
-                />
-              </Link>
-            ) : (
-              <div className="w-12 h-12 opacity-50">
-                <Image src="/nav-arrow.png" alt="Previous" width={48} height={48} />
-              </div>
-            )}
-          </div>
-
-          {/* Next Button - Right side of right content */}
-          <div className="absolute bottom-[12%] right-[8%]">
-            {nextSection ? (
-              <Link href={`/student/practice?location=${nextSection.id}`} className="block w-12 h-12">
-                <Image
-                  src="/nav-arrow.png"
-                  alt="Next"
-                  width={48}
-                  height={48}
-                  className="transform scale-x-[-1] hover:opacity-80 transition-opacity"
-                />
-              </Link>
-            ) : (
-              <div className="w-12 h-12 opacity-50">
-                <Image src="/nav-arrow.png" alt="Next" width={48} height={48} className="transform scale-x-[-1]" />
-              </div>
-            )}
-          </div>
+        </div>
+        
+        {/* Previous Button - Positioned outside the book, on the left side */}
+        <div className="fixed left-8 top-1/2 transform -translate-y-1/2 z-20">
+          {previousSection ? (
+            <Link href={`/student/practice?location=${previousSection.id}`} className="block w-24 h-24">
+              <Image
+                src="/nav-arrow.png"
+                alt="Previous"
+                width={128}
+                height={128}
+                className="hover:opacity-80 transition-opacity"
+              />
+            </Link>
+          ) : (
+            <div className="w-24 h-24 opacity-50">
+              <Image src="/nav-arrow.png" alt="Previous" width={128} height={128} />
+            </div>
+          )}
+        </div>
+        
+        {/* Next Button - Positioned outside the book, on the right side */}
+        <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-20">
+          {nextSection ? (
+            <Link href={`/student/practice?location=${nextSection.id}`} className="block w-24 h-24">
+              <Image
+                src="/nav-arrow.png"
+                alt="Next"
+                width={128}
+                height={128}
+                className="transform scale-x-[-1] hover:opacity-80 transition-opacity"
+              />
+            </Link>
+          ) : (
+            <div className="w-24 h-24 opacity-50">
+              <Image src="/nav-arrow.png" alt="Next" width={128} height={128} className="transform scale-x-[-1]" />
+            </div>
+          )}
         </div>
       </div>
     </div>
