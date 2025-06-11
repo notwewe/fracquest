@@ -105,7 +105,7 @@ export default async function StudentPracticePage({
               {/* Left Page */}
               <div className="flex-1 pr-8">
                 {/* Left Page Content - Increased height */}
-                <div className="font-blaka text-black mt-16 h-[280px] overflow-hidden">
+                <div className="font-blaka text-black mt-16 h-[320px] overflow-y-auto">
                   <p className="text-xl leading-relaxed">{currentLocation.description}</p>
                 </div>
               </div>
@@ -129,8 +129,8 @@ export default async function StudentPracticePage({
 
             {/* Button Area - Bottom 30%, moved up significantly */}
             <div className="flex -mt-16" style={{ height: "30%" }}>
-              {/* Left Page Button - Not centered, button-sized container */}
-              <div className="flex-1 pl-8 flex">
+              {/* Left Page Button - Moved slightly to the left */}
+              <div className="flex-1 flex justify-center pr-6">
                 <Button
                   asChild
                   className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3"
@@ -141,8 +141,8 @@ export default async function StudentPracticePage({
                 </Button>
               </div>
 
-              {/* Right Page Button - Not centered, button-sized container */}
-              <div className="flex-1 pl-8 flex">
+              {/* Right Page Button - Moved slightly to the right */}
+              <div className="flex-1 flex justify-center pl-6">
                 <Button
                   asChild
                   className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3"
