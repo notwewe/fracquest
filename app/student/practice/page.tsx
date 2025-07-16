@@ -22,7 +22,7 @@ const locationData = {
   },
   3: {
     name: "Fraction Forest",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_FractionForest.png",
     description:
       "Enter the enchanted Fraction Forest, where every tree represents a different part of the whole! In this magical woodland, you'll learn the fundamental concepts of fractions. Discover how to identify numerators and denominators, understand what fractions represent, and practice recognizing fractions in everyday objects. The forest spirits will guide you through the basics of fractional thinking!",
   },
