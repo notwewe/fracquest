@@ -28,7 +28,7 @@ const locationData = {
   },
   4: {
     name: "Realm of Balance",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_RealmOfBalance.png",
     description:
       "Welcome to the Realm of Balance, where harmony and equality reign supreme! Here, the ancient scales of justice teach the mysteries of equivalent fractions. Learn to find fractions that represent the same value, master the art of simplifying fractions to their lowest terms, and discover how to create equivalent fractions by multiplying or dividing. Balance is the key to unlocking these mathematical secrets!",
   },
