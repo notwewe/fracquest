@@ -144,7 +144,7 @@ export default function TeacherDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#FAF7F0]">
+      <div className="flex justify-center items-center min-h-screen bg-[#FAF7F0] font-sans">
         <Loader2 className="h-12 w-12 animate-spin text-[#8B4513]" />
       </div>
     )
@@ -152,13 +152,13 @@ export default function TeacherDashboard() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#FAF7F0]">
-        <div className="w-full max-w-md p-6 border-2 border-[#a0522d] rounded-lg shadow-md bg-[#f5e9d0]">
-          <h2 className="text-2xl font-sans font-bold text-[#8B4513] mb-4 text-center">Error!</h2>
-          <p className="text-[#8B4513] mb-6 text-center font-sans">{error}</p>
+      <div className="flex justify-center items-center min-h-screen bg-[#FAF7F0] font-sans">
+        <div className="w-full max-w-md p-6 border-2 border-[#a0522d] rounded-lg shadow-md bg-[#f5e9d0] font-sans">
+          <h2 className="text-2xl font-bold text-[#8B4513] mb-4 text-center">Error!</h2>
+          <p className="text-[#8B4513] mb-6 text-center">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-2 px-4 bg-[#8B4513] text-[#f5e9d0] font-sans font-semibold rounded-md hover:bg-[#a0522d] transition-colors"
+            className="w-full py-2 px-4 bg-[#8B4513] text-[#f5e9d0] font-semibold rounded-md hover:bg-[#a0522d] transition-colors"
           >
             Try Again
           </button>
@@ -183,7 +183,20 @@ export default function TeacherDashboard() {
   const chartTextStyle = { fontFamily: "Inter, sans-serif", fill: "#8B4513" }
 
   return (
-    <div className="min-h-screen p-6 bg-[#FAF7F0]">
+    <div
+      className="min-h-screen p-6 font-sans"
+      style={{
+        backgroundImage: "url('/dashboard/castle-background.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        WebkitBackgroundSize: 'cover',
+        MozBackgroundSize: 'cover',
+        OBackgroundSize: 'cover',
+        msBackgroundSize: 'cover',
+      }}
+    >
       <motion.div className="max-w-7xl mx-auto font-sans" variants={container} initial="hidden" animate="show">
         {/* Header */}
         <motion.div variants={item} className="mb-8">
