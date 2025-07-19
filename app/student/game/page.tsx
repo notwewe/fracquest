@@ -157,17 +157,22 @@ export default async function GamePage() {
         
         {/* Content overlay */}
         <div className="relative z-10 min-h-screen p-4">
+          {/* Back button at top left, like leaderboard */}
+          <div className="absolute top-8 left-8 z-20">
+            <Link href="/student/dashboard" className="block">
+              <Image
+                src="/backarrow.png"
+                alt="Back to Dashboard"
+                width={48}
+                height={48}
+                className="hover:opacity-80 transition-opacity"
+              />
+            </Link>
+          </div>
           <div className="max-w-6xl mx-auto">
-            <div className="mb-6">
-              <Button asChild variant="outline" className="font-[Blaka] border-amber-600 text-amber-700 bg-white/90">
-                <Link href="/student/dashboard">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Dashboard
-                </Link>
-              </Button>
-            </div>
-
-            <h1 className="text-6xl text-center mb-8 font-[Blaka] text-white drop-shadow-lg">Welcome To The World Of Numeria!</h1>
+            <h1 className="text-6xl text-center mb-8 font-[Blaka] text-white drop-shadow-lg" style={{ WebkitTextStroke: '2px black' }}>
+              Welcome To The World Of Numeria!
+            </h1>
             <div className="bg-gradient-to-br from-red-900 to-red-950 border-4 border-red-800 rounded-xl p-4 shadow-lg">
               <WorldMap locations={locations} />
             </div>

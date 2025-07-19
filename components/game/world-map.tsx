@@ -31,6 +31,25 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Add the levitate animation CSS
+  const levitateStyle = `
+    @keyframes levitate {
+      0% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+      100% {
+        transform: translateY(0px);
+      }
+    }
+    
+    .levitate {
+      animation: levitate 3s ease-in-out infinite;
+    }
+  `
+
   // Auto-select the first location when the component mounts
   useState(() => {
     if (locations && locations.length > 0 && !selectedLocation) {
@@ -55,6 +74,17 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     }
 
     setSelectedLocation(location)
+    
+    // Smooth scroll to the levels section
+    setTimeout(() => {
+      const waypointsSection = document.querySelector('[data-waypoints-section]')
+      if (waypointsSection) {
+        waypointsSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        })
+      }
+    }, 100)
   }
 
   const handleWaypointClick = async (waypoint: Waypoint) => {
@@ -116,6 +146,7 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
 
   return (
     <div className="w-full">
+      <style jsx global>{levitateStyle}</style>
       {/* Map with locations */}
       <div className="relative w-full h-[600px] md:h-[700px] bg-amber-100 rounded-lg border-4 border-amber-800 overflow-hidden mb-4">
         <div className="absolute inset-0 bg-[url('/world_map.png')] bg-cover bg-center opacity-100"></div>
@@ -136,24 +167,45 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
           const firstUncompletedWaypoint = sortedWaypoints.find(wp => !wp.completed)
           const hasCurrentWaypoint = firstUncompletedWaypoint && location.unlocked
 
+          const isSelectedLocation = selectedLocation?.id === location.id;
           return (
             <div
               key={location.id}
               className={`absolute ${location.position} transform -translate-x-1/4 -translate-y-1/6`}
             >
+              {/* Compass image for selected location */}
+              {isSelectedLocation && (
+                <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-20">
+                  <img
+                    src="/pixel-items/magical-compass.png"
+                    alt="Compass"
+                    width={100}
+                    height={100}
+                    className="levitate"
+                    style={{ 
+                      imageRendering: "pixelated",
+                      animation: "levitate 3s ease-in-out infinite"
+                    }}
+                  />
+                </div>
+              )}
               <p
                 onClick={() => handleLocationClick(location)}
-                className={`relative z-10 cursor-pointer text-center font-blaka text-4xl transition-all select-none ${
-                  hasCurrentWaypoint && !allWaypointsCompleted
+                className={`relative z-10 cursor-pointer text-center font-blaka text-4xl transition-all select-none
+                  ${hasCurrentWaypoint && !allWaypointsCompleted
                     ? "text-orange-600 drop-shadow-[0_0_10px_rgba(251,146,60,0.8)] animate-pulse font-bold"
-                    : allWaypointsCompleted
-                      ? "text-gray-600 drop-shadow-lg"
-                      : location.unlocked
-                        ? "text-gray-600 drop-shadow-lg hover:text-gray-700"
-                        : "text-gray-500 opacity-50 cursor-not-allowed"
-                } ${selectedLocation?.id === location.id ? "text-gray-700 drop-shadow-xl font-bold" : ""} ${
-                  !location.unlocked || isLoading ? "pointer-events-none" : ""
-                }`}
+                    : allWaypointsCompleted && isSelectedLocation
+                      ? "selected-gold text-black"
+                      : allWaypointsCompleted
+                        ? "completed-gold text-gray-600"
+                        : location.unlocked && isSelectedLocation
+                          ? "selected-gold text-black"
+                          : location.unlocked
+                            ? "text-gray-600 drop-shadow-lg hover:text-gray-700"
+                            : "text-gray-300 opacity-50 cursor-not-allowed"}
+                  ${(isSelectedLocation || location.unlocked) ? "transition-transform duration-200" : ""}
+                  ${(isSelectedLocation || location.unlocked) ? "hover:scale-125" : ""}
+                  ${isSelectedLocation ? "scale-125" : ""}`}
               >
                 {location.name}
               </p>
@@ -164,7 +216,7 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
 
       {/* Selected location waypoints */}
       {selectedLocation && (
-        <div className="bg-amber-800 rounded-lg p-4 text-white">
+        <div className="bg-amber-800 rounded-lg p-4 text-white" data-waypoints-section>
           <h3 className="text-3xl font-medium mb-4 font-[Blaka]">{selectedLocation.name}</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
             {selectedLocation.waypoints && selectedLocation.waypoints.length > 0 ? (
@@ -185,19 +237,19 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
                   // Determine if this waypoint is completed
                   const isCompleted = waypoint.completed
 
+                  const isSelected = selectedLocation && selectedLocation.waypoints && waypoint.id === selectedLocation.waypoints.find(wp => wp.id === waypoint.id)?.id;
                   return (
                     <button
                       type="button"
                       key={waypoint.id}
                       onClick={() => handleWaypointClick(waypoint)}
                       disabled={!isAvailable || isLoading}
-                      className={`p-4 rounded-lg text-center transition-all min-h-[120px] flex flex-col justify-center ${
-                        isCompleted
-                          ? "bg-green-600 hover:bg-green-700"
+                      className={`p-4 rounded-lg text-center transition-all min-h-[120px] flex flex-col justify-center
+                        ${isCompleted
+                          ? "bg-green-500 text-white"
                           : isAvailable
-                            ? "bg-amber-600 hover:bg-amber-700"
-                            : "bg-gray-600 opacity-50 cursor-not-allowed"
-                      }`}
+                            ? "bg-amber-500 text-white hover:bg-amber-600"
+                            : "bg-gray-400 text-gray-200 opacity-60 cursor-not-allowed"}`}
                     >
                       <div className="font-bold mb-1">{waypoint.name}</div>
                       <div className="text-xs">

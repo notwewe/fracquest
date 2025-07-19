@@ -283,6 +283,25 @@ export default function FractionForestGame() {
         </div>
       </div>
 
+      {/* Elder Barkroot image (foreground, but not in dialogue box) */}
+      {(dialoguePhase === "intro" ||
+        dialoguePhase === "tutorial" ||
+        dialoguePhase === "success" ||
+        dialoguePhase === "failure" ||
+        dialoguePhase === "complete") && (
+        <img
+          src="/game characters/Elder Barkroot.png"
+          alt="Elder Barkroot"
+          className="absolute left-1/2 -translate-x-1/2 bottom-56 z-20"
+          style={{
+            imageRendering: "pixelated",
+            filter: "drop-shadow(0 0 24px #000)",
+            width: "340px",
+            height: "340px",
+          }}
+        />
+      )}
+
       {/* Game Area */}
       {gameStarted && dialoguePhase === "game" && !gameEnded && !gameOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-20 pb-40">
@@ -320,29 +339,8 @@ export default function FractionForestGame() {
       )}
 
       {/* Dialogue Box */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 border-t-4 border-green-800 p-6">
+      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 border-t-4 border-green-800 p-6 z-30">
         <div className="flex items-end">
-          {(dialoguePhase === "intro" ||
-            dialoguePhase === "tutorial" ||
-            dialoguePhase === "success" ||
-            dialoguePhase === "failure" ||
-            dialoguePhase === "complete") && (
-            <img
-              src="/game characters/Elder Barkroot.png"
-              alt="Elder Barkroot"
-              style={{
-                imageRendering: "pixelated",
-                filter: "drop-shadow(0 0 12px #000)",
-                transform: "scaleX(-1)",
-                position: "relative",
-                left: "0", 
-                bottom: "0", 
-                width: "220px",
-                height: "220px",
-                marginRight: "32px",
-              }}
-            />
-          )}
           <div className="flex-1">
             <div className="text-green-300 font-pixel text-lg mb-2">Elder Barkroot</div>
             <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">

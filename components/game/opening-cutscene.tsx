@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 interface StoryScene {
   speaker: string
@@ -18,38 +20,81 @@ interface StoryScene {
 const storyScenes: StoryScene[] = [
   {
     speaker: "Narrator",
-    text: "In the mystical kingdom of Numeria, where numbers and fractions lived in perfect harmony, there stood a magnificent castle ruled by the wise King Equalis.",
+    text: "In the mystical kingdom of Numeria, where numbers and fractions lived in perfect harmony, there stood a magnificent castle ruled by the wise King Equalis. The kingdom thrived on mathematical balance, where every fraction had its place in the grand equation of life.",
     background: "/auth/backgrounds/numeria-castle.png",
+  },
+  {
+    speaker: "Narrator",
+    text: "The Fraction Orb, a sacred artifact that maintained this balance, floated above the palace, radiating harmony and order. It was the source of all mathematical magic in Numeria, ensuring that fractions remained whole and complete.",
+    background: "/auth/backgrounds/numeria-castle.png",
+    animation: "/pixel-items/whole-orb.png",
+  },
+  {
+    speaker: "Narrator",
+    text: "But in the shadows lurked the Decimal Phantom, a creature of chaos who despised the order of fractions. He watched and waited, plotting to shatter the harmony that kept Numeria whole.",
+    background: "/auth/backgrounds/numeria-castle.png",
+    character: "/pixel-characters/decimal-phantom-new.png",
   },
   {
     speaker: "Decimal Phantom",
-    text: "Hahaha! Finally, I have found the legendary Fraction Orb! With its power, I shall bring chaos to all mathematical order!",
+    text: "Hahaha! Finally, I have found the legendary Fraction Orb! With its power, I shall bring chaos to all mathematical order! No more will fractions rule supreme - decimals shall reign!",
     background: "/auth/backgrounds/numeria-castle.png",
     character: "/pixel-characters/decimal-phantom-new.png",
-    animation:
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/output-onlinegiftools-ezgif.com-speed-d3Q9ZtnjLe88ddvrekAl25Lgu1ir2s.gif",
+    animation: "/pixel-items/whole-orb.png",
+  },
+  {
+    speaker: "Narrator",
+    text: "With a terrible blast of dark energy, the Decimal Phantom shattered the Fraction Orb into countless pieces! The fragments scattered across the land, and chaos began to spread through Numeria.",
+    background: "/auth/backgrounds/numeria-castle.png",
+    character: "/pixel-characters/decimal-phantom-new.png",
+    animation: "/game assets/orb-shatter.gif",
+  },
+  {
+    speaker: "Narrator",
+    text: "Bridges crumbled, buildings flickered between whole and broken states, and the very fabric of mathematical reality began to unravel. The kingdom was in grave danger!",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
   },
   {
     speaker: "King Equalis",
-    text: "Oh no! The Decimal Phantom has shattered the Fraction Orb! Without it, our kingdom will fall into mathematical chaos! We need a hero to restore balance!",
+    text: "Oh no! The Decimal Phantom has shattered the Fraction Orb! Without it, our kingdom will fall into mathematical chaos! The bridges are collapsing, buildings are breaking apart - we need a hero to restore balance!",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
+    character: "/pixel-characters/king-equalis-new.png",
+  },
+  {
+    speaker: "King Equalis",
+    text: "The orb fragments have scattered across the land. Each piece holds the power to restore order, but they must be collected and understood. Only someone who truly comprehends fractions can save us!",
     videoBackground:
       "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
     character: "/pixel-characters/king-equalis-new.png",
   },
   {
     speaker: "Whiskers",
-    text: "Your Majesty, I may be small, but I have a brave heart! I will journey across the land to collect the scattered orb fragments and restore peace to Numeria!",
+    text: "Your Majesty, I may be small, but I have a brave heart and a curious mind! I've always been fascinated by how fractions work - how parts make up wholes. I will journey across the land to collect the scattered orb fragments and restore peace to Numeria!",
     videoBackground:
       "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
     character: "/pixel-characters/whiskers-new.png",
   },
   {
     speaker: "King Equalis",
-    text: "Brave Whiskers, take this magical compass! It will guide you to each fragment. Remember, understanding fractions is the key to defeating the Decimal Phantom. Good luck, young hero!",
+    text: "Brave Whiskers, your courage and curiosity give me hope! Journey forth and seek the wisdom of the land's guardians. They will help you understand fractions and guide you to each fragment. Remember, every fraction tells a story of parts and wholes!",
     videoBackground:
       "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
     character: "/pixel-characters/king-equalis-new.png",
-    item: "/pixel-items/magical-compass.png",
+  },
+  {
+    speaker: "King Equalis",
+    text: "You must visit the Fraction Forest, cross the Lessmore Bridge, explore the Realm of Balance, and face the challenges of Mixed Number Mountain. Each guardian will test your understanding of fractions in their own way. Good luck, young hero!",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
+    character: "/pixel-characters/king-equalis-new.png",
+  },
+  {
+    speaker: "Narrator",
+    text: "And so begins Whiskers' epic quest to restore the Fraction Orb and save the kingdom of Numeria. Armed with courage and a thirst for mathematical knowledge, our hero sets off into the unknown...",
+    videoBackground:
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Untitled-7tHA9aALLNg7O7t21yXaklukoi77rF.mp4",
   },
 ]
 
@@ -58,12 +103,17 @@ export function OpeningCutscene() {
   const supabase = createClient()
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
   const [displayedText, setDisplayedText] = useState("")
-  const [isTyping, setIsTyping] = useState(true)
   const [showContinue, setShowContinue] = useState(false)
-  const typingTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const [isShaking, setIsShaking] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const currentScene = storyScenes[currentSceneIndex]
+
+  // Display full text immediately without typewriter effect
+  useEffect(() => {
+    setDisplayedText(currentScene.text)
+    setShowContinue(true)
+  }, [currentScene.text])
 
   // Handle video playback when scene changes
   useEffect(() => {
@@ -73,61 +123,70 @@ export function OpeningCutscene() {
     }
   }, [currentSceneIndex, currentScene.videoBackground])
 
+  // Handle shaking effect after orb shattering
+  useEffect(() => {
+    // Start shaking during scene 4 (orb shattering) and continue for scenes 5-12
+    if (currentSceneIndex >= 4) {
+      setIsShaking(true)
+    } else {
+      setIsShaking(false)
+    }
+  }, [currentSceneIndex])
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
-      if (typingTimerRef.current) {
-        clearTimeout(typingTimerRef.current)
-      }
+      // No longer needed as typewriter is removed
     }
   }, [])
 
-  // Typewriter effect
-  useEffect(() => {
-    setDisplayedText("")
-    setIsTyping(true)
-    setShowContinue(false)
+  // Typewriter effect - REMOVED
+  // useEffect(() => {
+  //   setDisplayedText("")
+  //   setIsTyping(true)
+  //   setShowContinue(false)
 
-    if (typingTimerRef.current) {
-      clearTimeout(typingTimerRef.current)
-    }
+  //   if (typingTimerRef.current) {
+  //     clearTimeout(typingTimerRef.current)
+  //   }
 
-    let charIndex = 0
-    const fullText = currentScene.text
+  //   let charIndex = 0
+  //   const fullText = currentScene.text
 
-    const typeNextChar = () => {
-      if (charIndex < fullText.length) {
-        setDisplayedText(fullText.substring(0, charIndex + 1))
-        charIndex++
-        // Faster, more fluid typing speed
-        typingTimerRef.current = setTimeout(typeNextChar, 20)
-      } else {
-        setIsTyping(false)
-        setShowContinue(true)
-      }
-    }
+  //   const typeNextChar = () => {
+  //     if (charIndex < fullText.length) {
+  //       setDisplayedText(fullText.substring(0, charIndex + 1))
+  //       charIndex++
+  //       // Faster, more fluid typing speed
+  //       typingTimerRef.current = setTimeout(typeNextChar, 20)
+  //     } else {
+  //       setIsTyping(false)
+  //       setShowContinue(true)
+  //     }
+  //   }
 
-    // Start typing after a brief delay
-    typingTimerRef.current = setTimeout(typeNextChar, 300)
+  //   // Start typing after a brief delay
+  //   typingTimerRef.current = setTimeout(typeNextChar, 300)
 
-    return () => {
-      if (typingTimerRef.current) {
-        clearTimeout(typingTimerRef.current)
-      }
-    }
-  }, [currentSceneIndex, currentScene.text])
+  //   return () => {
+  //     if (typingTimerRef.current) {
+  //       clearTimeout(typingTimerRef.current)
+  //     }
+  //   }
+  // }, [currentSceneIndex, currentScene.text])
 
   const handleContinue = async () => {
-    if (isTyping) {
-      // Skip to end of current text
-      if (typingTimerRef.current) {
-        clearTimeout(typingTimerRef.current)
-      }
-      setDisplayedText(currentScene.text)
-      setIsTyping(false)
-      setShowContinue(true)
-      return
-    }
+    // No longer needed as typewriter is removed
+    // if (isTyping) {
+    //   // Skip to end of current text
+    //   if (typingTimerRef.current) {
+    //     clearTimeout(typingTimerRef.current)
+    //   }
+    //   setDisplayedText(currentScene.text)
+    //   setIsTyping(false)
+    //   setShowContinue(true)
+    //   return
+    // }
 
     if (currentSceneIndex < storyScenes.length - 1) {
       setCurrentSceneIndex((prev) => prev + 1)
@@ -178,7 +237,7 @@ export function OpeningCutscene() {
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden cursor-pointer" onClick={handleClick}>
+    <div className="min-h-screen w-full relative overflow-hidden">
       <style jsx>{`
         @keyframes levitate {
           0% {
@@ -215,34 +274,50 @@ export function OpeningCutscene() {
         .pulse {
           animation: pulse 1.5s ease-in-out infinite;
         }
+        
+        @keyframes shake {
+          0%, 100% {
+            transform: translateX(0);
+          }
+          10%, 30%, 50%, 70%, 90% {
+            transform: translateX(-3px);
+          }
+          20%, 40%, 60%, 80% {
+            transform: translateX(3px);
+          }
+        }
+        
+        .shake {
+          animation: shake 0.6s ease-in-out infinite;
+        }
       `}</style>
 
-      {/* Background - either image or video */}
-      {currentScene.videoBackground ? (
-        <div className="absolute inset-0 bg-black">
+      {/* Background */}
+      <div className="absolute inset-0">
+        {currentScene.videoBackground ? (
           <video
             ref={videoRef}
             src={currentScene.videoBackground}
-            className="absolute inset-0 w-full h-full object-cover"
+            className={`w-full h-full object-cover ${isShaking ? 'shake' : ''}`}
+            autoPlay
             muted
-            playsInline
             loop
+            playsInline
+            style={{ imageRendering: "pixelated" }}
           />
-        </div>
-      ) : (
-        <div className="absolute inset-0">
+        ) : (
           <Image
             src={currentScene.background || "/auth/backgrounds/numeria-castle.png"}
             alt="Scene background"
             fill
-            className="object-cover"
+            className={`object-cover ${isShaking ? 'shake' : ''}`}
             style={{ imageRendering: "pixelated" }}
             priority
           />
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Character - positioned lower */}
+      {/* Character */}
       {(currentScene.character || currentScene.speaker === "Squeaks") && (
         <div className="absolute left-24 bottom-[290px] z-10">
           <div className="relative">
@@ -253,17 +328,20 @@ export function OpeningCutscene() {
                   : currentScene.character || "/placeholder.svg"
               }
               alt={currentScene.speaker}
-              width={200}
-              height={200}
-              style={{ imageRendering: "pixelated" }}
+              width={400}
+              height={400}
+              style={{ 
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 12px #000)"
+              }}
             />
           </div>
         </div>
       )}
 
-      {/* Animated Orb - centered and bigger */}
+      {/* Animated Orb */}
       {currentScene.animation && (
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
           <div className="relative orb-glow">
             <Image
               src={currentScene.animation || "/placeholder.svg"}
@@ -276,7 +354,7 @@ export function OpeningCutscene() {
         </div>
       )}
 
-      {/* Item (compass) with levitation animation */}
+      {/* Item (compass) */}
       {currentScene.item && (
         <div className="absolute left-[280px] bottom-[380px] z-10">
           <div className="relative levitate">
@@ -291,43 +369,19 @@ export function OpeningCutscene() {
         </div>
       )}
 
-      {/* Dialogue Box - spans full width at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-30">
-        <div className="relative w-full">
-          {/* Dialog paper background - original height */}
-          <div className="relative w-full h-[280px]">
-            <Image
-              src="/pixel-ui/dialog-paper4.png"
-              alt="Dialog background"
-              fill
-              className="object-fill"
-              style={{ imageRendering: "pixelated" }}
-            />
-          </div>
-
-          {/* Content overlay with better spacing */}
-          <div className="absolute inset-0">
-            {/* Speaker name - using Blaka font */}
-            <div className="absolute top-12 left-[196px] text-amber-800 font-blaka text-3xl">
-              {currentScene.speaker}
-            </div>
-
-            {/* Dialogue text - normal size and weight */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black text-lg font-pixel leading-relaxed w-3/4 text-left pl-[196px]">
-              {displayedText}
-            </div>
-
-            {/* Continue indicator - using Blaka font */}
-            {showContinue && (
-              <div className="absolute bottom-12 right-16">
-                <div className="flex items-center">
-                  <span className="text-amber-800 font-blaka text-xl pulse">Click to continue</span>
-                  <span className="text-amber-800 ml-2">▼</span>
-                </div>
-              </div>
-            )}
-          </div>
+      {/* Dialogue box - exactly like other levels */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+        <div className="text-amber-300 font-pixel text-lg mb-2">{currentScene.speaker}</div>
+        <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+          {displayedText}
         </div>
+        {showContinue && (
+          <div className="flex justify-between">
+            <Button onClick={handleContinue} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+              Continue
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )
