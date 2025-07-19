@@ -287,6 +287,7 @@ export default function FractionForestGame() {
       {gameStarted && dialoguePhase === "game" && !gameEnded && !gameOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-20 pb-40">
           <div className="bg-green-800 bg-opacity-80 p-8 rounded-lg mb-8 w-full max-w-5xl mx-auto">
+
             <h2 className="text-2xl font-pixel text-green-200 mb-4">
               {rounds[currentRound].goal === "ascending"
                 ? "Arrange trees from smallest to largest"
