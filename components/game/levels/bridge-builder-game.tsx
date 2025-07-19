@@ -264,39 +264,57 @@ export default function BridgeBuilderGame() {
         </div>
       ) : (
         <>
-          {/* Main game dialogue box (hidden during post-game) */}
+          {/* Main game Elder Pebble image (not just post-game) */}
           {!showPostGameDialogue && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6">
-              <div className="text-stone-300 font-pixel text-lg mb-2">
-                Bridge Stones: {bridgeStones}/5 | Score: {score}/100 | Problem {currentProblem + 1}/5
+            <>
+              <img
+                src={"/game characters/Elder Pebble.png"}
+                alt="Elder Pebble"
+                className="pointer-events-none"
+                style={{
+                  imageRendering: "pixelated",
+                  filter: "drop-shadow(0 0 12px #000)",
+                  left: "32%",
+                  bottom: "32px",
+                  position: "absolute",
+                  width: "600px",
+                  height: "600px",
+                }}
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6">
+                <div className="text-stone-300 font-pixel text-lg mb-2">
+                  Bridge Stones: {bridgeStones}/5 | Score: {score} | Problem {currentProblem + 1}/5
+                </div>
+                <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+                  Stone {bridgeStones + 1}: Solve this subtraction problem:
+                  {"\n\n"}
+                  <span className="text-3xl text-stone-300">{bridgeProblems[currentProblem]?.question} = ?</span>
+                  {"\n\n"}
+                  {/* Hint removed as requested */}
+                </div>
+                <div className="flex justify-between items-center gap-4">
+                  <Input
+                    type="text"
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Enter your answer (e.g., 1/2)"
+                    className="text-lg max-w-md bg-gray-800 border-stone-600 text-white"
+                    disabled={gameEnded}
+                  />
+                  <Button
+                    onClick={checkAnswer}
+                    disabled={!userAnswer.trim() || gameEnded}
+                    className="font-pixel bg-stone-600 hover:bg-stone-700 text-white"
+                  >
+                    Place Stone
+                  </Button>
+                </div>
               </div>
-              <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-                Stone {bridgeStones + 1}: Solve this subtraction problem:
-                {"\n\n"}
-                <span className="text-3xl text-stone-300">{bridgeProblems[currentProblem]?.question} = ?</span>
-                {"\n\n"}
-                <span className="text-sm text-stone-400">Hint: {bridgeProblems[currentProblem]?.hint}</span>
-              </div>
-              <div className="flex justify-between items-center gap-4">
-                <Input
-                  type="text"
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Enter your answer (e.g., 1/2)"
-                  className="text-lg max-w-md bg-gray-800 border-stone-600 text-white"
-                  disabled={gameEnded}
-                />
-                <Button
-                  onClick={checkAnswer}
-                  disabled={!userAnswer.trim() || gameEnded}
-                  className="font-pixel bg-stone-600 hover:bg-stone-700 text-white"
-                >
-                  Place Stone
-                </Button>
-              </div>
-            </div>
+            </>
           )}
+        </>
+      )}
 
           {/* Emergency exit button */}
           <div className="absolute top-4 right-4">
@@ -308,31 +326,33 @@ export default function BridgeBuilderGame() {
             </Button>
           </div>
 
-          {/* Post-game dialogue box (with styled box) */}
-          {showPostGameDialogue && postGameDialogue.length > 0 && (
-            <div className="absolute inset-0 w-full h-full">
-              <FixedLessMooreBridgeBackground />
-              <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6 z-20">
-                <div className="text-stone-300 font-pixel text-lg mb-2">{postGameDialogue[postGameIndex].speaker}</div>
-                <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-                  {postGameDialogue[postGameIndex].text}
-                </div>
-                <div className="flex justify-end mt-6">
-                  <Button
-                    onClick={() => {
-                      if (postGameIndex < postGameDialogue.length - 1) {
-                        setPostGameIndex(postGameIndex + 1)
-                      } else {
-                        setShowPostGameDialogue(false)
-                        setShowCompletionPopup(true)
-                      }
-                    }}
-                    className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-                  >
-                    {postGameIndex < postGameDialogue.length - 1 ? "Next" : "Continue"}
-                  </Button>
-                </div>
-              </div>
+      {/* Post-game dialogue box (with styled box) */}
+      {showPostGameDialogue && postGameDialogue.length > 0 && (
+        <div className="absolute inset-0 w-full h-full">
+          <FixedLessMooreBridgeBackground />
+          {/* Only show Elder Pebble image when he is the speaker */}
+          {postGameDialogue[postGameIndex].speaker === "Elder Pebble" && (
+            <img
+              src={"/game characters/Elder Pebble.png"}
+              alt="Elder Pebble"
+              className="pointer-events-none"
+              style={{
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 12px #000)",
+                left: "10%",
+                bottom: "32px",
+                position: "absolute",
+                width: "600px",
+                height: "600px",
+                zIndex: 15
+              }}
+            />
+          )}
+          <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6 z-20">
+            <div className="text-stone-300 font-pixel text-lg mb-2">{postGameDialogue[postGameIndex].speaker}</div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+              {postGameDialogue[postGameIndex].text}
+
             </div>
           )}
 
