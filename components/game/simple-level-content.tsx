@@ -17,6 +17,9 @@ type DialogueLine = {
   correctChoice?: number
   wrongAnswerText?: string
   wrongAnswerLine?: number // Index to jump to if answer is wrong
+  character?: string // Character image path
+  characterStyle?: React.CSSProperties // Character image style
+  assets?: { src: string; assetStyle?: React.CSSProperties }[] // Additional assets for the dialogue line
 }
 
 type LevelProps = {
@@ -397,8 +400,35 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
         </div>
       )}
 
+      {/* Character image if present - fixed position, above background, below dialogue box */}
+      {currentDialogue.character && (
+        <img
+          src={currentDialogue.character}
+          alt={currentDialogue.speaker}
+          width={600}
+          height={600}
+          style={currentDialogue.characterStyle || {
+            imageRendering: "pixelated",
+            filter: "drop-shadow(0 0 12px #000)",
+            transform: "scaleX(-1)"
+          }}
+        />
+      )}
+      {/* Additional assets if present */}
+      {currentDialogue.assets &&
+        currentDialogue.assets.map((asset, idx) => (
+          <img
+            key={idx}
+            src={asset.src}
+            alt={`asset-${idx}`}
+            width={600}
+            height={600}
+            style={asset.assetStyle}
+          />
+        ))}
+
       {/* Dialogue box */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-30">
         <div className="text-amber-300 font-pixel text-lg mb-2">{currentDialogue.speaker}</div>
         <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
           {currentDialogue.text}

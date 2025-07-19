@@ -10,20 +10,18 @@ export function FractionIntroduction() {
 
   const steps = [
     {
+      speaker: "Squeaks",
       title: "Welcome to Squeaks' Fraction Emporium",
       content: (
         <div className="space-y-4">
           <p className="text-lg">
-            <span className="font-bold text-amber-700">Squeaks:</span> "Well, hello there, traveler! Welcome to Squeaks'
-            Fraction Emporium, home to the finest fraction gadgets in all of Numeria!"
+            <span className="font-bold text-amber-700">Squeaks:</span> "Well, hello there, traveler! Welcome to Squeaks' Fraction Emporium, home to the finest fraction gadgets in all of Numeria!"
           </p>
           <p className="text-lg">
-            <span className="font-bold text-blue-700">Whiskers:</span> "I heard this is where math meets magic. I'm
-            trying to learn more about fractions—heard they're the key to saving the kingdom!"
+            <span className="font-bold text-blue-700">Whiskers:</span> "I heard this is where math meets magic. I'm trying to learn more about fractions—heard they're the key to saving the kingdom!"
           </p>
           <p className="text-lg">
-            <span className="font-bold text-amber-700">Squeaks:</span> "Then you've come to the right place! Fractions
-            are all about parts of a whole. Let me show you!"
+            <span className="font-bold text-amber-700">Squeaks:</span> "Then you've come to the right place! Fractions are all about parts of a whole. Let me show you!"
           </p>
           <div className="flex justify-center">
             <Image
@@ -38,12 +36,12 @@ export function FractionIntroduction() {
       ),
     },
     {
+      speaker: "Squeaks",
       title: "Learning About Fractions",
       content: (
         <div className="space-y-4">
           <p className="text-lg">
-            <span className="font-bold text-amber-700">Squeaks:</span> "If I eat one slice of this cheese wheel that's
-            cut into 4 equal parts, I've eaten 1 out of 4... or 1/4."
+            <span className="font-bold text-amber-700">Squeaks:</span> "If I eat one slice of this cheese wheel that's cut into 4 equal parts, I've eaten 1 out of 4... or 1/4."
           </p>
           <div className="flex justify-center my-4">
             <div className="relative w-48 h-48">
@@ -61,13 +59,13 @@ export function FractionIntroduction() {
             </div>
           </div>
           <p className="text-lg">
-            <span className="font-bold text-amber-700">Squeaks:</span> "The top number tells us how many slices we have,
-            and the bottom number tells us how many equal slices the whole cheese had!"
+            <span className="font-bold text-amber-700">Squeaks:</span> "The top number tells us how many slices we have, and the bottom number tells us how many equal slices the whole cheese had!"
           </p>
         </div>
       ),
     },
     {
+      speaker: "Squeaks",
       title: "More Examples",
       content: (
         <div className="space-y-4">
@@ -102,16 +100,15 @@ export function FractionIntroduction() {
       ),
     },
     {
+      speaker: "Squeaks",
       title: "Understanding Fractions",
       content: (
         <div className="space-y-4">
           <p className="text-lg">
-            <span className="font-bold text-blue-700">Whiskers:</span> "So fractions are just parts of something
-            bigger?"
+            <span className="font-bold text-blue-700">Whiskers:</span> "So fractions are just parts of something bigger?"
           </p>
           <p className="text-lg">
-            <span className="font-bold text-amber-700">Squeaks:</span> "Exactly! Once you understand how they work, you
-            can compare them, add them, and even use them in magic!"
+            <span className="font-bold text-amber-700">Squeaks:</span> "Exactly! Once you understand how they work, you can compare them, add them, and even use them in magic!"
           </p>
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
             <h3 className="font-bold text-lg text-amber-800 mb-2">Key Points About Fractions:</h3>
@@ -123,13 +120,12 @@ export function FractionIntroduction() {
             </ul>
           </div>
           <p className="text-lg">
-            <span className="font-bold text-amber-700">Squeaks:</span> "Now that you get the basics, it's time for
-            something bigger..."
+            <span className="font-bold text-amber-700">Squeaks:</span> "Now that you get the basics, it's time for something bigger..."
           </p>
         </div>
       ),
     },
-  ]
+  ];
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -143,33 +139,47 @@ export function FractionIntroduction() {
     }
   }
 
- return (
-  <div
-    className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center p-4"
-    style={{
-    backgroundImage: "url('/game backgrounds/Squeaks Emporium.png')",
-  }}
+  // Helper to check if Squeaks is speaking in the current step
+  const isSqueaksSpeaking = () => steps[currentStep].speaker === "Squeaks";
 
-  >
-    <Card className="w-full max-w-2xl mx-auto p-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl my-8">
-      <h2 className="text-2xl font-bold text-amber-800 mb-4">{steps[currentStep].title}</h2>
-      <div className="min-h-[350px]">{steps[currentStep].content}</div>
-      <div className="flex justify-between mt-6">
-        <Button onClick={handlePrevious} disabled={currentStep === 0} className="bg-amber-600 hover:bg-amber-700">
-          Previous
-        </Button>
-        <div className="text-sm text-amber-700">
-          Step {currentStep + 1} of {steps.length}
+  return (
+    <div
+      className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center p-4 relative"
+      style={{
+        backgroundImage: "url('/game backgrounds/Squeaks Emporium.png')",
+      }}
+    >
+      {/* Squeaks character image - show when Squeaks is speaking */}
+      {steps[currentStep].speaker === "Squeaks" && (
+        <div className="absolute left-24 bottom-[290px] z-10">
+          <Image
+            src="/game-characters/Squeaks.png"
+            alt="Squeaks"
+            width={200}
+            height={200}
+            style={{ imageRendering: "pixelated" }}
+          />
         </div>
-        <Button
-          onClick={handleNext}
-          disabled={currentStep === steps.length - 1}
-          className="bg-amber-600 hover:bg-amber-700"
-        >
-          Next
-        </Button>
-      </div>
-    </Card>
-  </div>
-)
+      )}
+      <Card className="w-full max-w-2xl mx-auto p-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl my-8 relative z-20">
+        <h2 className="text-2xl font-bold text-amber-800 mb-4">{steps[currentStep].title}</h2>
+        <div className="min-h-[350px]">{steps[currentStep].content}</div>
+        <div className="flex justify-between mt-6">
+          <Button onClick={handlePrevious} disabled={currentStep === 0} className="bg-amber-600 hover:bg-amber-700">
+            Previous
+          </Button>
+          <div className="text-sm text-amber-700">
+            Step {currentStep + 1} of {steps.length}
+          </div>
+          <Button
+            onClick={handleNext}
+            disabled={currentStep === steps.length - 1}
+            className="bg-amber-600 hover:bg-amber-700"
+          >
+            Next
+          </Button>
+        </div>
+      </Card>
+    </div>
+  )
 }

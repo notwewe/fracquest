@@ -243,11 +243,15 @@ export function OpeningCutscene() {
       )}
 
       {/* Character - positioned lower */}
-      {currentScene.character && (
+      {(currentScene.character || currentScene.speaker === "Squeaks") && (
         <div className="absolute left-24 bottom-[290px] z-10">
           <div className="relative">
             <Image
-              src={currentScene.character || "/placeholder.svg"}
+              src={
+                currentScene.speaker === "Squeaks"
+                  ? "/game characters/Squeaks.png"
+                  : currentScene.character || "/placeholder.svg"
+              }
               alt={currentScene.speaker}
               width={200}
               height={200}
