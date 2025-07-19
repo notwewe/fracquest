@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
+import DreadpointHollowGameOverPopup from "./DreadpointHollowGameOverPopup"
 
 type BossProblem = {
   type: "conversion" | "addition" | "subtraction" | "arrangement" | "comparison"
@@ -157,53 +158,7 @@ const bossProblems: BossProblem[] = [
   },
 ]
 
-const credits = [
-  "FracQuest",
-  "The Tale of Whiskers and the Fraction Orb",
-  "",
-  "Created by",
-  "The FracQuest Team",
-  "",
-  "Story",
-  "The Numeria Chronicles",
-  "",
-  "Art",
-  "Pixel Perfection Studios",
-  "",
-  "Music",
-  "Fraction Harmonics",
-  "",
-  "Programming",
-  "Code Wizards Inc.",
-  "",
-  "Educational Content",
-  "Math Masters Academy",
-  "",
-  "Special Thanks",
-  "To all the teachers and students",
-  "who make learning fractions fun!",
-  "",
-  "Voice Acting",
-  "Whiskers - Felix Feline",
-  "Squeaks - Minnie Mouse",
-  "Elder Pebble - Rocky Stone",
-  "Elder Barkroot - Woody Branch",
-  "Guardian of Equilibrium - Balance Master",
-  "Decimal Phantom - Shadow Voice",
-  "King Equalis - Royal Narrator",
-  "",
-  "Beta Testers",
-  "Mrs. Johnson's 4th Grade Class",
-  "Lincoln Elementary School",
-  "Fraction Fanatics Club",
-  "",
-  "© 2025 FracQuest",
-  "All Rights Reserved",
-  "",
-  "Thank you for playing!",
-  "",
-  "The End",
-]
+// Remove the credits array and credits scroll rendering from this file
 
 export default function DreadpointHollowGame() {
   const router = useRouter()
@@ -212,7 +167,6 @@ export default function DreadpointHollowGame() {
   const [score, setScore] = useState(0)
   const [gameStarted, setGameStarted] = useState(false)
   const [gameEnded, setGameEnded] = useState(false)
-  const [phantomHealth, setPhantomHealth] = useState(100)
   const [isLoading, setIsLoading] = useState(false)
   const [currentPhase, setCurrentPhase] = useState(1)
   const [battlePhase, setBattlePhase] = useState<
@@ -222,6 +176,24 @@ export default function DreadpointHollowGame() {
   const [dialogueIndex, setDialogueIndex] = useState(0)
   const [creditsFinished, setCreditsFinished] = useState(false)
   const supabase = createClient()
+  const [whiskersHealth, setWhiskersHealth] = useState(50)
+  // 1. Restore phantomHealth state
+  const [phantomHealth, setPhantomHealth] = useState(100)
+  // 1. Add mockingDialogues array and mockingDialogue state
+  const mockingDialogues = [
+    "Your fractions bleed into the void. You were never whole.",
+    "Broken pieces, broken mind. The Hollow claims another.",
+    "You crumble, Whiskers. The numbers feast on your failure.",
+    "Lost in the darkness, your math is your undoing.",
+    "The Decimal Phantom devours your hope. Try again, if you dare."
+  ];
+  const [mockingDialogue, setMockingDialogue] = useState("");
+  const [showEerieGameOver, setShowEerieGameOver] = useState(false);
+  // Add state for mistake warning
+  const [showMistakeWarning, setShowMistakeWarning] = useState(false);
+  const [showCriticalWarning, setShowCriticalWarning] = useState(false);
+  // Add state for fade-out effect
+  const [mistakeFadeOut, setMistakeFadeOut] = useState(false);
 
   // Victory dialogues
   const victoryDialogues = [
@@ -254,10 +226,12 @@ export default function DreadpointHollowGame() {
     setBattlePhase("battle")
     setCurrentProblem(0)
     setScore(0)
-    setPhantomHealth(100)
+    setWhiskersHealth(50)
     setSelectedAnswer("")
     setCurrentPhase(1)
     setPhaseMessage("Phase 1: Conversion Clash")
+    // 2. On startBattle, reset phantomHealth to 100
+    setPhantomHealth(100)
   }
 
   const handleAnswerSelect = (answer: string) => {
@@ -270,8 +244,16 @@ export default function DreadpointHollowGame() {
 
     if (isCorrect) {
       setScore(score + 20)
-      const healthReduction = currentPhase === 6 ? 20 : 10
-      setPhantomHealth(Math.max(0, phantomHealth - healthReduction))
+      // Calculate health reduction based on phase and total questions
+      let healthReduction = 0
+      if (currentPhase === 6) {
+        // Final phase, more damage per question
+        healthReduction = 20
+      } else {
+        // Earlier phases, less damage
+        healthReduction = 10
+      }
+      setPhantomHealth((prev) => Math.max(0, prev - healthReduction))
 
       toast({
         title: "Critical Hit!",
@@ -280,7 +262,7 @@ export default function DreadpointHollowGame() {
       })
 
       // Check if phantom is defeated or if we need to move to next phase
-      if (phantomHealth - healthReduction <= 0) {
+      if (phantomHealth <= 0) {
         setBattlePhase("final-blow")
         return
       }
@@ -319,11 +301,17 @@ export default function DreadpointHollowGame() {
         setSelectedAnswer("")
       }
     } else {
+      setWhiskersHealth((prev) => Math.max(0, prev - 10)) // Deduct 10 health for wrong answer
       toast({
         title: "Attack Missed!",
         description: problem.hint,
         variant: "destructive",
       })
+      // In checkAnswer, if wrong answer, show mistake warning for 2.5s, then fade out for 0.5s
+      setShowMistakeWarning(true);
+      setMistakeFadeOut(false);
+      setTimeout(() => setMistakeFadeOut(true), 2000);
+      setTimeout(() => setShowMistakeWarning(false), 2500);
     }
   }
 
@@ -346,12 +334,7 @@ export default function DreadpointHollowGame() {
       if (dialogueIndex < victoryDialogues.length - 1) {
         setDialogueIndex(dialogueIndex + 1)
       } else {
-        setBattlePhase("credits")
-        setDialogueIndex(0)
-        // Start credits timer
-        setTimeout(() => {
-          setCreditsFinished(true)
-        }, 60000) // 60 seconds for credits
+        router.push("/student/game/level/11");
       }
     }
   }
@@ -412,8 +395,42 @@ export default function DreadpointHollowGame() {
     }
   }
 
+  // 2. When whiskersHealth reaches 0, set a random mocking dialogue and show the popup
+  useEffect(() => {
+    if (whiskersHealth === 0) {
+      const random = Math.floor(Math.random() * mockingDialogues.length);
+      setMockingDialogue(mockingDialogues[random]);
+      setShowEerieGameOver(true);
+    }
+  }, [whiskersHealth]);
+
+  // useEffect to show critical health warning when health <= 33%
+  useEffect(() => {
+    if (whiskersHealth > 0 && whiskersHealth <= 16) {
+      setShowCriticalWarning(true);
+    } else {
+      setShowCriticalWarning(false);
+    }
+  }, [whiskersHealth]);
+
+  const whiskersHealthPercent = (whiskersHealth / 50) * 100;
+  let whiskersBarColor = "bg-green-500";
+  if (whiskersHealthPercent <= 33) {
+    whiskersBarColor = "bg-red-600";
+  } else if (whiskersHealthPercent <= 66) {
+    whiskersBarColor = "bg-yellow-400";
+  }
+
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
+    <div className="relative h-screen w-full bg-black overflow-hidden"
+    style={{
+        backgroundImage: "url('/game backgrounds/Dreadpoint Hollow Entrance.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
       {/* Background */}
       <div
         className={`absolute inset-0 flex items-center justify-center ${
@@ -435,11 +452,7 @@ export default function DreadpointHollowGame() {
               animationFillMode: "forwards",
             }}
           >
-            {credits.map((line, index) => (
-              <div key={index} className="my-4 text-2xl">
-                {line}
-              </div>
-            ))}
+            {/* Remove any rendering of the credits array or credits scroll */}
           </div>
 
           {/* Finish Button - Only appears after credits are done */}
@@ -461,31 +474,29 @@ export default function DreadpointHollowGame() {
 
       {/* Battle UI */}
       {battlePhase === "battle" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pt-20 pb-40">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pt-40 pb-40">
           <div className="bg-red-900 bg-opacity-80 p-6 rounded-lg mb-8 w-full max-w-2xl">
+            {/* Render the boss health bar absolutely centered above the question box, reflecting current phantomHealth */}
+            {(battlePhase === "battle" || battlePhase === "phase-transition" || battlePhase === "final-blow" || (battlePhase === "victory" && dialogueIndex >= 2)) && (
+              <div className="absolute left-1/2 -translate-x-1/2 z-30 flex flex-col items-center mb-4" style={{bottom: 'calc(50% + 180px)'}}>
+                <span className="font-pixel text-red-300 text-lg mb-1">Decimal Phantom</span>
+                <div className="w-[90vw] max-w-[1600px] bg-gray-900 border-2 border-red-900 rounded-full h-6 shadow-lg">
+                  <div className="bg-red-600 h-6 rounded-full transition-all duration-500" style={{ width: `${phantomHealth}%` }}></div>
+                </div>
+                <span className="font-pixel text-red-200 text-sm mt-1">{phantomHealth}/100</span>
+              </div>
+            )}
             <h2 className="text-xl font-pixel text-red-200 mb-2">{phaseMessage}</h2>
-
-            {/* Problem Display */}
             <div className="text-white font-pixel text-2xl mb-6 text-center">
               {bossProblems[currentProblem]?.question}
             </div>
 
             {/* Score and Health Display */}
             <div className="flex justify-between text-red-300 font-pixel text-sm mb-4">
-              <span>Score: {score}</span>
-              <span>Phantom Health: {phantomHealth}/100</span>
-              <span>
+              {/* <span>
                 Phase {currentPhase}/6 • Problem{" "}
                 {currentProblem + 1 - bossProblems.findIndex((p) => p.phase === currentPhase)}
-              </span>
-            </div>
-
-            {/* Health Bar */}
-            <div className="w-full bg-gray-700 rounded-full h-3 mb-6">
-              <div
-                className="bg-red-600 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${phantomHealth}%` }}
-              ></div>
+              </span> */}
             </div>
 
             {/* Answer Choices */}
@@ -494,9 +505,8 @@ export default function DreadpointHollowGame() {
                 <Button
                   key={index}
                   onClick={() => handleAnswerSelect(choice)}
-                  className={`text-lg py-4 font-pixel ${
-                    selectedAnswer === choice ? "bg-red-600 text-white" : "bg-red-100 text-red-900 hover:bg-red-200"
-                  } border-2 border-red-600`}
+                  className={`text-lg py-4 font-pixel border-2 border-red-600 ${selectedAnswer === choice ? "bg-red-800 text-white no-blue-hover" : "bg-red-100 text-red-900 hover:bg-red-200"}`}
+                  style={selectedAnswer === choice ? { boxShadow: "none" } : {}}
                 >
                   {choice}
                 </Button>
@@ -514,8 +524,6 @@ export default function DreadpointHollowGame() {
               </Button>
             </div>
 
-            {/* Hint */}
-            <div className="mt-4 text-sm text-red-300 font-pixel">Hint: {bossProblems[currentProblem]?.hint}</div>
           </div>
         </div>
       )}
@@ -580,10 +588,30 @@ export default function DreadpointHollowGame() {
         <div className="absolute top-4 right-4">
           <Button
             onClick={() => router.push("/student/game")}
-            className="font-pixel bg-gray-600 hover:bg-gray-700 text-white"
+            className="font-pixel bg-red-600 hover:bg-red-700 text-white"
           >
             Exit Hollow
           </Button>
+        </div>
+      )}
+
+      {/* Remove all score displays and logic from the UI */}
+      {(battlePhase === "battle" || battlePhase === "phase-transition" || battlePhase === "final-blow" || battlePhase === "victory") && (
+        <div className="absolute top-4 left-4 z-30 flex flex-col items-start space-y-2">
+          {/* In the Whiskers health bar, set the color based on health percentage */}
+          <div className="bg-gray-800 rounded-full px-4 py-2 flex items-center mb-2">
+            <span className="font-pixel text-blue-200 mr-2">Whiskers</span>
+            <div className="w-32 h-4 bg-blue-200 rounded-full overflow-hidden">
+              <div className={`h-4 rounded-full transition-all duration-300 ${whiskersBarColor}`} style={{ width: `${whiskersHealthPercent}%` }}></div>
+            </div>
+            <span className="font-pixel text-blue-200 ml-2">{whiskersHealth}/50</span>
+          </div>
+          {battlePhase === "battle" && (
+            <div className="bg-gray-800 rounded px-3 py-1 mt-1">
+              <span className="font-pixel text-blue-100">Phase {currentPhase}/6</span>
+              <span className="font-pixel text-blue-100 ml-4">Problem {currentProblem + 1 - bossProblems.findIndex((p) => p.phase === currentPhase)}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -602,6 +630,90 @@ export default function DreadpointHollowGame() {
           animation-fill-mode: forwards;
         }
       `}</style>
+
+      {/* Add custom CSS for more critical warning UI */}
+      <style jsx global>{`
+        @keyframes critical-pulse {
+          0% { box-shadow: 0 0 2px 0px #dc2626cc; }
+          50% { box-shadow: 0 0 8px 2px #dc2626cc; }
+          100% { box-shadow: 0 0 2px 0px #dc2626cc; }
+        }
+        .critical-warning {
+          animation: critical-pulse 1.2s infinite;
+          font-size: 0.95rem;
+          font-weight: bold;
+          background: #dc2626;
+          border: 2px solid #b91c1c;
+          color: #fff;
+          padding: 0.28rem 0.8rem;
+          border-radius: 0.4rem;
+          letter-spacing: 0.01em;
+          text-shadow: none;
+          box-shadow: none;
+          backdrop-filter: none;
+        }
+        @keyframes mistake-fade-out {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+        .mistake-fade-out {
+          animation: mistake-fade-out 0.5s forwards;
+        }
+        .mistake-warning {
+          font-size: 0.95rem;
+          font-weight: bold;
+          letter-spacing: 0.01em;
+          background: #fde047;
+          color: #222;
+          border: 2px solid #facc15;
+          border-radius: 0.4rem;
+          padding: 0.25rem 0.7rem;
+          box-shadow: 0 0 2px 0 #facc15;
+        }
+        .no-blue-hover:hover, .no-blue-hover:focus, .no-blue-hover:active {
+          background-color: #991b1b !important;
+          color: #fff !important;
+          box-shadow: none !important;
+        }
+      `}</style>
+
+      {/* Render warning messages at the top center of the screen */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-8 z-40 flex flex-col items-center">
+        {showMistakeWarning && whiskersHealth > 10 && (
+          <div className="mistake-warning font-pixel mb-2">
+            Mistake! Be careful.
+          </div>
+        )}
+        {showCriticalWarning && (
+          <div className="critical-warning font-pixel mb-2">
+            Critical Health! One more mistake and it's over!
+          </div>
+        )}
+      </div>
+
+      {/* Render the DreadpointHollowGameOverPopup when showEerieGameOver is true */}
+      <DreadpointHollowGameOverPopup
+        open={showEerieGameOver}
+        dialogue={mockingDialogue}
+        onRetry={() => {
+          setShowEerieGameOver(false);
+          setGameStarted(false);
+          setGameEnded(false);
+          setCurrentProblem(0);
+          setSelectedAnswer("");
+          setWhiskersHealth(50);
+          setPhantomHealth(100);
+          setScore(0);
+          setCurrentPhase(1);
+          setPhaseMessage("Phase 1: Conversion Clash");
+          setDialogueIndex(0);
+          setBattlePhase("intro");
+        }}
+        onQuit={() => {
+          setShowEerieGameOver(false);
+          router.push("/student/game");
+        }}
+      />
     </div>
   )
 }

@@ -2159,6 +2159,17 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Elder Barkroot",
         text: "The forest breathes in fractions. When their order is disturbed, so is the grove. You must line up the Trees of Fraction from the smallest to the largest, and balance shall return.",
         background: "Elder Barkroot",
+        character: "/game characters/Elder Barkroot.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Whiskers",
@@ -2300,5 +2311,6 @@ export const backgroundImages: Record<string, string> = {
   'Fraction Forest Entrance': '/game backgrounds/Fraction Forest Entrance.png',
   'Fraction Forest': '/game backgrounds/Fraction Forest.png',
   'Realm of Balance': '/game backgrounds/Realm of Balance.png',
+  'Dreadpoint Hollow Entrance': '/game backgrounds/Dreadpoint Hollow Entrance.png',
   // Add other mappings as needed
 };

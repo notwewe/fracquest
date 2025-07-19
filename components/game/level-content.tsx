@@ -133,12 +133,23 @@ export function LevelContent({ levelId, dialogue, onComplete }: LevelProps) {
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - text only, no images */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-          {currentDialogue.background || "Scene Background"}
+      {/* Background - show image for 'Fraction Emporium Test', otherwise text */}
+      {currentDialogue.background === "Fraction Emporium Test" ? (
+        <div className="absolute inset-0">
+          <img
+            src="/game-backgrounds/testimage.jpg"
+            alt="Fraction Emporium Test Background"
+            className="w-full h-full object-cover"
+            style={{ zIndex: 0 }}
+          />
         </div>
-      </div>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+            {currentDialogue.background || "Scene Background"}
+          </div>
+        </div>
+      )}
 
       {/* Dialogue box */}
       <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">

@@ -13,7 +13,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
 import { isMobileDevice } from "@/lib/utils/deviceDetection"
-import { BackgroundSlideshow } from "@/components/auth/background-slideshow"
 import Image from "next/image"
 
 export default function StudentProfilePage() {
@@ -217,7 +216,15 @@ export default function StudentProfilePage() {
   if (isLoadingData) {
     return (
       <div className="h-screen flex justify-center items-center relative overflow-hidden">
-        <BackgroundSlideshow />
+        <div className="absolute inset-0 w-full h-full z-0">
+          <Image
+            src="/dashboard/bg1_castle.png"
+            alt="Castle Background"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+        </div>
         <Loader2 className="h-8 w-8 animate-spin text-amber-600 z-20" />
       </div>
     )
@@ -225,8 +232,16 @@ export default function StudentProfilePage() {
 
   return (
     <div className="h-screen p-4 overflow-hidden flex flex-col justify-center relative">
-      {/* Background Slideshow */}
-      <BackgroundSlideshow />
+      {/* Background Image */}
+      <div className="absolute inset-0 w-full h-full z-0">
+        <Image
+          src="/dashboard/bg1_castle.png"
+          alt="Castle Background"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+      </div>
 
       {/* Back Arrow */}
       <div className="absolute top-8 left-8 z-20">
@@ -244,12 +259,12 @@ export default function StudentProfilePage() {
       <div className="flex flex-col items-center relative z-10">
         {/* Profile Title - Using the same style as Practice page */}
         <h1
-          className="text-8xl font-bold text-center mb-6 mt-0"
+          className="text-8xl text-center mb-6 mt-0"
           style={{
             fontFamily: "var(--font-blaka)",
             color: "#FFFFFF", // White color
-            WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
-            textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+            WebkitTextStroke: "2px #000000", // Black outline (increased thickness)
+            textStroke: "2px #000000", // Black outline (for non-webkit browsers)
             textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
           }}
         >

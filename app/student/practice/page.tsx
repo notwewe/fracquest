@@ -99,12 +99,12 @@ export default async function StudentPracticePage({
       <div className="relative z-10 w-full max-w-4xl mx-auto">
         {/* Title - Added above the book */}
         <h1
-          className="text-8xl font-bold text-center mb-0 mt-20"
+          className="text-8xl text-center mb-0 mt-20"
           style={{
             fontFamily: "var(--font-blaka)",
             color: "#FFFFFF", // White color
-            WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
-            textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+            WebkitTextStroke: "2px #000000", // Black outline (increased thickness)
+            textStroke: "2px #000000", // Black outline (for non-webkit browsers)
             textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
           }}
         >
@@ -113,7 +113,7 @@ export default async function StudentPracticePage({
 
         {/* Book Container - Same size as login */}
         <div className="relative -mt-5">
-          <Image src="/book.png" alt="Open Book" width={800} height={600} className="w-full h-auto max-w-4xl mx-auto" />
+          <Image src="/book.png" alt="Open Book" width={600} height={400} className="w-full h-auto max-w-4xl mx-auto" />
 
           {/* Book Content - Positioned inside the book */}
           <div className="absolute top-[12%] left-[8%] right-[8%] bottom-[15%] flex flex-col">
@@ -122,7 +122,7 @@ export default async function StudentPracticePage({
               {/* Left Page */}
               <div className="flex-1 pr-8">
                 {/* Left Page Content - Increased height */}
-                <div className="font-blaka text-black mt-16 h-[320px] overflow-y-auto">
+                <div className="text-black mt-16 h-[320px] overflow-y-auto">
                   <p className="text-xl leading-relaxed">{currentLocation.description}</p>
                 </div>
               </div>
@@ -146,23 +146,11 @@ export default async function StudentPracticePage({
 
             {/* Button Area - Bottom 30%, moved up significantly */}
             <div className="flex -mt-16" style={{ height: "30%" }}>
-              {/* Left Page Button - Moved slightly to the left */}
-              <div className="flex-1 flex justify-center pr-6">
+              {/* Practice Game Button - Moved to the right with reduced width */}
+              <div className="flex-1 flex justify-end pr-16">
                 <Button
                   asChild
-                  className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3 shadow-md shadow-amber-950/40"
-                >
-                  <Link href={currentSection ? `/student/practice/${currentSection.id}/intro` : "#"}>
-                    Review Lesson
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Right Page Button - Moved slightly to the right */}
-              <div className="flex-1 flex justify-center pl-6">
-                <Button
-                  asChild
-                  className="w-4/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3 shadow-md shadow-amber-950/40"
+                  className="w-2/5 font-blaka bg-amber-800 hover:bg-amber-900 text-amber-100 text-lg py-3 shadow-md shadow-amber-950/40"
                 >
                   <Link href={currentSection ? `/student/practice/${currentSection.id}/game` : "#"}>Practice Game</Link>
                 </Button>

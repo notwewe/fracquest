@@ -35,12 +35,12 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
   const [score, setScore] = useState(0)
   const [mistakes, setMistakes] = useState(0)
   const [attempts, setAttempts] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(60)
   const [streak, setStreak] = useState(0)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const [questionMistakes, setQuestionMistakes] = useState(0)
 
   // Generate questions
   const generateQuestion = (mode: GameMode): Question => {
@@ -77,7 +77,6 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
     setScore(0)
     setMistakes(0)
     setAttempts(0)
-    setTimeLeft(60)
     setStreak(0)
     setCurrentQuestion(generateQuestion(gameMode))
   }
@@ -105,53 +104,41 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
       setScore((prev) => prev + 10)
       setStreak((prev) => prev + 1)
       setFeedback("Correct! Great job!")
+      setQuestionMistakes(0)
 
       // Bonus for streak
       if (streak === 4) {
         // This will be the 5th correct answer
-        setTimeLeft((prev) => prev + 10)
         setFeedback("Perfect streak! +10 seconds bonus!")
         setStreak(0)
       }
 
       // Next question
-      setCurrentQuestion(generateQuestion(gameMode))
-      setUserAnswer("")
+      setTimeout(() => {
+        setCurrentQuestion(generateQuestion(gameMode))
+        setUserAnswer("")
+        setFeedback(null)
+      }, 1500)
     } else {
       // Wrong answer
-      setMistakes((prev) => prev + 1)
-      setStreak(0)
-
-      if (gameMode === "improper-to-mixed") {
-        setFeedback("Try again! Remember to divide the numerator by the denominator.")
+      if (questionMistakes + 1 >= 3) {
+        setGameState("complete")
       } else {
-        setFeedback("Try again! Remember to multiply the whole number by the denominator and add the numerator.")
+        setQuestionMistakes((prev) => prev + 1)
+        setMistakes((prev) => prev + 1)
+        setStreak(0)
+        if (gameMode === "improper-to-mixed") {
+          setFeedback("Try again! Remember to divide the numerator by the denominator.")
+        } else {
+          setFeedback("Try again! Remember to multiply the whole number by the denominator and add the numerator.")
+        }
+        // Do NOT advance to next question, let user retry
+        setTimeout(() => {
+          setFeedback(null)
+        }, 2000)
       }
     }
-
-    // Clear feedback after 2 seconds
-    setTimeout(() => {
-      setFeedback(null)
-    }, 2000)
   }
-
-  // Timer effect
-  useEffect(() => {
-    if (gameState !== "playing") return
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer)
-          setGameState("complete")
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [gameState])
 
   // Complete game effect
   useEffect(() => {
@@ -165,9 +152,14 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
     <div className="space-y-4">
       <h2 className="text-xl font-pixel text-amber-900">Welcome to Squeaks' Sorting Table!</h2>
       <p className="font-pixel text-amber-700">
-        In this game, you'll practice converting between improper fractions and mixed numbers.
+        In this game, you'll practice converting between improper fractions and mixed numbers. Answer each question correctly to move on. If you make 3 mistakes on the same question, the game will end and you can try again!
       </p>
-
+      <ul className="list-disc pl-6 font-pixel text-amber-800 space-y-2">
+        <li>Convert improper fractions to mixed numbers (e.g., 9/4 → 2 1/4)</li>
+        <li>Convert mixed numbers to improper fractions (e.g., 3 2/5 → 17/5)</li>
+        <li>Each correct answer advances to a new question</li>
+        <li>Three mistakes on the same question ends the game</li>
+      </ul>
       <div className="bg-amber-100 p-4 rounded-lg border-2 border-amber-300">
         <h3 className="font-pixel text-amber-900 mb-2">How to Convert Improper Fractions to Mixed Numbers:</h3>
         <ol className="list-decimal pl-5 space-y-2">
@@ -178,7 +170,6 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
         </ol>
         <p className="font-pixel text-amber-800 mt-2">Example: 7/4 = 1 3/4</p>
       </div>
-
       <div className="bg-amber-100 p-4 rounded-lg border-2 border-amber-300">
         <h3 className="font-pixel text-amber-900 mb-2">How to Convert Mixed Numbers to Improper Fractions:</h3>
         <ol className="list-decimal pl-5 space-y-2">
@@ -188,7 +179,6 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
         </ol>
         <p className="font-pixel text-amber-800 mt-2">Example: 2 3/5 = 13/5</p>
       </div>
-
       <div className="flex justify-center space-x-4">
         <Button
           onClick={() => {
@@ -197,16 +187,7 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
           }}
           className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
         >
-          Practice Improper to Mixed
-        </Button>
-        <Button
-          onClick={() => {
-            setGameMode("mixed-to-improper")
-            startGame()
-          }}
-          className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-        >
-          Practice Mixed to Improper
+          Start the Challenge!
         </Button>
       </div>
     </div>
@@ -222,7 +203,7 @@ export function FractionConversionGame({ waypointId, userId, onComplete }: Fract
         </div>
         <div className="flex items-center">
           <Clock className="h-5 w-5 text-amber-600 mr-1" />
-          <span className="font-pixel text-amber-900">Time: {timeLeft}s</span>
+          <span className="font-pixel text-amber-900">Time: 0s</span>
         </div>
       </div>
 

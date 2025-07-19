@@ -356,6 +356,7 @@ export function CompassGame({ levelId, onComplete }: CompassGameProps) {
           levelId={levelId}
           levelName="Fraction Addition"
           score={score}
+          maxScore={100}
         />
       </div>
     )

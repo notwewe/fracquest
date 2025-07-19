@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "./level-completion-popup"
+import CreditsScroll from "@/components/game/credits-scroll" // or use a placeholder if not present
 import { backgroundImages } from "@/lib/game-content"
 
 type DialogueLine = {
@@ -40,6 +41,7 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null)
   const [skipNextLine, setSkipNextLine] = useState(false)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
+  const [showCredits, setShowCredits] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const supabase = createClient()
 
@@ -309,8 +311,11 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
 
       setIsCompleted(true)
 
-      // Show completion popup
-      setShowCompletionPopup(true)
+      if (levelId === "11") {
+        setShowCredits(true)
+      } else {
+        setShowCompletionPopup(true)
+      }
     } catch (error) {
       console.error("Error marking level as completed:", error)
       toast({
@@ -382,10 +387,38 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
     )
   }
 
+  // After dialogue, render credits if showCredits is true and levelId is 11
+  if (showCredits && levelId === "11") {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black">
+        {/* Replace with your actual credits scroll component */}
+        <CreditsScroll />
+      </div>
+    )
+  }
+
   const currentDialogue = dialogue[currentLine]
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
+      {/* Background - show image for 'Fraction Emporium Test', otherwise text */}
+      {currentDialogue.background === "Fraction Emporium Test" ? (
+        <div className="absolute inset-0">
+          <img
+            src="/game-backgrounds/testimage.jpg"
+            alt="Fraction Emporium Test Background"
+            className="w-full h-full object-cover"
+            style={{ zIndex: 0 }}
+          />
+        </div>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+            {currentDialogue.background || "Fraction Practice"}
+          </div>
+        </div>
+      )}
+
       {/* Background image if available */}
       {currentDialogue.background && backgroundImages[currentDialogue.background] ? (
         <div
@@ -478,17 +511,19 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
       </div>
 
       {/* Completion Popup */}
-      <LevelCompletionPopup
-        isOpen={showCompletionPopup}
-        onClose={() => {
-          setShowCompletionPopup(false)
-          router.push("/student/game")
-        }}
-        levelId={levelId}
-        levelName={levelName}
-        score={100}
-        isStory={true}
-      />
+      {levelId !== "11" && (
+        <LevelCompletionPopup
+          isOpen={showCompletionPopup}
+          onClose={() => {
+            setShowCompletionPopup(false)
+            router.push("/student/game")
+          }}
+          levelId={levelId}
+          levelName={levelName}
+          score={100}
+          isStory={true}
+        />
+      )}
     </div>
   )
 }

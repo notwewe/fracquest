@@ -142,7 +142,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
         {clouds.map((cloud) => (
           <div
             key={cloud.id}
-            className="absolute pixelated"
+            className="absolute pixelated drop-shadow-lg"
             style={{
               top: cloud.top,
               left: cloud.left,
@@ -162,23 +162,23 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
         ))}
       </div>
 
-      {/* Main Content Area - Centered */}
-      <div className="flex flex-col items-center justify-center w-full h-full z-20 px-4">
-        {/* Background container for content - Slightly lower positioning */}
-        <div className="relative flex flex-col items-center max-w-5xl w-full -mt-8">
-          {/* Background image - Same size */}
+      {/* Main Content Area - Left side positioning */}
+      <div className="flex flex-col items-start justify-center w-full h-full z-20 px-4 pl-8">
+        {/* Background container for content - Left aligned */}
+        <div className="relative flex flex-col items-center max-w-3xl w-full -mt-8 ml-0">
+          {/* Background image - Adjusted dimensions */}
           <Image
             src="/dashboard/blank.png"
             alt="Background Panel"
-            width={1800}
-            height={2160}
-            className="w-full h-auto"
+            width={1000}
+            height={2800}
+            className="w-full h-auto transform rotate-90"
           />
           
           {/* Content positioned over background */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pt-0 px-20">
+          <div className="absolute inset-0 flex flex-col items-center justify-center pt-0 px-20 drop-shadow-2xl">
             {/* Title and Welcome - Same as before */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 drop-shadow-lg">
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-blaka text-[#333333] mb-1">
                 FRACQUEST
               </h1>
@@ -192,59 +192,59 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
             
             {/* Alert */}
             {showAlert && (
-              <Alert className="z-20 mb-3 w-full bg-amber-100 border-amber-300">
+              <Alert className="z-20 mb-3 w-full bg-amber-100 border-amber-300 drop-shadow-lg">
                 <AlertDescription className="text-amber-800 text-lg">{alertMessage}</AlertDescription>
               </Alert>
             )}
 
             {/* Navigation Buttons - With larger text */}
-            <div className="flex flex-col items-center gap-3 w-full">
+            <div className="flex flex-col items-center gap-3 w-full drop-shadow-lg">
               {isEnrolled ? (
                 <Link href="/student/game" className="w-2/5 mx-auto">
-                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
                     Play
                   </button>
                 </Link>
               ) : (
                 <button
                   onClick={() => handleUnenrolledClick("play the game")}
-                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70"
+                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
                 >
                   Play
                 </button>
               )}
 
-              {isEnrolled ? (
+              {/* {isEnrolled ? (
                 <Link href="/student/practice" className="w-2/5 mx-auto">
-                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
                     Practice
                   </button>
                 </Link>
               ) : (
                 <button
                   onClick={() => handleUnenrolledClick("practice")}
-                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70"
+                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
                 >
                   Practice
                 </button>
-              )}
+              )} */}
 
               <Link href="/student/profile" className="w-2/5 mx-auto">
-                <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
                   Profile
                 </button>
               </Link>
 
               {isEnrolled ? (
                 <Link href="/student/leaderboard" className="w-2/5 mx-auto">
-                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
                     Leaderboards
                   </button>
                 </Link>
               ) : (
                 <button
                   onClick={() => handleUnenrolledClick("view the leaderboard")}
-                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70"
+                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
                 >
                   Leaderboards
                 </button>
@@ -252,7 +252,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
 
               {/* Logout button - Moved up by reducing top margin */}
               <Link href="/auth/logout" className="w-1/5 mx-auto mt-3">
-                <button className="bg-[#8B3734] text-white font-blaka text-xl px-4 py-2 w-full rounded hover:bg-[#6d2b29] transition-colors">
+                <button className="bg-[#8B3734] text-white font-blaka text-xl px-4 py-2 w-full rounded hover:bg-[#6d2b29] transition-colors border-2 border-[#6d2b29] outline-2 outline-[#4a1e1c] hover:outline-[#3b1815] shadow-lg">
                   Logout
                 </button>
               </Link>
