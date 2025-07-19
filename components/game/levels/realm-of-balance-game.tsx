@@ -219,7 +219,15 @@ export default function RealmOfBalanceGame() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
+    <div className="relative h-screen w-full bg-black overflow-hidden"
+      style={{
+          backgroundImage: "url('/game backgrounds/Realm of Balance.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
+    >
       {/* Background */}
       <div className="absolute inset-0 flex items-center justify-center bg-blue-900 bg-opacity-40">
         <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-blue-200">

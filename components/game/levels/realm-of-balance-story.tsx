@@ -143,7 +143,15 @@ export default function RealmOfBalanceStory() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-800 to-purple-900 flex flex-col items-center justify-center p-4 font-['Blaka']">
+    <div className="min-h-screen bg-gradient-to-b from-purple-800 to-purple-900 flex flex-col items-center justify-center p-4 font-['Blaka']"
+    style={{
+          backgroundImage: "url('/game backgrounds/Realm of Balance.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
+    >
       {/* Background */}
       <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 

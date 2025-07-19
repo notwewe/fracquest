@@ -8,7 +8,8 @@ import { ArrowLeft, Edit, BarChart, Users } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
 import { RemoveStudentButton } from "@/components/ui/remove-student-button"
 
-export default async function ClassDetailPage({ params }: { params: { id: string } }) {
+export default async function ClassDetailPage(props: any) {
+  const { params } = await props;
   const supabase = createClient()
   const classId = Number.parseInt(params.id)
 

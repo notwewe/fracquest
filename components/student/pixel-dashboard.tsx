@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-// Cloud object type (same as auth pages)
+// Cloud object type
 type Cloud = {
   id: number
   cloudNumber: number
@@ -43,13 +43,11 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
     }
   }, [])
 
-  // Track window size for responsive adjustments (same as auth pages)
+  // Track window size
   useEffect(() => {
-    // Set initial window dimensions
     setWindowWidth(window.innerWidth)
     setWindowHeight(window.innerHeight)
 
-    // Update window dimensions on resize
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
       setWindowHeight(window.innerHeight)
@@ -59,74 +57,18 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Initialize clouds (same as auth pages)
-  useEffect(() => {
-    if (!windowWidth) return
-
-    // Create initial set of clouds
-    const initialClouds: Cloud[] = []
-
-    // Adjust number of clouds based on screen size
-    const cloudCount = windowWidth < 640 ? 3 : 5
-
-    // Create clouds
-    for (let i = 0; i < cloudCount; i++) {
-      initialClouds.push(createNewCloud())
-    }
-
-    setClouds(initialClouds)
-
-    // Start cloud animation
-    const intervalId = setInterval(() => {
-      setClouds((prevClouds) => {
-        return prevClouds.map((cloud) => {
-          // Move cloud based on its speed and direction
-          const currentLeft = Number.parseFloat(cloud.left)
-          const newLeft = currentLeft + cloud.speed * cloud.direction
-
-          // Check if cloud has left the viewport
-          if ((cloud.direction === 1 && newLeft > 110) || (cloud.direction === -1 && newLeft < -30)) {
-            // Replace with a new cloud from the opposite side
-            return createNewCloud(cloud.direction === 1 ? -1 : 1)
-          }
-
-          // Update cloud position
-          return {
-            ...cloud,
-            left: `${newLeft}%`,
-          }
-        })
-      })
-    }, 33) // ~30fps for smooth animation
-
-    return () => clearInterval(intervalId)
-  }, [windowWidth])
-
-  // Function to create a new cloud (same as auth pages)
+  // Function to create a new cloud
   const createNewCloud = (forcedDirection?: -1 | 1): Cloud => {
-    // Randomly select cloud image (1, 2, or 3)
     const cloudNumber = Math.floor(Math.random() * 3) + 1
-
-    // Adjust cloud size based on screen width
-    const baseSize = windowWidth < 640 ? 80 : windowWidth < 1024 ? 100 : 120
-    const sizeVariation = windowWidth < 640 ? 40 : 60
-
-    // Random cloud size
+    // Increased cloud sizes
+    const baseSize = windowWidth < 640 ? 200 : windowWidth < 1024 ? 250 : 300
+    const sizeVariation = windowWidth < 640 ? 100 : 150
     const size = Math.floor(Math.random() * sizeVariation) + baseSize
-
-    // Random speed between 0.08 and 0.2, adjusted for screen size
     const speedFactor = windowWidth < 640 ? 0.7 : 1
-    const speed = (Math.random() * 0.12 + 0.08) * speedFactor
-
-    // Random direction (left or right) if not forced
+    // Slightly reduced speed for larger clouds
+    const speed = (Math.random() * 0.1 + 0.05) * speedFactor
     const direction = forcedDirection || (Math.random() > 0.5 ? 1 : -1)
-
-    // Random vertical position between 5% and 85%
     const top = `${Math.floor(Math.random() * 80) + 5}%`
-
-    // Starting position based on direction
-    // If moving right, start from left (-20% to -10%)
-    // If moving left, start from right (110% to 120%)
     const left =
       direction === 1 ? `${Math.floor(Math.random() * 10) - 20}%` : `${Math.floor(Math.random() * 10) + 110}%`
 
@@ -142,6 +84,40 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
     }
   }
 
+  // Initialize clouds
+  useEffect(() => {
+    if (!windowWidth) return
+
+    const initialClouds: Cloud[] = []
+    const cloudCount = windowWidth < 640 ? 3 : 5
+
+    for (let i = 0; i < cloudCount; i++) {
+      initialClouds.push(createNewCloud())
+    }
+
+    setClouds(initialClouds)
+
+    const intervalId = setInterval(() => {
+      setClouds((prevClouds) => {
+        return prevClouds.map((cloud) => {
+          const currentLeft = Number.parseFloat(cloud.left)
+          const newLeft = currentLeft + cloud.speed * cloud.direction
+
+          if ((cloud.direction === 1 && newLeft > 110) || (cloud.direction === -1 && newLeft < -30)) {
+            return createNewCloud(cloud.direction === 1 ? -1 : 1)
+          }
+
+          return {
+            ...cloud,
+            left: `${newLeft}%`,
+          }
+        })
+      })
+    }, 33)
+
+    return () => clearInterval(intervalId)
+  }, [windowWidth])
+
   const handleUnenrolledClick = (feature: string) => {
     setAlertMessage(`You need to join a class to ${feature}.`)
     setShowAlert(true)
@@ -153,7 +129,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
       {/* Background image */}
       <div className="absolute inset-0 w-full h-full z-0">
         <Image
-          src="/dashboard/castle-background.jpg"
+          src="/dashboard/bg1_castle.png"
           alt="Castle Background"
           fill
           className="object-cover object-center"
@@ -161,9 +137,8 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
         />
       </div>
 
-      {/* Full-width container for clouds (same as auth pages) */}
+      {/* Cloud container */}
       <div className="absolute inset-0 w-full h-full overflow-hidden z-10">
-        {/* Render all active clouds */}
         {clouds.map((cloud) => (
           <div
             key={cloud.id}
@@ -173,7 +148,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
               left: cloud.left,
               width: `${cloud.size}px`,
               height: "auto",
-              transition: "left 0.033s linear", // Very smooth transition
+              transition: "left 0.033s linear",
             }}
           >
             <Image
@@ -187,184 +162,104 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
         ))}
       </div>
 
-      {/* Top section with name/class and welcome banner */}
-      <div className="w-full flex flex-col items-center relative z-20 pt-2">
-        {/* Name and Class Container - Top Left */}
-        <div className="absolute top-2 left-2 sm:left-4">
-          <div className="relative">
-            <Image
-              src="/dashboard/nameandclass.png"
-              alt="Name and Class"
-              width={260}
-              height={312}
-              className="pixelated"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center pt-10 px-4">
-              <p className="text-[#8B3734] font-blaka text-center text-2xl mb-3 max-w-[220px] break-words">
-                {username}
-              </p>
-              {isEnrolled ? (
-                <p className="text-[#8B3734] font-blaka text-center text-lg max-w-[220px] break-words">
-                  Class: {className}
-                </p>
-              ) : (
-                <p className="text-[#8B3734] font-blaka text-center text-lg max-w-[220px] break-words">No Class</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Banner with enhanced hover animation */}
-        <div
-          className="mt-2 mb-3 w-full flex justify-center"
-          style={{
-            animation: "float 3s ease-in-out infinite",
-          }}
-        >
-          <style jsx>{`
-            @keyframes float {
-              0% {
-                transform: translateY(0px);
-              }
-              50% {
-                transform: translateY(-8px);
-              }
-              100% {
-                transform: translateY(0px);
-              }
-            }
-          `}</style>
-          <div className="relative">
-            <Image src="/dashboard/welcome.png" alt="Welcome Banner" width={350} height={80} className="pixelated" />
-            <h1 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg sm:text-xl md:text-2xl whitespace-nowrap font-bold text-[#8B3734] font-blaka">
-              Welcome to FracQuest
-            </h1>
-          </div>
-        </div>
-      </div>
-
-      {/* Alert */}
-      {showAlert && (
-        <Alert className="z-20 mb-3 max-w-md w-full bg-amber-100 border-amber-300">
-          <AlertDescription className="text-amber-800">{alertMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Main container - centered */}
-      <div className="flex items-center justify-center w-full z-20 px-4">
-        <div className="relative max-w-xl w-full">
+      {/* Main Content Area - Centered */}
+      <div className="flex flex-col items-center justify-center w-full h-full z-20 px-4">
+        {/* Background container for content - Slightly lower positioning */}
+        <div className="relative flex flex-col items-center max-w-5xl w-full -mt-8">
+          {/* Background image - Same size */}
           <Image
-            src="/dashboard/container.png"
-            alt="Container"
-            width={500}
-            height={333}
-            className="pixelated w-full h-auto"
+            src="/dashboard/blank.png"
+            alt="Background Panel"
+            width={1800}
+            height={2160}
+            className="w-full h-auto"
           />
+          
+          {/* Content positioned over background */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pt-0 px-20">
+            {/* Title and Welcome - Same as before */}
+            <div className="text-center mb-6">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-blaka text-[#333333] mb-1">
+                FRACQUEST
+              </h1>
+              <p className="text-2xl sm:text-3xl font-blaka">
+                WELCOME, {username.toUpperCase()}!
+              </p>  
+              <p className="text-lg sm:text-xl font-blaka">
+                class: {isEnrolled ? className : "No Class"}
+              </p>
+            </div>
+            
+            {/* Alert */}
+            {showAlert && (
+              <Alert className="z-20 mb-3 w-full bg-amber-100 border-amber-300">
+                <AlertDescription className="text-amber-800 text-lg">{alertMessage}</AlertDescription>
+              </Alert>
+            )}
 
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Buttons grid - centered in container */}
-            <div className="grid grid-cols-2 gap-4 sm:gap-5 md:gap-6 w-full max-w-md px-4">
-              {/* Play button */}
+            {/* Navigation Buttons - With larger text */}
+            <div className="flex flex-col items-center gap-3 w-full">
               {isEnrolled ? (
-                <Link href="/student/game" className="flex justify-center">
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 transform hover:scale-110 transition-transform hover:rotate-3">
-                    <Image
-                      src="/dashboard/play-btn.png"
-                      alt="Play"
-                      width={128}
-                      height={128}
-                      className="pixelated w-full h-full"
-                    />
-                  </div>
+                <Link href="/student/game" className="w-2/5 mx-auto">
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                    Play
+                  </button>
                 </Link>
               ) : (
                 <button
                   onClick={() => handleUnenrolledClick("play the game")}
-                  className="flex justify-center opacity-70"
+                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70"
                 >
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32">
-                    <Image
-                      src="/dashboard/play-btn.png"
-                      alt="Play"
-                      width={128}
-                      height={128}
-                      className="pixelated grayscale w-full h-full"
-                    />
-                  </div>
+                  Play
                 </button>
               )}
 
-              {/* Practice button */}
-              <Link href="/student/practice" className="flex justify-center">
-                <div className="relative w-28 h-28 sm:w-32 sm:h-32 transform hover:scale-110 transition-transform hover:rotate-3">
-                  <Image
-                    src="/dashboard/practice-btn.png"
-                    alt="Practice"
-                    width={128}
-                    height={128}
-                    className="pixelated w-full h-full"
-                  />
-                </div>
+              {isEnrolled ? (
+                <Link href="/student/practice" className="w-2/5 mx-auto">
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                    Practice
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleUnenrolledClick("practice")}
+                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70"
+                >
+                  Practice
+                </button>
+              )}
+
+              <Link href="/student/profile" className="w-2/5 mx-auto">
+                <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                  Profile
+                </button>
               </Link>
 
-              {/* Leaderboard button */}
               {isEnrolled ? (
-                <Link href="/student/leaderboard" className="flex justify-center">
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 transform hover:scale-110 transition-transform hover:rotate-3">
-                    <Image
-                      src="/dashboard/ranking-btn.png"
-                      alt="Leaderboard"
-                      width={128}
-                      height={128}
-                      className="pixelated w-full h-full"
-                    />
-                  </div>
+                <Link href="/student/leaderboard" className="w-2/5 mx-auto">
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors">
+                    Leaderboards
+                  </button>
                 </Link>
               ) : (
                 <button
                   onClick={() => handleUnenrolledClick("view the leaderboard")}
-                  className="flex justify-center opacity-70"
+                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70"
                 >
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32">
-                    <Image
-                      src="/dashboard/ranking-btn.png"
-                      alt="Leaderboard"
-                      width={128}
-                      height={128}
-                      className="pixelated grayscale w-full h-full"
-                    />
-                  </div>
+                  Leaderboards
                 </button>
               )}
 
-              {/* Profile button */}
-              <Link href="/student/profile" className="flex justify-center">
-                <div className="relative w-28 h-28 sm:w-32 sm:h-32 transform hover:scale-110 transition-transform hover:rotate-3">
-                  <Image
-                    src="/dashboard/profile-btn.png"
-                    alt="Profile"
-                    width={128}
-                    height={128}
-                    className="pixelated w-full h-full"
-                  />
-                </div>
+              {/* Logout button - Moved up by reducing top margin */}
+              <Link href="/auth/logout" className="w-1/5 mx-auto mt-3">
+                <button className="bg-[#8B3734] text-white font-blaka text-xl px-4 py-2 w-full rounded hover:bg-[#6d2b29] transition-colors">
+                  Logout
+                </button>
               </Link>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Logout button - bottom section */}
-      <div className="mt-1 mb-4 z-20 w-full flex justify-center">
-        <Link href="/auth/logout" className="flex justify-center">
-          <div className="relative transform hover:scale-105 transition-transform">
-            <Image src="/dashboard/logout.png" alt="Logout" width={200} height={45} className="pixelated" />
-            <p className="absolute top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#f8d78b] font-blaka text-lg">
-              Logout
-            </p>
-          </div>
-        </Link>
-      </div>
     </div>
-  )
+  );
 }

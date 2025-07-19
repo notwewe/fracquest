@@ -119,99 +119,321 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "Whiskers enters a small wooden shop with shelves filled with fraction-themed items—half-cheese wheels, quarter-apples, and fraction potions.",
-        background: "Fraction Emporium Test",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "A quaint little wooden shop with shelves packed with fraction-themed items—cheese wheels sliced into parts, labeled potions, pies in slices, and scrolls with numbers and symbols.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "Whiskers pushes open the door, and a little bell jingles. Squeaks, a tiny mouse with big glasses and a merchant's apron, hops onto the counter.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Well, hello there, traveler! Welcome to Squeaks' Fraction Emporium, home to the finest fraction gadgets in all of Numeria!",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Whiskers",
         text: "I heard this is where math meets magic. I'm trying to learn more about fractions—heard they're the key to saving the kingdom!",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
+        //Squeaks is Center
         speaker: "Squeaks",
         text: "Then you've come to the right place! Fractions are all about parts of a whole. Let me show you!",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Narrator",
         text: "Squeaks pulls out a round cheese wheel and slices it into 4 equal parts.",
-        background: "Cheese Wheel Demo",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "50%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "If I eat one slice, I've eaten 1 out of 4... or 1/4. The top number tells us how many slices we have, and the bottom number tells us how many equal slices the whole cheese had!",
-        background: "Cheese Wheel Demo",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/14.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "200px",
+              position: "absolute",
+              width: "400px",
+              height: "400px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
-        text: "A pie sliced into 8 pieces: 3 slices is 3/8! A potion bottle half full: That's 1/2!",
-        background: "Fraction Examples",
+        text: "A pizza sliced into 8 pieces: 3 slices is 3/8! A potion bottle half full: That's 1/2!",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/38.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/12.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              
+              left: "60%",
+              bottom: "125px",
+              position: "absolute",
+              width: "600px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "So fractions are just parts of something bigger?",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
+         character: "/game characters/Squeaks.png",
+          characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Exactly! Once you understand how they work, you can compare them, add them, and even use them in magic! Now that you get the basics, it's time for something bigger...",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Now, let's practice with some examples to make sure you've got it!",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "If I have a pizza with 8 slices and I eat 3 slices, what fraction of the pizza have I eaten?",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
         isChoice: true,
         choices: ["3/8", "3/5", "5/8", "8/3"],
         correctChoice: 0, // 3/8 is the correct answer (index 0)
         wrongAnswerText:
           "That's not right. Remember, the denominator (bottom number) is the total number of slices, and the numerator (top number) is how many you've eaten.",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       // Correct answer response
       {
         speaker: "Squeaks",
         text: "Correct! 3/8 is the right answer. The denominator (8) tells us how many total slices, and the numerator (3) tells us how many we've eaten.",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Let's try another one. If a potion bottle is 1/4 full, what fraction is empty?",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
         isChoice: true,
         choices: ["1/4", "3/4", "4/1", "4/3"],
         correctChoice: 1, // 3/4 is the correct answer (index 1)
         wrongAnswerText:
           "Not quite. Think about it: if 1/4 is full, what fraction remains empty out of the whole bottle (4/4)?",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       // Correct answer response
       {
         speaker: "Squeaks",
         text: "Excellent! 3/4 is correct. If 1/4 is full, then 3/4 must be empty, since the whole bottle is 4/4 or 1 whole.",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "You're getting the hang of this! Let's move on to more advanced fraction concepts.",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        
       },
     ],
 
@@ -220,107 +442,603 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "Deeper into Squeaks' Emporium, a dusty corner reveals a stack of magical crates, each labeled with mysterious numbers and glowing softly.",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
       },
       {
         speaker: "Narrator",
         text: "A sign above reads: 'Fractions That Don't Fit Neatly!'",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
+        character: "/game characters/Sign.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "25%",
+          bottom: "10px",
+          position: "absolute",
+          width: "900px",
+          height: "900px"
+        }
       },
       {
         speaker: "Narrator",
         text: "Whiskers and Squeaks walk toward a glowing cheese crate that's bursting at the seams with more slices than it seems it can hold.",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
+        character: "/game assets/Crate.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "30%",
+          bottom: "180px",
+          position: "absolute",
+          width: "700px",
+          height: "500px"
+        }
       },
       {
         speaker: "Whiskers",
         text: "Whoa! That crate is supposed to hold one cheese wheel, right? But... there are more slices than one wheel!",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
+        character: "/game assets/Crate.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "30%",
+          bottom: "180px",
+          position: "absolute",
+          width: "700px",
+          height: "500px"
+        }
       },
       {
+        //Squeaks is at the Side
         speaker: "Squeaks",
         text: "Good eye, traveler! What you're looking at is an improper fraction—it's when the number on top, the numerator, is bigger than the number on the bottom, the denominator.",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/Crate.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "50%",
+              bottom: "200px",
+              position: "absolute",
+              width: "700px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Narrator",
         text: "Squeaks pulls out 7 slices from a crate labeled '4-slice cheeses.'",
-        background: "Cheese Slices",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "260px",
+              position: "absolute",
+              width: "400px",
+              height: "400px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "See? If each cheese wheel has 4 slices, and I have 7 slices, I've got 7/4. That's more than a whole cheese!",
-        background: "Improper Fractions",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "70%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "260px",
+              position: "absolute",
+              width: "400px",
+              height: "400px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "So... what do I do with a fraction like that?",
-        background: "Improper Fractions",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "70%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "260px",
+              position: "absolute",
+              width: "400px",
+              height: "400px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Well, we turn it into a mixed number! That means we show how many whole cheese wheels you have, and what's left over.",
-        background: "Mixed Numbers",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "70%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "260px",
+              position: "absolute",
+              width: "400px",
+              height: "400px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Let's turn 7/4 into a mixed number. First, divide the top by the bottom: 7 ÷ 4 = 1 remainder 3. That's 1 whole and 3 left over.",
-        background: "Mixed Numbers Step 1",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "70%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "260px",
+              position: "absolute",
+              width: "400px",
+              height: "400px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Now we write the mixed number: The whole is 1, and the leftover is 3 slices out of 4. So, 7/4 = 1 3/4!",
-        background: "Mixed Numbers Step 2",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/threefourth.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "600px",
+              height: "600px"
+            }
+          },
+          {
+            src: "/game assets/onewhole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "230px",
+              position: "absolute",
+              width: "550px",
+              height: "550px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "See? You had one full cheese wheel (4/4) and 3 slices left. So it's 1 3/4!",
-        background: "Mixed Numbers",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/threefourth.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "600px",
+              height: "600px"
+            }
+          },
+          {
+            src: "/game assets/onewhole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "230px",
+              position: "absolute",
+              width: "550px",
+              height: "550px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
-        text: "What if I have a mixed number like 2 2/5? How do I turn it back into an improper fraction?",
-        background: "Mixed Numbers",
+        text: "What if I have a mixed number like 2 1/4? How do I turn it back into an improper fraction?",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Great question! Let's flip it around!",
-        background: "Conversion",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
-        text: "First, multiply the whole number by the denominator: 2 × 5 = 10",
-        background: "Conversion Step 1",
+        text: "First, multiply the whole number by the denominator: 2 × 4 = 8",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "210px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/whole.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "220px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
-        text: "Next, add the numerator: 10 + 2 = 12",
-        background: "Conversion Step 2",
+        text: "Next, add the numerator: 8 + 1 = 9",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/9.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "170px",
+              position: "absolute",
+              width: "700px",
+              height: "700px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
-        text: "Finally, keep the same denominator. So, 2 2/5 = 12/5",
-        background: "Conversion Step 3",
+        text: "Finally, keep the same denominator. So, 2 1/4 = 9/4",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/ninefourth.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "170px",
+              position: "absolute",
+              width: "700px",
+              height: "700px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Simple, right? You're just counting all the slices from full cheese wheels and the extra ones!",
-        background: "Conversion",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/ninefourth.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "170px",
+              position: "absolute",
+              width: "700px",
+              height: "700px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "That's not so hard when you break it down like that. Let's play that conversion game now—I'm ready!",
-        background: "Conversion",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/ninefourth.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "170px",
+              position: "absolute",
+              width: "700px",
+              height: "700px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Let's see how fast your brain and paws can work together! To the Sorting Table!",
-        background: "Conversion",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Convert 9/4 to a mixed number.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         isChoice: true,
         choices: ["2 1/4", "2 1/2", "2 1/3", "2 1/5"],
         correctChoice: 0, // 2 1/4 is the correct answer (index 0)
@@ -331,12 +1049,34 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Excellent! 9/4 = 2 1/4 because 9 ÷ 4 = 2 remainder 1.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Now convert 3 2/5 to an improper fraction.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         isChoice: true,
         choices: ["15/5", "17/5", "12/5", "7/5"],
         correctChoice: 1, // 17/5 is the correct answer (index 1)
@@ -347,7 +1087,18 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Perfect! 3 2/5 = 17/5 because (3 × 5) + 2 = 17.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
     ],
 
@@ -356,12 +1107,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Welcome to the Sorting Table! Here, you'll test your knowledge by converting fractions. Don't worry—I'll guide you through the first round!",
-        background: "Squeaks' Sorting Table",
+        background: "Sorting Table",
       },
       {
         speaker: "Squeaks",
         text: "You'll need to convert between improper fractions and mixed numbers. Remember: divide to go from improper to mixed, multiply and add to go from mixed to improper!",
-        background: "Squeaks' Sorting Table",
+        background: "Sorting Table",
       },
     ],
 
@@ -370,57 +1121,57 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "The back room of the Emporium. A floating pedestal glows, waiting for the compass pieces to be placed.",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "If you can fix the compass, then you shall continue on your journey to restore the Fraction Orb!",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "When you add fractions with the same bottom number—the denominator—you just add the top numbers!",
-        background: "Fraction Addition",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "For example: 1/4 + 2/4 = 3/4 and 2/8 + 5/8 = 7/8",
-        background: "Fraction Addition",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "When the denominators are different, we need to do a little more work.",
-        background: "Fraction Addition",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Look at both denominators. Find the Least Common Denominator (LCD) – the smallest number both can divide into. Rewrite each fraction so they have this shared denominator. Then, add the numerators like usual!",
-        background: "Common Denominators",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "For example, 1/2 + 1/4 = ? The denominators are 2 and 4. The LCD is 4. Convert 1/2 to 2/4. Now add: 2/4 + 1/4 = 3/4",
-        background: "Common Denominators",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Another example: 2/3 + 1/6 = ? The denominators are 3 and 6. The LCD is 6. Convert 2/3 to 4/6. Now add: 4/6 + 1/6 = 5/6",
-        background: "Common Denominators",
+        background: "Backrooms",
       },
       {
         speaker: "Whiskers",
         text: "So to assemble the compass, I just need to know how much I've added so far?",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Precisely! But be careful—only the exact total will activate it!",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Let's try a practice problem. What is 1/3 + 1/3?",
-        background: "Addition Practice",
+        background: "Backrooms",
         isChoice: true,
         choices: ["1/3", "2/3", "2/6", "1/6"],
         correctChoice: 1, // 2/3 is the correct answer (index 1)
@@ -430,12 +1181,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Correct! 1/3 + 1/3 = 2/3. Since the denominators are the same, we just add the numerators.",
-        background: "Addition Practice",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Now try a harder one. What is 1/2 + 1/4?",
-        background: "Addition Practice",
+        background: "Backrooms",
         isChoice: true,
         choices: ["2/6", "3/4", "1/6", "2/4"],
         correctChoice: 1, // 3/4 is the correct answer (index 1)
@@ -445,7 +1196,7 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Excellent! 1/2 + 1/4 = 3/4. We convert 1/2 to 2/4, then add: 2/4 + 1/4 = 3/4.",
-        background: "Addition Practice",
+        background: "Backrooms",
       },
     ],
 
@@ -454,27 +1205,27 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "After learning about fraction addition, Whiskers is ready to assemble the Fraction Compass.",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Welcome to the Compass Chamber! Here, you'll need to add fractions correctly to restore the magical Fraction Compass.",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Each correct answer will add a piece to the compass. Complete all five pieces to activate it!",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Remember, when adding fractions with the same denominator, just add the numerators. When the denominators are different, find a common denominator first.",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Whiskers",
         text: "I'm ready to restore the compass!",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
     ],
 
@@ -483,117 +1234,117 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "You've got the compass, Whiskers! It'll guide you to the lost pieces of the orb, but remember—fractions aren't just about knowing... they're about doing.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Whiskers",
         text: "Thanks, Squeaks. I can feel it... something important is just ahead.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Follow the old stone path outside town. It leads to Borrowdale. Last I heard, the bridge there was acting strange... numbers vanish right off the stones!",
-        background: "Map Pointing",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Whiskers",
         text: "Then it's time to do some subtracting. Let's go!",
-        background: "Leaving Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "Whiskers follows the path until he arrives at the edge of a misty ravine. A grand, glowing bridge once stood here—but now, parts of it are missing.",
-        background: "Lessmore Bridge",
+        background: "Broken LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "The compass pulses and glows. Whiskers steps cautiously to the ravine's edge.",
-        background: "Compass Glowing",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Whiskers",
         text: "The compass brought me here... but the bridge is broken!",
-        background: "Lessmore Bridge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "A gentle rumble echoes as an ancient figure rises from the stone—Elder Pebble, the guardian of understanding.",
-        background: "Elder Pebble Rising",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Only those who understand taking away can rebuild what was lost. You must master the art of fraction subtraction to restore the bridge.",
-        background: "Lessmore Bridge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "Elder Pebble conjures a glowing stone plate with 5 of 8 sections lit.",
-        background: "Stone Plate",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Start with 5 out of 8. Take away 2 of the same kind. What remains?",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Examples: 5/8 − 2/8 = 3/8, 3/4 − 1/4 = 2/4 → 1/2, 6/6 − 4/6 = 2/6 → 1/3",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Whiskers",
         text: "So when the parts match, it's like taking blocks from the same pile?",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Exactly. When the pieces share a name, you simply subtract the tops. But not all fractions speak the same tongue...",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "He steps aside. Two glowing stones float between you—2/5 and 3/4.",
-        background: "Floating Stones",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "When parts differ, you must make them agree. This is the art of the Least Common Denominator.",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "To subtract 3/4 and 2/5, we must find a common ground. Their denominators—4 and 5—must become one.",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Find the Least Common Denominator (LCD). Multiples of 4: 4, 8, 12, 16, 20, ... Multiples of 5: 5, 10, 15, 20, ... LCD = 20",
-        background: "Finding LCD",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Convert to Equivalent Fractions: 3/4 → 15/20 (×5), 2/5 → 8/20 (×4)",
-        background: "Converting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Subtract the Numerators: 15/20 − 8/20 = 7/20",
-        background: "Subtracting Numerators",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "By reshaping the parts, you've brought them to unity. Only then can subtraction begin.",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Now, solve these subtraction problems to prove your worth and cross the bridge!",
-        background: "Subtraction Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "What is 5/8 - 2/8?",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
         isChoice: true,
         choices: ["3/8", "3/16", "7/8", "3/4"],
         correctChoice: 0, // 3/8 is the correct answer (index 0)
@@ -603,12 +1354,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Elder Pebble",
         text: "Correct! 5/8 - 2/8 = 3/8. Since the denominators are the same, we just subtract the numerators.",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Now try a harder one. What is 3/4 - 1/2?",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
         isChoice: true,
         choices: ["2/4", "1/4", "2/6", "1/2"],
         correctChoice: 1, // 1/4 is the correct answer (index 1)
@@ -618,7 +1369,7 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Elder Pebble",
         text: "Excellent! 3/4 - 1/2 = 1/4. We convert 1/2 to 2/4, then subtract: 3/4 - 2/4 = 1/4.",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
       },
     ],
 
@@ -627,22 +1378,44 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "After learning about fraction subtraction from Elder Pebble, Whiskers is ready to rebuild the Lessmore Bridge.",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "To restore the bridge, you must solve five subtraction problems. Each correct answer will add a stone to the bridge.",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Remember, when subtracting fractions with the same denominator, simply subtract the numerators. When the denominators are different, find a common denominator first.",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Whiskers",
         text: "I'm ready to rebuild the bridge!",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
+      },
+      // Post-game from Bridge scene
+      {
+        speaker: "Elder Pebble",
+        text: "You see, young one... subtraction is not just taking away—it's revealing what remains.",
+        background: "Fixed LessMoore Bridge",
+        
+      },
+      {
+        speaker: "Elder Pebble",
+        text: "Few walk this path with such clarity. Fewer still reach the end.",
+        background: "Fixed LessMoore Bridge",
+      },
+      {
+        speaker: "Elder Pebble",
+        text: "Go forth, traveler. This path is now yours. Let the numbers guide you as they have here.",
+        background: "Fixed LessMoore Bridge",
+      },
+      {
+        speaker: "Squeaks",
+        text: "Bridge complete, tail intact. Onward!",
+        background: "Fixed LessMoore Bridge",
       },
     ],
 
@@ -800,3 +1573,18 @@ export function getLevelDialogue(levelId: string) {
 
   return levelDialogues[levelId] || defaultDialogue
 }
+
+// Add this mapping for backgrounds to image paths
+export const backgroundImages: Record<string, string> = {
+  'Squeaks Emporium': '/game backgrounds/Squeaks Emporium.png',
+  'CheeseCrate': '/game backgrounds/CheeseCrate.png',
+  'Sorting Table': '/game backgrounds/Sorting Table.png',
+  'Backrooms': '/game backgrounds/Backrooms.png',
+  'Broken LessMoore Bridge': '/game backgrounds/Broken LessMoore Bridge.png',
+  'Fixed LessMoore Bridge': '/game backgrounds/Fixed LessMoore Bridge.png',
+  'LessMoore Bridge': '/game backgrounds/LessMoore Bridge.png',
+  'Fraction Forest Entrance': '/game backgrounds/Fraction Forest Entrance.png',
+  'Fraction Forest': '/game backgrounds/Fraction Forest.png',
+  'Realm of Balance': '/game backgrounds/Realm of Balance.png',
+  // Add other mappings as needed
+};

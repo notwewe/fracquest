@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
+import BackroomsBackground from "./backrooms-bg"
 
 type AdditionProblem = {
   question: string
@@ -195,9 +196,11 @@ export default function AdditionGame() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - same as story levels */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Backrooms background image */}
+      <BackroomsBackground />
+      {/* Overlay tint for ambience */}
+      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20 z-10">
         <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
           Compass Chamber
         </div>
@@ -205,7 +208,7 @@ export default function AdditionGame() {
 
       {!gameStarted ? (
         // Start Screen - styled like dialogue box
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-20">
           <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
           <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
             Welcome to the Compass Chamber! Here, you'll need to add fractions correctly to restore the magical Fraction
@@ -227,7 +230,7 @@ export default function AdditionGame() {
         </div>
       ) : (
         // Game Screen - styled like dialogue box
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-20">
           <div className="text-amber-300 font-pixel text-lg mb-2">
             Compass Pieces: {compassPieces}/5 | Score: {score}
           </div>
@@ -263,7 +266,7 @@ export default function AdditionGame() {
       )}
 
       {/* Emergency exit button - always visible */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-20">
         <Button
           onClick={() => router.push("/student/game")}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"

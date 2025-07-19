@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
+import { backgroundImages } from '@/lib/game-content'
 
 type ConversionProblem = {
   type: "improper-to-mixed" | "mixed-to-improper"
@@ -34,7 +35,8 @@ const problems: ConversionProblem[] = [
   { type: "mixed-to-improper", question: "5 2/7", answer: "37/7", mixedNumber: "5 2/7" },
 ]
 
-export default function ConversionGame() {
+export default function ConversionGame(props: any) {
+  const { params } = props || {};
   const router = useRouter()
   // Scoring logic
   const [score, setScore] = useState(0)
@@ -298,32 +300,89 @@ export default function ConversionGame() {
                 {shuffledProblems[currentProblem]?.question.split("/")[1]}
               </span>
             )}
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Background image - revert to original */}
+      <div
+        className="absolute inset-0 bg-contain bg-no-repeat bg-center z-0"
+        style={{ backgroundImage: `url('${backgroundImages['Sorting Table']}')` }}
+      />
+      {/* Overlay for readability - revert to original */}
+      <div className="absolute inset-0 bg-amber-900 bg-opacity-20 z-10" />
+      {/* Foreground content */}
+      <div className="relative z-20 min-h-screen w-full flex flex-col">
+        {/* (Test button removed) */}
+        {!gameStarted ? (
+          // Start Screen - styled like dialogue box
+          <div className="mt-auto mb-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+            <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+              Welcome to the Sorting Table! Test your knowledge by converting fractions.
+              {"\n\n"}• Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)
+              {"\n"}• Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)
+              {"\n"}• You have 60 seconds to score as many points as possible
+              {"\n"}• Get 5 in a row for bonus time!
+            </div>
+            <div className="flex justify-between">
+              <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+                Start the Challenge!
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-between items-center gap-4">
-            <Input
-              type="text"
-              value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Enter your answer (e.g., 2 1/4 or 17/5)"
-              className="text-lg max-w-md bg-gray-800 border-amber-600 text-white"
-              disabled={gameEnded}
-            />
-            <Button
-              onClick={checkAnswer}
-              disabled={!userAnswer.trim() || gameEnded}
-              className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-            >
-              Submit
-            </Button>
+        ) : (
+          // Game Screen - styled like dialogue box
+          <div className="mt-auto mb-8 left-1/2 w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl z-20 mx-auto">
+            <div className="text-amber-300 font-pixel text-lg mb-2">
+              Score: {score} | Time: {timeLeft}s | Streak: {streak}
+            </div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+              {shuffledProblems[currentProblem]?.type === "improper-to-mixed"
+                ? "Convert to Mixed Number:"
+                : "Convert to Improper Fraction:"}
+              {"\n\n"}
+              <span className="text-3xl text-amber-300">{shuffledProblems[currentProblem]?.question}</span>
+              {"\n\n"}
+              {shuffledProblems[currentProblem]?.type === "improper-to-mixed" && (
+                <span className="text-sm text-amber-400">
+                  Hint: Divide {shuffledProblems[currentProblem]?.question.split("/")[0]} by {shuffledProblems[currentProblem]?.question.split("/")[1]}
+                </span>
+              )}
+            </div>
+            <div className="flex justify-between items-center gap-4">
+              <Input
+                type="text"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Enter your answer (e.g., 2 1/4 or 17/5)"
+                className="text-lg max-w-md bg-gray-800 border-amber-600 text-white"
+                disabled={gameEnded}
+              />
+              <Button
+                onClick={checkAnswer}
+                disabled={!userAnswer.trim() || gameEnded}
+                className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                Submit
+              </Button>
+            </div>
           </div>
           {feedback && (
             <div className="text-center mt-4">
               <span className={`font-pixel text-lg ${feedback.startsWith('Correct') ? 'text-green-600' : feedback.startsWith('Incorrect') ? 'text-red-600' : feedback.startsWith('Game over') ? 'text-red-600' : 'text-amber-600'}`}>{feedback}</span>
             </div>
           )}
+
+        )}
+
+        {/* Emergency exit button - always visible */}
+        <div className="absolute top-4 right-4 z-30">
+          <Button
+            onClick={() => router.push("/student/game")}
+            className="font-pixel bg-red-600 hover:bg-red-700 text-white"
+          >
+            Exit
+          </Button>
         </div>
-      )}
 
       {/* Emergency exit button - always visible */}
       <div className="absolute top-4 right-4">
@@ -364,6 +423,19 @@ export default function ConversionGame() {
         isStory={false}
         passed={passed}
       />
+        {/* Completion Popup */}
+        <LevelCompletionPopup
+          isOpen={showCompletionPopup}
+          onClose={() => {
+            setShowCompletionPopup(false)
+            router.push("/student/game")
+          }}
+          levelId="3"
+          levelName="Conversion Game"
+          score={score}
+          isStory={false}
+        />
+      </div>
     </div>
   )
 }

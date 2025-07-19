@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Trophy, Medal } from "lucide-react"
+import Image from "next/image"
 
 export default async function StudentLeaderboardPage() {
   const supabase = createClient()
@@ -103,24 +104,16 @@ profiles:student_id (
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Back to Dashboard Button */}
-      <div className="absolute top-4 left-4 z-20">
-        <Link href="/student/dashboard">
-          <div
-            className="relative w-64 h-20 cursor-pointer hover:scale-105 transition-transform"
-            style={{
-              backgroundImage: "url('/dashboard/logout.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }}
-          >
-            <div className="absolute inset-0 flex items-center justify-center" style={{ marginTop: "-4px" }}>
-              <span className="text-amber-200 font-bold text-2xl" style={{ fontFamily: "var(--font-blaka)" }}>
-                Dashboard
-              </span>
-            </div>
-          </div>
+      {/* Back Arrow */}
+      <div className="absolute top-8 left-8 z-20">
+        <Link href="/student/dashboard" className="block">
+          <Image
+            src="/backarrow.png"
+            alt="Back to Dashboard"
+            width={48}
+            height={48}
+            className="hover:opacity-80 transition-opacity"
+          />
         </Link>
       </div>
 

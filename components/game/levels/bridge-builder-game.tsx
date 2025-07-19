@@ -9,6 +9,9 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
+import { getLevelDialogue } from "@/lib/game-content"
+import FixedLessMooreBridgeBackground from "./fixed-lessmoore-bridge-bg"
+import LessmoreBridgeBackground from "./lessmore-bridge-bg"
 
 type SubtractionProblem = {
   question: string
@@ -54,6 +57,8 @@ export default function BridgeBuilderGame() {
   const [bridgeStones, setBridgeStones] = useState(0)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showPostGameDialogue, setShowPostGameDialogue] = useState(false)
+  const [postGameIndex, setPostGameIndex] = useState(0)
   const supabase = createClient()
   const [mistakes, setMistakes] = useState(0)
   const [gameOver, setGameOver] = useState(false)
@@ -138,7 +143,8 @@ export default function BridgeBuilderGame() {
   const endGame = async () => {
     setGameEnded(true)
     setIsLoading(true)
-
+    setShowPostGameDialogue(true)
+    setPostGameIndex(0)
     try {
       const {
         data: { user },
@@ -187,24 +193,40 @@ export default function BridgeBuilderGame() {
         }
       }
 
-      setShowCompletionPopup(true)
+      setShowCompletionPopup(false) // Hide popup until post-game dialogue is done
     } catch (error: any) {
       console.error("Error saving game progress:", error.message || error)
       // Still show completion popup even if save fails
-      setShowCompletionPopup(true)
+      setShowCompletionPopup(false)
     } finally {
       setIsLoading(false)
     }
   }
 
+  // Get post-game dialogue from game-content
+  const postGameDialogue = (getLevelDialogue("7") as Array<{ speaker: string; text: string; background: string }>).filter(
+    (d: { speaker: string; text: string; background: string }) => d.background === "Fixed LessMoore Bridge"
+  );
+
+  // Helper to choose background based on current dialogue
+  function getCurrentBackground() {
+    if (showPostGameDialogue && postGameDialogue.length > 0) {
+      return postGameDialogue[postGameIndex].background === "Fixed LessMoore Bridge"
+        ? <FixedLessMooreBridgeBackground />
+        : <LessmoreBridgeBackground />
+    }
+    return <LessmoreBridgeBackground />
+  }
+
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - same as story levels */}
-      <div className="absolute inset-0 flex items-center justify-center bg-stone-700 bg-opacity-20">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-stone-200">
-          Lessmore Bridge
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Dynamic background based on current dialogue */}
+      {getCurrentBackground()}
+      {/* Overlay tint for ambience (only for main game, not post-game) */}
+      {!showPostGameDialogue && (
+        <div className="absolute inset-0 flex items-center justify-center bg-stone-700 bg-opacity-20">
         </div>
-      </div>
+      )}
 
       {/* Add health bar UI */}
       {gameStarted && !gameEnded && !gameOver && (
@@ -242,6 +264,9 @@ export default function BridgeBuilderGame() {
         </div>
       ) : (
         // Game Screen - styled like dialogue box
+
+      {/* Main game dialogue box (hidden during post-game) */}
+      {!showPostGameDialogue && (
         <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6">
           <div className="text-stone-300 font-pixel text-lg mb-2">
             Bridge Stones: {bridgeStones}/5 | Score: {score}/100 | Problem {currentProblem + 1}/5
@@ -283,6 +308,34 @@ export default function BridgeBuilderGame() {
           Exit Bridge
         </Button>
       </div>
+
+      {/* Post-game dialogue box (with styled box) */}
+      {showPostGameDialogue && postGameDialogue.length > 0 && (
+        <div className="absolute inset-0 w-full h-full">
+          <FixedLessMooreBridgeBackground />
+          <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6 z-20">
+            <div className="text-stone-300 font-pixel text-lg mb-2">{postGameDialogue[postGameIndex].speaker}</div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+              {postGameDialogue[postGameIndex].text}
+            </div>
+            <div className="flex justify-end mt-6">
+              <Button
+                onClick={() => {
+                  if (postGameIndex < postGameDialogue.length - 1) {
+                    setPostGameIndex(postGameIndex + 1)
+                  } else {
+                    setShowPostGameDialogue(false)
+                    setShowCompletionPopup(true)
+                  }
+                }}
+                className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                {postGameIndex < postGameDialogue.length - 1 ? "Next" : "Continue"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Completion Popup */}
       <LevelCompletionPopup
