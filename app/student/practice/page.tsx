@@ -99,12 +99,12 @@ export default async function StudentPracticePage({
       <div className="relative z-10 w-full max-w-4xl mx-auto">
         {/* Title - Added above the book */}
         <h1
-          className="text-8xl font-bold text-center mb-0 mt-20"
+          className="text-8xl text-center mb-0 mt-20"
           style={{
             fontFamily: "var(--font-blaka)",
             color: "#FFFFFF", // White color
-            WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
-            textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+            WebkitTextStroke: "2px #000000", // Black outline (increased thickness)
+            textStroke: "2px #000000", // Black outline (for non-webkit browsers)
             textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
           }}
         >
@@ -113,7 +113,7 @@ export default async function StudentPracticePage({
 
         {/* Book Container - Same size as login */}
         <div className="relative -mt-5">
-          <Image src="/book.png" alt="Open Book" width={800} height={600} className="w-full h-auto max-w-4xl mx-auto" />
+          <Image src="/book.png" alt="Open Book" width={600} height={400} className="w-full h-auto max-w-4xl mx-auto" />
 
           {/* Book Content - Positioned inside the book */}
           <div className="absolute top-[12%] left-[8%] right-[8%] bottom-[15%] flex flex-col">
