@@ -286,12 +286,10 @@ export default function ConversionGame(props: any) {
           </div>
         )}
       </div>
-          {feedback && (
-            <div className="text-center mt-4">
-              <span className={`font-pixel text-lg ${feedback.startsWith('Correct') ? 'text-green-600' : feedback.startsWith('Incorrect') ? 'text-red-600' : feedback.startsWith('Game over') ? 'text-red-600' : 'text-amber-600'}`}>{feedback}</span>
-            </div>
-          )}
-        </>
+      {feedback && (
+        <div className="text-center mt-4">
+          <span className={`font-pixel text-lg ${feedback.startsWith('Correct') ? 'text-green-600' : feedback.startsWith('Incorrect') ? 'text-red-600' : feedback.startsWith('Game over') ? 'text-red-600' : 'text-amber-600'}`}>{feedback}</span>
+        </div>
       )}
 
       {/* Emergency exit button - always visible */}
@@ -324,10 +322,6 @@ export default function ConversionGame(props: any) {
           setShowCompletionPopup(false)
           router.push("/student/game")
         }}
-        levelId="3"
-        levelName="Conversion Game"
-        score={score}
-        isStory={false}
         onRetry={() => {
           setGameOver(false); setGameEnded(false); setPassed(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false);
         }}

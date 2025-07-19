@@ -96,7 +96,7 @@ export default function BridgeBuilderGame() {
           if (score + 20 >= 60) {
             setPassed(true)
             setGameEnded(true)
-            setShowCompletionPopup(true)
+            endGame()
           } else {
             setGameOver(true)
             setShowCompletionPopup(true)
@@ -117,10 +117,11 @@ export default function BridgeBuilderGame() {
           if (score >= 60) {
             setPassed(true)
             setGameEnded(true)
+            endGame()
           } else {
             setGameOver(true)
+            setShowCompletionPopup(true)
           }
-          setShowCompletionPopup(true)
           setFeedback(null)
         } else {
           toast({
@@ -208,6 +209,19 @@ export default function BridgeBuilderGame() {
     (d: { speaker: string; text: string; background: string }) => d.background === "Fixed LessMoore Bridge"
   );
 
+  // Handle post-game dialogue progression
+  const handlePostGameDialogue = () => {
+    console.log("Post-game dialogue progression:", postGameIndex, postGameDialogue.length)
+    if (postGameIndex < postGameDialogue.length - 1) {
+      setPostGameIndex(postGameIndex + 1)
+    } else {
+      // Dialogue is complete, show completion popup
+      console.log("Dialogue complete, showing completion popup")
+      setShowPostGameDialogue(false)
+      setShowCompletionPopup(true)
+    }
+  }
+
   // Helper to choose background based on current dialogue
   function getCurrentBackground() {
     if (showPostGameDialogue && postGameDialogue.length > 0) {
@@ -241,7 +255,7 @@ export default function BridgeBuilderGame() {
         </div>
       )}
 
-      {!gameStarted && !gameEnded ? (
+      {!gameStarted && !gameEnded && !showPostGameDialogue ? (
         // Start Screen - styled like dialogue box
         <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6">
           <div className="text-stone-300 font-pixel text-lg mb-2">Elder Pebble</div>
@@ -316,15 +330,15 @@ export default function BridgeBuilderGame() {
         </>
       )}
 
-          {/* Emergency exit button */}
-          <div className="absolute top-4 right-4">
-            <Button
-              onClick={() => router.push("/student/game")}
-              className="font-pixel bg-red-600 hover:bg-red-700 text-white"
-            >
-              Exit Bridge
-            </Button>
-          </div>
+      {/* Emergency exit button */}
+      <div className="absolute top-4 right-4">
+        <Button
+          onClick={() => router.push("/student/game")}
+          className="font-pixel bg-red-600 hover:bg-red-700 text-white"
+        >
+          Exit Bridge
+        </Button>
+      </div>
 
       {/* Post-game dialogue box (with styled box) */}
       {showPostGameDialogue && postGameDialogue.length > 0 && (
@@ -352,39 +366,48 @@ export default function BridgeBuilderGame() {
             <div className="text-stone-300 font-pixel text-lg mb-2">{postGameDialogue[postGameIndex].speaker}</div>
             <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
               {postGameDialogue[postGameIndex].text}
-
             </div>
-          )}
-
-          {/* Completion Popup */}
-          <LevelCompletionPopup
-            isOpen={showCompletionPopup}
-            onClose={() => {
-              setShowCompletionPopup(false)
-              router.push("/student/map?location=lessmoore-bridge")
-            }}
-            onRetry={() => {
-              setShowCompletionPopup(false)
-              setGameStarted(false)
-              setGameEnded(false)
-              setGameOver(false)
-              setPassed(false)
-              setCurrentProblem(0)
-              setScore(0)
-              setBridgeStones(0)
-              setMistakes(0)
-              setUserAnswer("")
-              setFeedback(null)
-            }}
-            levelId="7"
-            levelName="Bridge Builder Game"
-            score={score}
-            isGameOver={gameOver}
-            isStory={false}
-            passed={passed}
-          />
-        </>
+            <div className="flex justify-end">
+              <Button 
+                onClick={handlePostGameDialogue}
+                className="font-pixel bg-stone-600 hover:bg-stone-700 text-white"
+              >
+                {postGameIndex < postGameDialogue.length - 1 ? "Continue" : "Finish"}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Completion Popup - moved outside post-game dialogue container */}
+      <LevelCompletionPopup
+        isOpen={showCompletionPopup}
+        onClose={() => {
+          setShowCompletionPopup(false)
+          router.push("/student/game")
+        }}
+        onRetry={() => {
+          setShowCompletionPopup(false)
+          setShowPostGameDialogue(false)
+          setPostGameIndex(0)
+          setGameStarted(false)
+          setGameEnded(false)
+          setGameOver(false)
+          setPassed(false)
+          setCurrentProblem(0)
+          setScore(0)
+          setBridgeStones(0)
+          setMistakes(0)
+          setUserAnswer("")
+          setFeedback(null)
+        }}
+        levelId="7"
+        levelName="Bridge Builder Game"
+        score={score}
+        isGameOver={gameOver}
+        isStory={false}
+        passed={passed}
+      />
     </div>
   )
 }
