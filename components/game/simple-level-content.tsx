@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "./level-completion-popup"
+import { backgroundImages } from "@/lib/game-content"
 
 type DialogueLine = {
   speaker: string
@@ -382,12 +383,19 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - text only */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-          {currentDialogue.background || "Fraction Practice"}
+      {/* Background image if available */}
+      {currentDialogue.background && backgroundImages[currentDialogue.background] ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{ backgroundImage: `url('${backgroundImages[currentDialogue.background]}')` }}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20 z-0">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+            {currentDialogue.background || "Fraction Practice"}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Dialogue box */}
       <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">

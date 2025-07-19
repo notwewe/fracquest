@@ -119,67 +119,67 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "Whiskers enters a small wooden shop with shelves filled with fraction-themed items—half-cheese wheels, quarter-apples, and fraction potions.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "A quaint little wooden shop with shelves packed with fraction-themed items—cheese wheels sliced into parts, labeled potions, pies in slices, and scrolls with numbers and symbols.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "Whiskers pushes open the door, and a little bell jingles. Squeaks, a tiny mouse with big glasses and a merchant's apron, hops onto the counter.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Well, hello there, traveler! Welcome to Squeaks' Fraction Emporium, home to the finest fraction gadgets in all of Numeria!",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Whiskers",
         text: "I heard this is where math meets magic. I'm trying to learn more about fractions—heard they're the key to saving the kingdom!",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Then you've come to the right place! Fractions are all about parts of a whole. Let me show you!",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "Squeaks pulls out a round cheese wheel and slices it into 4 equal parts.",
-        background: "Cheese Wheel Demo",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "If I eat one slice, I've eaten 1 out of 4... or 1/4. The top number tells us how many slices we have, and the bottom number tells us how many equal slices the whole cheese had!",
-        background: "Cheese Wheel Demo",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "A pie sliced into 8 pieces: 3 slices is 3/8! A potion bottle half full: That's 1/2!",
-        background: "Fraction Examples",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Whiskers",
         text: "So fractions are just parts of something bigger?",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Exactly! Once you understand how they work, you can compare them, add them, and even use them in magic! Now that you get the basics, it's time for something bigger...",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Now, let's practice with some examples to make sure you've got it!",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "If I have a pizza with 8 slices and I eat 3 slices, what fraction of the pizza have I eaten?",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
         isChoice: true,
         choices: ["3/8", "3/5", "5/8", "8/3"],
         correctChoice: 0, // 3/8 is the correct answer (index 0)
@@ -190,12 +190,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Correct! 3/8 is the right answer. The denominator (8) tells us how many total slices, and the numerator (3) tells us how many we've eaten.",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Let's try another one. If a potion bottle is 1/4 full, what fraction is empty?",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
         isChoice: true,
         choices: ["1/4", "3/4", "4/1", "4/3"],
         correctChoice: 1, // 3/4 is the correct answer (index 1)
@@ -206,12 +206,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Excellent! 3/4 is correct. If 1/4 is full, then 3/4 must be empty, since the whole bottle is 4/4 or 1 whole.",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "You're getting the hang of this! Let's move on to more advanced fraction concepts.",
-        background: "Fraction Practice",
+        background: "Squeaks Emporium",
       },
     ],
 
@@ -220,107 +220,107 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "Deeper into Squeaks' Emporium, a dusty corner reveals a stack of magical crates, each labeled with mysterious numbers and glowing softly.",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
       },
       {
         speaker: "Narrator",
         text: "A sign above reads: 'Fractions That Don't Fit Neatly!'",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
       },
       {
         speaker: "Narrator",
         text: "Whiskers and Squeaks walk toward a glowing cheese crate that's bursting at the seams with more slices than it seems it can hold.",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
       },
       {
         speaker: "Whiskers",
         text: "Whoa! That crate is supposed to hold one cheese wheel, right? But... there are more slices than one wheel!",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Good eye, traveler! What you're looking at is an improper fraction—it's when the number on top, the numerator, is bigger than the number on the bottom, the denominator.",
-        background: "The Overflowing Cheese Crate",
+        background: "CheeseCrate",
       },
       {
         speaker: "Narrator",
         text: "Squeaks pulls out 7 slices from a crate labeled '4-slice cheeses.'",
-        background: "Cheese Slices",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "See? If each cheese wheel has 4 slices, and I have 7 slices, I've got 7/4. That's more than a whole cheese!",
-        background: "Improper Fractions",
+        background: "CheeseCrate",
       },
       {
         speaker: "Whiskers",
         text: "So... what do I do with a fraction like that?",
-        background: "Improper Fractions",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Well, we turn it into a mixed number! That means we show how many whole cheese wheels you have, and what's left over.",
-        background: "Mixed Numbers",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Let's turn 7/4 into a mixed number. First, divide the top by the bottom: 7 ÷ 4 = 1 remainder 3. That's 1 whole and 3 left over.",
-        background: "Mixed Numbers Step 1",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Now we write the mixed number: The whole is 1, and the leftover is 3 slices out of 4. So, 7/4 = 1 3/4!",
-        background: "Mixed Numbers Step 2",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "See? You had one full cheese wheel (4/4) and 3 slices left. So it's 1 3/4!",
-        background: "Mixed Numbers",
+        background: "CheeseCrate",
       },
       {
         speaker: "Whiskers",
         text: "What if I have a mixed number like 2 2/5? How do I turn it back into an improper fraction?",
-        background: "Mixed Numbers",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Great question! Let's flip it around!",
-        background: "Conversion",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "First, multiply the whole number by the denominator: 2 × 5 = 10",
-        background: "Conversion Step 1",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Next, add the numerator: 10 + 2 = 12",
-        background: "Conversion Step 2",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Finally, keep the same denominator. So, 2 2/5 = 12/5",
-        background: "Conversion Step 3",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Simple, right? You're just counting all the slices from full cheese wheels and the extra ones!",
-        background: "Conversion",
+        background: "CheeseCrate",
       },
       {
         speaker: "Whiskers",
         text: "That's not so hard when you break it down like that. Let's play that conversion game now—I'm ready!",
-        background: "Conversion",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Let's see how fast your brain and paws can work together! To the Sorting Table!",
-        background: "Conversion",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Convert 9/4 to a mixed number.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
         isChoice: true,
         choices: ["2 1/4", "2 1/2", "2 1/3", "2 1/5"],
         correctChoice: 0, // 2 1/4 is the correct answer (index 0)
@@ -331,12 +331,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Excellent! 9/4 = 2 1/4 because 9 ÷ 4 = 2 remainder 1.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
       },
       {
         speaker: "Squeaks",
         text: "Now convert 3 2/5 to an improper fraction.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
         isChoice: true,
         choices: ["15/5", "17/5", "12/5", "7/5"],
         correctChoice: 1, // 17/5 is the correct answer (index 1)
@@ -347,7 +347,7 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Perfect! 3 2/5 = 17/5 because (3 × 5) + 2 = 17.",
-        background: "Conversion Practice",
+        background: "CheeseCrate",
       },
     ],
 
@@ -356,12 +356,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Welcome to the Sorting Table! Here, you'll test your knowledge by converting fractions. Don't worry—I'll guide you through the first round!",
-        background: "Squeaks' Sorting Table",
+        background: "Sorting Table",
       },
       {
         speaker: "Squeaks",
         text: "You'll need to convert between improper fractions and mixed numbers. Remember: divide to go from improper to mixed, multiply and add to go from mixed to improper!",
-        background: "Squeaks' Sorting Table",
+        background: "Sorting Table",
       },
     ],
 
@@ -800,3 +800,11 @@ export function getLevelDialogue(levelId: string) {
 
   return levelDialogues[levelId] || defaultDialogue
 }
+
+// Add this mapping for backgrounds to image paths
+export const backgroundImages: Record<string, string> = {
+  'Squeaks Emporium': '/game backgrounds/Squeaks Emporium.png',
+  'CheeseCrate': '/game backgrounds/CheeseCrate.png',
+  'Sorting Table': '/game backgrounds/Sorting Table.png',
+  // Add other mappings as needed
+};

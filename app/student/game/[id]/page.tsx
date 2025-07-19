@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { GameContent } from "@/components/game/game-content"
 
-export default async function GamePage({ params }: { params: { id: string } }) {
+export default async function GamePage(props: any) {
+  const { params } = await props;
   const supabase = createClient()
 
   // Get the current user

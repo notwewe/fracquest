@@ -7,7 +7,8 @@ import { ArrowLeft } from "lucide-react"
 import { FractionTutorial } from "@/components/game/fraction-tutorial"
 import { StoryScene } from "@/components/game/story-scene"
 
-export default async function IntroPage({ params }: { params: { id: string } }) {
+export default async function IntroPage(props: any) {
+  const { params } = await props;
   const supabase = createClient()
   const waypointId = Number.parseInt(params.id)
 

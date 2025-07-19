@@ -27,7 +27,7 @@ export function FractionIntroduction() {
           </p>
           <div className="flex justify-center">
             <Image
-              src="/pixel-locations/fraction-emporium-interior.png"
+              src="/game backgrounds/Squeaks Emporium.png"
               alt="Fraction Emporium"
               width={300}
               height={200}
@@ -52,7 +52,8 @@ export function FractionIntroduction() {
                 alt="Cheese wheel cut into quarters"
                 width={192}
                 height={192}
-                className="object-contain"
+                className="object-contain bg-cover bg-center"
+                style={{ backgroundImage: "url('/game backgrounds/Squeaks Emporium.png')" }}
               />
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold">
                 1/4
@@ -142,27 +143,33 @@ export function FractionIntroduction() {
     }
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] p-4">
-      <Card className="w-full max-w-3xl p-6 bg-gradient-to-b from-amber-50 to-amber-100 shadow-lg">
-        <h2 className="text-2xl font-bold text-amber-800 mb-4">{steps[currentStep].title}</h2>
-        <div className="min-h-[350px]">{steps[currentStep].content}</div>
-        <div className="flex justify-between mt-6">
-          <Button onClick={handlePrevious} disabled={currentStep === 0} className="bg-amber-600 hover:bg-amber-700">
-            Previous
-          </Button>
-          <div className="text-sm text-amber-700">
-            Step {currentStep + 1} of {steps.length}
-          </div>
-          <Button
-            onClick={handleNext}
-            disabled={currentStep === steps.length - 1}
-            className="bg-amber-600 hover:bg-amber-700"
-          >
-            Next
-          </Button>
+ return (
+  <div
+    className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center p-4"
+    style={{
+    backgroundImage: "url('/game backgrounds/Squeaks Emporium.png')",
+  }}
+
+  >
+    <Card className="w-full max-w-2xl mx-auto p-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl my-8">
+      <h2 className="text-2xl font-bold text-amber-800 mb-4">{steps[currentStep].title}</h2>
+      <div className="min-h-[350px]">{steps[currentStep].content}</div>
+      <div className="flex justify-between mt-6">
+        <Button onClick={handlePrevious} disabled={currentStep === 0} className="bg-amber-600 hover:bg-amber-700">
+          Previous
+        </Button>
+        <div className="text-sm text-amber-700">
+          Step {currentStep + 1} of {steps.length}
         </div>
-      </Card>
-    </div>
-  )
+        <Button
+          onClick={handleNext}
+          disabled={currentStep === steps.length - 1}
+          className="bg-amber-600 hover:bg-amber-700"
+        >
+          Next
+        </Button>
+      </div>
+    </Card>
+  </div>
+)
 }
