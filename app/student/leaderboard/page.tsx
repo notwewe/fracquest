@@ -97,7 +97,7 @@ profiles:student_id (
     <div
       className="min-h-screen p-4 overflow-y-auto flex flex-col items-center"
       style={{
-        backgroundImage: "url('/dashboard/castle-background.jpg')",
+        backgroundImage: "url('/dashboard/bg1_castle.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -119,29 +119,29 @@ profiles:student_id (
 
       {/* Leaderboard Title */}
       <h1
-        className="text-8xl font-bold text-center mt-8"
+        className="text-8xl text-center mt-8"
         style={{
           fontFamily: "var(--font-blaka)",
           color: "#FFFFFF", // White color
-          WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
-          textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+          WebkitTextStroke: "2px #000000", // Black outline (increased thickness)
+          textStroke: "2px #000000", // Black outline (for non-webkit browsers)
           textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
         }}
       >
-        Leaderboard
+        Leaderboards
       </h1>
 
-      {/* Combined Stats and Leaderboard Container with Scroll Background */}
+      {/* Combined Stats and Leaderboard Container with Blank Background */}
       <div
         className="w-full mt-0 flex flex-col lg:flex-row gap-2 justify-center"
         style={{
-          backgroundImage: "url('/dashboard/scroll.png')",
+          backgroundImage: "url('/dashboard/blank.png')",
           backgroundSize: "100% 100%", // Make background cover the new smaller dimensions
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           minHeight: "600px", // Reduced height
-          minWidth: "1200px", // Reduced width
-          width: "1400px", // Reduced width
+          minWidth: "600px", // Even further reduced width
+          width: "800px", // Even further reduced width
           height: "600px", // Reduced height
           paddingTop: "80px", // Reduced top padding
           paddingLeft: "48px", // Reduced left padding
@@ -150,9 +150,9 @@ profiles:student_id (
         }}
       >
         {/* Left Column: Stats */}
-        <div className="w-full p-4 flex flex-col gap-4" style={{ width: "15%" }}>
+        <div className="w-full p-4 flex flex-col gap-4" style={{ width: "25%" }}>
           {" "}
-          {/* Reduced padding and gap */}
+          {/* Increased width from 15% to 25% */}
           {/* Class info */}
           <div className="bg-amber-100/70 p-3 rounded-md border-2 border-amber-800">
             {" "}
@@ -220,9 +220,9 @@ profiles:student_id (
         </div>
 
         {/* Right Column: Leaderboard Table */}
-        <div className="w-full p-4" style={{ width: "45%" }}>
+        <div className="w-full p-4" style={{ width: "65%" }}>
           {" "}
-          {/* Reduced padding */}
+          {/* Increased width from 45% to 65% */}
           <div className="overflow-auto max-h-[450px] rounded-md border-2 border-amber-800">
             {" "}
             {/* Changed border color */}
@@ -252,12 +252,6 @@ profiles:student_id (
                     style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
                   >
                     Levels
-                  </th>
-                  <th
-                    className="font-normal text-3xl text-center w-24 px-4 py-3"
-                    style={{ fontFamily: "var(--font-blaka)", color: "#4A2C0D" }}
-                  >
-                    Mistakes
                   </th>
                 </tr>
               </thead>
@@ -296,12 +290,6 @@ profiles:student_id (
                       style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
                     >
                       {student.completedLevels}
-                    </td>
-                    <td
-                      className="text-center font-normal text-xl px-4 py-3"
-                      style={{ fontFamily: "var(--font-blaka)", color: "#784D1B" }}
-                    >
-                      {student.totalMistakes}
                     </td>
                   </tr>
                 ))}
