@@ -250,31 +250,26 @@ export default function StudentProfilePage() {
       </div>
 
       <div className="flex flex-col items-center">
-        {/* Profile Title */}
-        <div
-          className="relative mb-6"
+        {/* Profile Title - Using the same style as Practice page */}
+        <h1
+          className="text-8xl font-bold text-center mb-6 mt-0"
           style={{
-            backgroundImage: "url('/dashboard/welcome.png')",
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            width: "500px",
-            height: "100px",
+            fontFamily: "var(--font-blaka)",
+            color: "#FFFFFF", // White color
+            WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
+            textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+            textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
           }}
         >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="text-4xl font-bold text-amber-900 font-blaka" style={{ fontFamily: "var(--font-blaka)" }}>
-              Profile
-            </h1>
-          </div>
-        </div>
+          Profile
+        </h1>
 
         {!isEnrolled && (
           <Alert className="mb-4 bg-amber-100 border-amber-300 max-w-2xl">
             <AlertDescription className="text-amber-800">
               You need to join a class to play the game and see leaderboards. Join a class below!
             </AlertDescription>
-          </Alert>
+          </Alert>  
         )}
 
         {/* Row layout with responsive sizing */}
