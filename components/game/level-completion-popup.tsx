@@ -13,6 +13,9 @@ interface LevelCompletionPopupProps {
   score: number
   maxScore?: number
   isStory?: boolean
+  isGameOver?: boolean
+  onRetry?: () => void
+  passed?: boolean
 }
 
 export function LevelCompletionPopup({
@@ -21,8 +24,11 @@ export function LevelCompletionPopup({
   levelId,
   levelName,
   score,
-  maxScore = 20,
+  maxScore = 100,
   isStory = false,
+  isGameOver = false,
+  onRetry,
+  passed = false,
 }: LevelCompletionPopupProps) {
   const [stars, setStars] = useState(0)
 
@@ -47,7 +53,7 @@ export function LevelCompletionPopup({
       <DialogContent className="bg-amber-50 border-2 border-amber-800 max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-pixel text-center text-amber-900">
-            {isStory ? "Story Complete!" : "Level Complete!"}
+            {isGameOver ? "Game Over" : isStory ? "Story Complete!" : passed ? "Level Passed!" : "Level Complete!"}
           </DialogTitle>
         </DialogHeader>
 
@@ -64,7 +70,7 @@ export function LevelCompletionPopup({
             )}
           </div>
 
-          {!isStory && (
+          {!isStory && !isGameOver && (
             <div className="flex justify-center space-x-2">
               {[...Array(3)].map((_, i) => (
                 <Star
@@ -79,21 +85,36 @@ export function LevelCompletionPopup({
 
           <div className="bg-amber-100 p-4 rounded-lg border-2 border-amber-300 text-center">
             <p className="font-pixel text-amber-800">
-              {isStory
-                ? "You've completed this part of the story! Continue your journey to save Numeria!"
-                : stars === 3
-                  ? "Amazing job! You've mastered this level!"
-                  : stars === 2
-                    ? "Great work! Keep practicing to get all three stars!"
-                    : "Good effort! Try again to improve your score!"}
+              {isGameOver
+                ? "You made 3 mistakes on the same question. Would you like to retry?"
+                : isStory
+                  ? "You've completed this part of the story! Continue your journey to save Numeria!"
+                  : passed
+                    ? "Congratulations! You passed this level. You can continue to the next level or retry to improve your score!"
+                    : "Good effort! Try again to improve your score! (Score at least 60 to pass)"}
             </p>
           </div>
         </div>
 
         <DialogFooter>
-          <Button onClick={onClose} className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-            Continue
-          </Button>
+          {isGameOver || (!passed && !isGameOver) ? (
+            <Button onClick={onRetry} className="w-full font-pixel bg-red-600 hover:bg-red-700 text-white">
+              Retry
+            </Button>
+          ) : passed ? (
+            <div className="flex gap-2 w-full">
+              <Button onClick={onClose} className="flex-1 font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+                Continue
+              </Button>
+              <Button onClick={onRetry} className="flex-1 font-pixel bg-red-600 hover:bg-red-700 text-white">
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <Button onClick={onClose} className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+              Continue
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
