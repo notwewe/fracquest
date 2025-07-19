@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
 import { backgroundImages } from '@/lib/game-content'
+import { updateStudentProgress } from "@/lib/update-progress"
 
 type ConversionProblem = {
   type: "improper-to-mixed" | "mixed-to-improper"
@@ -54,6 +55,7 @@ export default function ConversionGame(props: any) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
   const [timeLeft, setTimeLeft] = useState(60)
+  const [showCompletionPopup, setShowCompletionPopup] = useState(false)
 
   // Shuffle problems for variety
   const [shuffledProblems, setShuffledProblems] = useState<ConversionProblem[]>([])
@@ -70,13 +72,13 @@ export default function ConversionGame(props: any) {
     } else if (timeLeft === 0 && gameStarted && !gameEnded && !gameOver) {
       if (score >= 60) {
         setPassed(true)
-        setGameEnded(true)
+        endGame(); // Ensure DB update and popup
       } else {
         setGameOver(true)
       }
     } else if (score >= 100 && gameStarted && !gameEnded && !gameOver) {
       setPassed(true)
-      setGameEnded(true)
+      endGame(); // Ensure DB update and popup
     }
   }, [gameStarted, gameEnded, gameOver, timeLeft, score])
 
@@ -131,7 +133,7 @@ export default function ConversionGame(props: any) {
         // End of questions
         if (newScore >= 60) {
           setPassed(true)
-          setGameEnded(true)
+          endGame();
         } else {
           setGameOver(true)
         }
@@ -165,60 +167,21 @@ export default function ConversionGame(props: any) {
   const endGame = async () => {
     setGameEnded(true)
     setIsLoading(true)
-
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser()
 
       if (user) {
-        // Check if record exists first
-        const { data: existingProgress } = await supabase
-          .from("student_progress")
-          .select("*")
-          .eq("student_id", user.id)
-          .eq("waypoint_id", 3)
-          .maybeSingle()
-
-        if (existingProgress) {
-          // Update existing record only if new score is higher
-          const newScore = Math.max(existingProgress.score || 0, score)
-          const { error: updateError } = await supabase
-            .from("student_progress")
-            .update({
-              completed: true,
-              score: newScore,
-              can_revisit: true,
-              last_updated: new Date().toISOString(),
-            })
-            .eq("student_id", user.id)
-            .eq("waypoint_id", 3)
-
-          if (updateError) {
-            console.error("Error updating progress:", updateError)
-          }
-        } else {
-          // Insert new record
-          const { error: insertError } = await supabase.from("student_progress").insert({
-            student_id: user.id,
-            waypoint_id: 3,
-            completed: true,
-            score: score,
-            can_revisit: true,
-            last_updated: new Date().toISOString(),
-          })
-
-          if (insertError) {
-            console.error("Error inserting progress:", insertError)
-          }
-        }
+        await updateStudentProgress(user.id, 3, {
+          completed: true,
+          score: score,
+        })
       }
-
-      // setShowCompletionPopup(true) // This line is removed as per new logic
+      setShowCompletionPopup(true)
     } catch (error: any) {
       console.error("Error saving game progress:", error.message || error)
-      // Still show completion popup even if save fails
-      // setShowCompletionPopup(true) // This line is removed as per new logic
+      setShowCompletionPopup(true)
     } finally {
       setIsLoading(false)
     }
@@ -353,9 +316,10 @@ export default function ConversionGame(props: any) {
 
       {/* Completion Popup */}
       <LevelCompletionPopup
-        isOpen={gameOver || gameEnded}
+        isOpen={showCompletionPopup}
         onClose={() => {
-          router.push("/student/map")
+          setShowCompletionPopup(false)
+          router.push("/student/game")
         }}
         onRetry={() => {
           setGameOver(false); setGameEnded(false); setPassed(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false);
