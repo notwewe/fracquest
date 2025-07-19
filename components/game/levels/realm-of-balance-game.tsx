@@ -231,7 +231,7 @@ export default function RealmOfBalanceGame() {
       {/* Background */}
       <div className="absolute inset-0 flex items-center justify-center bg-blue-900 bg-opacity-40">
         <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-blue-200">
-          Realm of Balance
+          
         </div>
       </div>
 
@@ -257,17 +257,32 @@ export default function RealmOfBalanceGame() {
             )}
 
             <div className="flex justify-center items-center space-x-8 mb-6">
-              <div className="bg-blue-600 p-8 rounded-lg text-center w-48">
-                <div className="text-white font-pixel text-3xl">{questions[currentQuestion].leftFraction}</div>
+              <div
+                className="p-8 rounded-lg text-center w-56 relative"
+                style={{
+                  backgroundImage: "url('/game assets/scale.png')",
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "left top",
+                }}
+              >
+                <div className="text-white font-pixel text-3xl relative z-10">{questions[currentQuestion].leftFraction}</div>
               </div>
 
               <div className="text-white font-pixel text-6xl">?</div>
 
-              <div className="bg-blue-600 p-8 rounded-lg text-center w-48">
-                <div className="text-white font-pixel text-3xl">{questions[currentQuestion].rightFraction}</div>
+              <div
+                className="p-8 rounded-lg text-center w-56 relative"
+                style={{
+                  backgroundImage: "url('/game assets/scale.png')",
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right top",
+                }}
+              >
+                <div className="text-white font-pixel text-3xl relative z-10">{questions[currentQuestion].rightFraction}</div>
               </div>
             </div>
-
             <div className="flex justify-center space-x-4 mt-6">
               <Button
                 onClick={() => handleAnswer(">")}
@@ -287,59 +302,85 @@ export default function RealmOfBalanceGame() {
               >
                 &lt;
               </Button>
-            </div>
+            </div>          
           </div>
         </div>
       )}
 
       {/* Dialogue Box */}
       <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 border-t-4 border-blue-800 p-6">
-        <div className="text-blue-300 font-pixel text-lg mb-2">Guardian of Equilibrium</div>
-        <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-          {dialoguePhase === "intro" && (
-            <>
-              "To pass through the Realm of Balance, you must decide... Which fraction weighs more? Which weighs less? Or do they match? Choose the correct symbol: &gt;, &lt;, or =."
-              {"\n\n"}
-              You have 3 lives. 3 mistakes and the game ends.
-              {"\n"}Score 60 or more to pass. Good luck!
-            </>
-          )}
-          {dialoguePhase === "feedback" && feedback === "correct" && (
-            <>"Well judged! Your understanding of fractions brings balance to the scales."</>
-          )}
-          {dialoguePhase === "feedback" && feedback === "incorrect" && (
-            <>
-              "The scales tilt with uncertainty. Remember to find a common denominator to compare fractions accurately."
-            </>
-          )}
-          {dialoguePhase === "feedback" && feedback === "incorrect" && (
-            <div className="absolute bottom-8 left-8 z-50">
-              <Button onClick={() => { setFeedback(null); setDialoguePhase('game'); }} className="font-pixel bg-blue-600 hover:bg-blue-700 text-white">
-                Try Again
-              </Button>
+        {/* Guardian of Equilibrium image as background, behind the dialogue */}
+        {(dialoguePhase === "intro" ||
+          dialoguePhase === "feedback" ||
+          dialoguePhase === "complete") && (
+          <img
+            src="/game characters/guardian of equilibrium.png"
+            alt="Guardian of Equilibrium"
+            style={{
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 32px #000)",
+              position: "absolute",
+              left: "50%",
+              bottom: "100%", 
+              transform: "translate(-50%, 0%)",
+              width: "480px",
+              height: "480px",
+              zIndex: 0,
+              opacity: 0.9,
+              pointerEvents: "none",
+            }}
+          />
+        )}
+        <div className="flex items-end relative z-10">
+          <div className="flex-1">
+            <div className="text-blue-300 font-pixel text-lg mb-2">Guardian of Equilibrium</div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+              {dialoguePhase === "intro" && (
+                <>
+                  "To pass through the Realm of Balance, you must decide... Which fraction weighs more? Which weighs less? Or do they match? Choose the correct symbol: &gt;, &lt;, or =."
+                  {"\n\n"}
+                  You have 3 lives. 3 mistakes and the game ends.
+                  {"\n"}Score 60 or more to pass. Good luck!
+                </>
+              )}
+              {dialoguePhase === "feedback" && feedback === "correct" && (
+                <>"Well judged! Your understanding of fractions brings balance to the scales."</>
+              )}
+              {dialoguePhase === "feedback" && feedback === "incorrect" && (
+                <>
+                  "The scales tilt with uncertainty. Remember to find a common denominator to compare fractions accurately."
+                </>
+              )}
+              {dialoguePhase === "complete" && (
+                <>
+                  "You have judged with wisdom. The scales are balanced. The path to Dreadpoint Hollow is now open. Proceed,
+                  Whiskers, and face your final challenge."
+                </>
+              )}
             </div>
-          )}
-          {dialoguePhase === "complete" && (
-            <>
-              "You have judged with wisdom. The scales are balanced. The path to Dreadpoint Hollow is now open. Proceed,
-              Whiskers, and face your final challenge."
-            </>
-          )}
-        </div>
-        <div className="flex justify-between">
-          {dialoguePhase === "intro" && (
-            <Button onClick={startGame} className="font-pixel bg-blue-600 hover:bg-blue-700 text-white">
-              Begin Trial
-            </Button>
-          )}
-          {dialoguePhase === "complete" && !showCompletionPopup && (
-            <Button
-              onClick={() => setShowLevelCompletionPopup(true)}
-              className="font-pixel bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Complete Trial
-            </Button>
-          )}
+            <div className="flex justify-between">
+              {dialoguePhase === "intro" && (
+                <Button onClick={startGame} className="font-pixel bg-blue-600 hover:bg-blue-700 text-white">
+                  Begin Trial
+                </Button>
+              )}
+              {dialoguePhase === "complete" && !showCompletionPopup && (
+                <Button
+                  onClick={() => setShowLevelCompletionPopup(true)}
+                  className="font-pixel bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Complete Trial
+                </Button>
+              )}
+            </div>
+            {dialoguePhase === "feedback" && feedback === "incorrect" && (
+              <div className="absolute bottom-8 left-8 z-50">
+                <Button onClick={() => { setFeedback(null); setDialoguePhase('game'); }} className="font-pixel bg-blue-600 hover:bg-blue-700 text-white">
+                  Try Again
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
