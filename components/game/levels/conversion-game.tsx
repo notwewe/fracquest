@@ -218,40 +218,41 @@ export default function ConversionGame(props: any) {
   )
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - same as story levels */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-          Squeaks' Sorting Table
-        </div>
-      </div>
-
-      {!gameStarted ? (
-        // Start Screen - styled like dialogue box
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
-          <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
-          <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-            Convert between improper fractions and mixed numbers.
-            {"\n\n"}
-            • You have 1 minute.
-            {"\n"}• 3 correct answers in a row: +10 seconds.
-            {"\n"}• 3 mistakes: game over.
-            {"\n"}• Reach 100 points or run out of time to finish.
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Background image - revert to original */}
+      <div
+        className="absolute inset-0 bg-contain bg-no-repeat bg-center z-0"
+        style={{ backgroundImage: `url('${backgroundImages['Sorting Table']}')` }}
+      />
+      {/* Overlay for readability - revert to original */}
+      <div className="absolute inset-0 bg-amber-900 bg-opacity-20 z-10" />
+      {/* Foreground content */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center">
+        {/* (Test button removed) */}
+        {!gameStarted ? (
+          // Start Screen - styled like dialogue box
+          <div className="w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl mx-auto flex flex-col items-center justify-center">
+            <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+              Welcome to the Sorting Table! Test your knowledge by converting fractions.
+              {"\n\n"}• Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)
+              {"\n"}• Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)
+              {"\n"}• You have 60 seconds to score as many points as possible
+              {"\n"}• Get 5 in a row for bonus time!
+            </div>
+            <div className="flex justify-between w-full">
+              <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+                Start the Challenge!
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
-              Start the Challenge!
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Game Screen - styled like dialogue box */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+        ) : (
+          // Game Screen - styled like dialogue box
+          <div className="w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl mx-auto flex flex-col items-center justify-center">
             <div className="text-amber-300 font-pixel text-lg mb-2">
               Score: {score} | Streak: {streak} | Time: {timeLeft}s
             </div>
-            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px] text-center">
               {shuffledProblems[currentProblem]?.type === "improper-to-mixed"
                 ? "Convert to Mixed Number:"
                 : "Convert to Improper Fraction:"}
@@ -264,7 +265,7 @@ export default function ConversionGame(props: any) {
                 </span>
               )}
             </div>
-            <div className="flex justify-between items-center gap-4">
+            <div className="flex justify-center items-center gap-4 w-full">
               <Input
                 type="text"
                 value={userAnswer}
@@ -283,6 +284,8 @@ export default function ConversionGame(props: any) {
               </Button>
             </div>
           </div>
+        )}
+      </div>
           {feedback && (
             <div className="text-center mt-4">
               <span className={`font-pixel text-lg ${feedback.startsWith('Correct') ? 'text-green-600' : feedback.startsWith('Incorrect') ? 'text-red-600' : feedback.startsWith('Game over') ? 'text-red-600' : 'text-amber-600'}`}>{feedback}</span>
@@ -321,6 +324,10 @@ export default function ConversionGame(props: any) {
           setShowCompletionPopup(false)
           router.push("/student/game")
         }}
+        levelId="3"
+        levelName="Conversion Game"
+        score={score}
+        isStory={false}
         onRetry={() => {
           setGameOver(false); setGameEnded(false); setPassed(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false);
         }}

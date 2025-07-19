@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
 import BackroomsBackground from "./backrooms-bg"
+import { gameContent } from "@/lib/game-content"
 
 type AdditionProblem = {
   question: string
@@ -62,6 +63,7 @@ export default function AdditionGame() {
   const [gameOver, setGameOver] = useState(false)
   const [passed, setPassed] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
+  
   const supabase = createClient()
 
   const startGame = () => {
@@ -199,11 +201,26 @@ export default function AdditionGame() {
     <div className="relative h-screen w-full overflow-hidden">
       {/* Backrooms background image */}
       <BackroomsBackground />
+      {/* Squeaks character image - above background, below dialogue box */}
+      <img
+        src="/game characters/Squeaks.png"
+        alt="Squeaks"
+        style={{
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px",
+          zIndex: 15
+        }}
+        className="pointer-events-none"
+      />
       {/* Overlay tint for ambience */}
       <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20 z-10">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-          Compass Chamber
-        </div>
+        
       </div>
 
       {!gameStarted ? (

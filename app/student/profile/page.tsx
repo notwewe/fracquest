@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -256,10 +256,10 @@ export default function StudentProfilePage() {
         </Link>
       </div>
 
-      <div className="flex flex-col items-center relative z-10">
+      <div className="flex flex-col items-center relative z-10 mt-[-4rem]">
         {/* Profile Title - Using the same style as Practice page */}
         <h1
-          className="text-8xl text-center mb-6 mt-0"
+          className="text-8xl text-center mb-4 mt-0"
           style={{
             fontFamily: "var(--font-blaka)",
             color: "#FFFFFF", // White color
@@ -272,32 +272,79 @@ export default function StudentProfilePage() {
         </h1>
 
         {!isEnrolled && (
-          <Alert className="mb-4 bg-amber-100 border-amber-300 max-w-2xl">
+          <Alert className="mb-1 bg-amber-100 border-amber-300 max-w-2xl">
             <AlertDescription className="text-amber-800">
               You need to join a class to play the game and see leaderboards. Join a class below!
             </AlertDescription>
           </Alert>  
         )}
 
-        {/* Row layout with responsive sizing */}
-        <div className="flex flex-col lg:flex-row justify-center items-center gap-6 w-full max-w-[1400px] mx-auto">
-          {/* Profile Information Section */}
-          <div className="flex flex-col items-center w-full lg:w-3/5 max-w-full">
+        {/* Unified Container for both sections */}
+        <div 
+          className="flex flex-col lg:flex-row rounded-xl overflow-hidden shadow-lg mx-auto mt-2 justify-center items-center"
+          style={{
+            backgroundImage: "url('/dashboard/blank.png')",
+            backgroundSize: "90% 90%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            width: "1000px",
+            height: "650px",
+            minWidth: "1000px",
+            minHeight: "650px",
+          }}
+        >
+          {/* Progress Section - Now on the left */}
+          <div className="flex flex-col justify-center items-center w-[350px]">
+            {/* Progress Container */}
+            <div className="w-full max-w-[350px]">
+              <div className="flex flex-col justify-center py-8">
+                <div className="w-full max-w-[280px] mx-auto">
+                  <div className="space-y-8">
+                    {/* Progress items */}
+                    <div className="bg-amber-100/80 p-5 rounded-lg border-2 border-amber-800">
+                      <div className="flex items-center gap-4">
+                        <BookOpen className="h-8 w-8 text-amber-700" />
+                        <div>
+                          <p
+                            className="text-lg text-amber-800"
+                            style={{ fontFamily: "var(--font-blaka)" }}
+                          >
+                            Levels Completed
+                          </p>
+                          <p className="text-3xl text-amber-900" style={{ fontFamily: "var(--font-blaka)" }}>
+                            {completedLevels}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-amber-100/80 p-5 rounded-lg border-2 border-amber-800">
+                      <div className="flex items-center gap-4">
+                        <Trophy className="h-8 w-8 text-amber-700" />
+                        <div>
+                          <p
+                            className="text-lg text-amber-800"
+                            style={{ fontFamily: "var(--font-blaka)" }}
+                          >
+                            Total Score
+                          </p>
+                          <p className="text-3xl text-amber-900" style={{ fontFamily: "var(--font-blaka)" }}>
+                            {totalScore}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Information Section - Now on the right */}
+          <div className="flex flex-col justify-center items-center w-[450px]">
             {/* Profile Information Container */}
-            <div
-              style={{
-                backgroundImage: "url('/dashboard/scroll.png')",
-                backgroundSize: "contain",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                width: "100%",
-                height: "550px",
-                position: "relative",
-                maxWidth: "800px",
-              }}
-            >
-              <div className="absolute inset-0 flex flex-col justify-center px-20 py-12">
-                <div className="max-w-md mx-auto w-full space-y-4">
+            <div className="w-full max-w-[450px]">
+              <div className="flex flex-col justify-center py-8">
+                <div className="max-w-sm mx-auto w-full space-y-4">
                   {error && (
                     <Alert variant="destructive" className="mb-2">
                       <AlertDescription>{error}</AlertDescription>
@@ -313,7 +360,7 @@ export default function StudentProfilePage() {
                     <div className="space-y-1">
                       <Label
                         htmlFor="username"
-                        className="text-amber-900 font-bold text-xl"
+                        className="text-amber-900 font-bold text-2xl"
                         style={{ fontFamily: "var(--font-blaka)" }}
                       >
                         Username
@@ -323,13 +370,13 @@ export default function StudentProfilePage() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        className="border border-amber-600 bg-amber-50/80 text-amber-900 p-2 h-12 text-lg"
+                        className="border border-amber-600 bg-amber-50/80 text-amber-900 p-2 h-12 text-xl"
                       />
                     </div>
                     <div className="space-y-1">
                       <Label
                         htmlFor="email"
-                        className="text-amber-900 font-bold text-xl"
+                        className="text-amber-900 font-bold text-2xl"
                         style={{ fontFamily: "var(--font-blaka)" }}
                       >
                         Email
@@ -338,14 +385,14 @@ export default function StudentProfilePage() {
                         id="email"
                         value={email}
                         disabled
-                        className="border border-amber-400 bg-amber-100/80 opacity-70 text-amber-800 p-2 h-12 text-lg"
+                        className="border border-amber-400 bg-amber-100/80 opacity-70 text-amber-800 p-2 h-12 text-xl"
                       />
-                      <p className="text-sm text-amber-700">Email cannot be changed</p>
+                      <p className="text-base text-amber-700">Email cannot be changed</p>
                     </div>
                     <div className="space-y-1">
                       <Label
                         htmlFor="class"
-                        className="text-amber-900 font-bold text-xl"
+                        className="text-amber-900 font-bold text-2xl"
                         style={{ fontFamily: "var(--font-blaka)" }}
                       >
                         Class
@@ -355,26 +402,27 @@ export default function StudentProfilePage() {
                           id="class"
                           value={className || "Not enrolled in any class"}
                           disabled
-                          className="border border-amber-400 bg-amber-100/80 opacity-70 text-amber-800 p-2 h-12 text-lg flex-1"
+                          className="border border-amber-400 bg-amber-100/80 opacity-70 text-amber-800 p-2 h-12 text-xl flex-1"
                         />
                         {!isEnrolled && (
                           <Button
                             type="button"
                             onClick={() => setShowJoinClass(true)}
-                            className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 h-10 text-sm"
+                            className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 h-12 text-base"
                           >
-                            <UserPlus className="mr-1 h-4 w-4" />
+                            <UserPlus className="mr-1 h-5 w-5" />
                             Join
                           </Button>
                         )}
                       </div>
                     </div>
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-amber-800 hover:bg-amber-700 text-amber-100 font-blaka py-1.5 px-8 rounded-md transition-colors duration-200 text-base"
-                      style={{ fontFamily: "var(--font-blaka)" }}
-                    >
+                    <div className="flex justify-center">
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="bg-amber-800 hover:bg-amber-700 text-amber-100 font-blaka py-2 px-12 rounded-md transition-colors duration-200 text-lg h-10 w-48"
+                        style={{ fontFamily: "var(--font-blaka)" }}
+                      >
                       {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -387,64 +435,8 @@ export default function StudentProfilePage() {
                         </>
                       )}
                     </Button>
+                    </div>
                   </form>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Section */}
-          <div className="flex flex-col items-center w-full lg:w-2/5 max-w-full">
-            {/* Progress Container */}
-            <div
-              style={{
-                backgroundImage: "url('/dashboard/blank.png')",
-                backgroundSize: "contain",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                width: "100%",
-                height: "550px",
-                position: "relative",
-                maxWidth: "600px",
-              }}
-            >
-              <div className="absolute inset-0 flex flex-col justify-center px-16 py-12">
-                <div className="w-full max-w-[320px] mx-auto">
-                  <div className="space-y-8">
-                    {/* Progress items */}
-                    <div className="bg-amber-100/80 p-5 rounded-lg border border-amber-300">
-                      <div className="flex items-center gap-4">
-                        <BookOpen className="h-8 w-8 text-amber-700" />
-                        <div>
-                          <p
-                            className="text-lg text-amber-800 font-semibold"
-                            style={{ fontFamily: "var(--font-blaka)" }}
-                          >
-                            Levels Completed
-                          </p>
-                          <p className="text-3xl font-bold text-amber-900" style={{ fontFamily: "var(--font-blaka)" }}>
-                            {completedLevels}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-amber-100/80 p-5 rounded-lg border border-amber-300">
-                      <div className="flex items-center gap-4">
-                        <Trophy className="h-8 w-8 text-amber-700" />
-                        <div>
-                          <p
-                            className="text-lg text-amber-800 font-semibold"
-                            style={{ fontFamily: "var(--font-blaka)" }}
-                          >
-                            Total Score
-                          </p>
-                          <p className="text-3xl font-bold text-amber-900" style={{ fontFamily: "var(--font-blaka)" }}>
-                            {totalScore}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
