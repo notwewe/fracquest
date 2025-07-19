@@ -6,21 +6,14 @@ import { BookLoginForm } from "@/components/auth/book-login-form"
 import { BackgroundSlideshow } from "@/components/auth/background-slideshow"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { InfoIcon } from "lucide-react"
-import { MobileLoginView } from "@/components/auth/mobile-login-view"
-import { useMobileDetect } from "@/lib/utils/deviceDetection"
 
 function LoginContent() {
   const searchParams = useSearchParams()
   const [message, setMessage] = useState<string | null>(null)
-  const isMobile = useMobileDetect()
 
   useEffect(() => {
     setMessage(searchParams.get("message"))
   }, [searchParams])
-
-  if (isMobile) {
-    return <MobileLoginView message={message} />
-  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -52,17 +45,12 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  const isMobile = useMobileDetect()
   const searchParams = useSearchParams()
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     setMessage(searchParams.get("message"))
   }, [searchParams])
-
-  if (isMobile) {
-    return <MobileLoginView message={message} />
-  }
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
