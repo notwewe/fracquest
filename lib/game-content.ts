@@ -1583,5 +1583,8 @@ export const backgroundImages: Record<string, string> = {
   'Broken LessMoore Bridge': '/game backgrounds/Broken LessMoore Bridge.png',
   'Fixed LessMoore Bridge': '/game backgrounds/Fixed LessMoore Bridge.png',
   'LessMoore Bridge': '/game backgrounds/LessMoore Bridge.png',
+  'Fraction Forest Entrance': '/game backgrounds/Fraction Forest Entrance.png',
+  'Fraction Forest': '/game backgrounds/Fraction Forest.png',
+  'Realm of Balance': '/game backgrounds/Realm of Balance.png',
   // Add other mappings as needed
 };

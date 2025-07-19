@@ -34,7 +34,7 @@ const locationData = {
   },
   5: {
     name: "Dreadpoint Hollow",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_Dread.png",
     description:
       "Venture into the shadowy depths of Dreadpoint Hollow, where the most challenging fraction mysteries await! This treacherous realm tests your mastery of complex fraction operations. Face the trials of subtracting fractions with unlike denominators, solve multi-step fraction problems, and conquer the fearsome mixed number conversions. Only the bravest mathematicians dare to enter these dark caverns!",
   },
@@ -82,14 +82,17 @@ export default async function StudentPracticePage({
       {/* Background Slideshow */}
       <BackgroundSlideshow />
 
-      {/* Back to Dashboard Button */}
+      {/* Back Arrow */}
       <div className="absolute top-8 left-8 z-20">
-        <Button asChild variant="outline" className="font-blaka border-amber-600 text-black bg-amber-50/90 text-lg">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <Link href="/student/dashboard" className="block">
+          <Image
+            src="/backarrow.png"
+            alt="Back to Dashboard"
+            width={48}
+            height={48}
+            className="hover:opacity-80 transition-opacity"
+          />
+        </Link>
       </div>
 
       {/* Main Content */}
