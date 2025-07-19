@@ -1586,5 +1586,6 @@ export const backgroundImages: Record<string, string> = {
   'Fraction Forest Entrance': '/game backgrounds/Fraction Forest Entrance.png',
   'Fraction Forest': '/game backgrounds/Fraction Forest.png',
   'Realm of Balance': '/game backgrounds/Realm of Balance.png',
+  'Dreadpoint Hollow Entrance': '/game backgrounds/Dreadpoint Hollow Entrance.png',
   // Add other mappings as needed
 };

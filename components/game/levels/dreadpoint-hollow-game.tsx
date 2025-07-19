@@ -422,7 +422,15 @@ export default function DreadpointHollowGame() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
+    <div className="relative h-screen w-full bg-black overflow-hidden"
+    style={{
+        backgroundImage: "url('/game backgrounds/Dreadpoint Hollow Entrance.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
       {/* Background */}
       <div
         className={`absolute inset-0 flex items-center justify-center ${
