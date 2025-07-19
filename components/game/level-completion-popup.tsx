@@ -97,7 +97,11 @@ export function LevelCompletionPopup({
         </div>
 
         <DialogFooter>
-          {isGameOver || (!passed && !isGameOver) ? (
+          {isStory ? (
+            <Button onClick={onClose} className="w-full font-pixel bg-amber-600 hover:bg-amber-700 text-white">
+              Return to Map
+            </Button>
+          ) : isGameOver || (!passed && !isGameOver) ? (
             <Button onClick={onRetry} className="w-full font-pixel bg-red-600 hover:bg-red-700 text-white">
               Retry
             </Button>
