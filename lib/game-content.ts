@@ -370,57 +370,57 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "The back room of the Emporium. A floating pedestal glows, waiting for the compass pieces to be placed.",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "If you can fix the compass, then you shall continue on your journey to restore the Fraction Orb!",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "When you add fractions with the same bottom number—the denominator—you just add the top numbers!",
-        background: "Fraction Addition",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "For example: 1/4 + 2/4 = 3/4 and 2/8 + 5/8 = 7/8",
-        background: "Fraction Addition",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "When the denominators are different, we need to do a little more work.",
-        background: "Fraction Addition",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Look at both denominators. Find the Least Common Denominator (LCD) – the smallest number both can divide into. Rewrite each fraction so they have this shared denominator. Then, add the numerators like usual!",
-        background: "Common Denominators",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "For example, 1/2 + 1/4 = ? The denominators are 2 and 4. The LCD is 4. Convert 1/2 to 2/4. Now add: 2/4 + 1/4 = 3/4",
-        background: "Common Denominators",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Another example: 2/3 + 1/6 = ? The denominators are 3 and 6. The LCD is 6. Convert 2/3 to 4/6. Now add: 4/6 + 1/6 = 5/6",
-        background: "Common Denominators",
+        background: "Backrooms",
       },
       {
         speaker: "Whiskers",
         text: "So to assemble the compass, I just need to know how much I've added so far?",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Precisely! But be careful—only the exact total will activate it!",
-        background: "Assembling the Fraction Compass",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Let's try a practice problem. What is 1/3 + 1/3?",
-        background: "Addition Practice",
+        background: "Backrooms",
         isChoice: true,
         choices: ["1/3", "2/3", "2/6", "1/6"],
         correctChoice: 1, // 2/3 is the correct answer (index 1)
@@ -430,12 +430,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Correct! 1/3 + 1/3 = 2/3. Since the denominators are the same, we just add the numerators.",
-        background: "Addition Practice",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Now try a harder one. What is 1/2 + 1/4?",
-        background: "Addition Practice",
+        background: "Backrooms",
         isChoice: true,
         choices: ["2/6", "3/4", "1/6", "2/4"],
         correctChoice: 1, // 3/4 is the correct answer (index 1)
@@ -445,7 +445,7 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "Excellent! 1/2 + 1/4 = 3/4. We convert 1/2 to 2/4, then add: 2/4 + 1/4 = 3/4.",
-        background: "Addition Practice",
+        background: "Backrooms",
       },
     ],
 
@@ -454,27 +454,27 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "After learning about fraction addition, Whiskers is ready to assemble the Fraction Compass.",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Welcome to the Compass Chamber! Here, you'll need to add fractions correctly to restore the magical Fraction Compass.",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Each correct answer will add a piece to the compass. Complete all five pieces to activate it!",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Squeaks",
         text: "Remember, when adding fractions with the same denominator, just add the numerators. When the denominators are different, find a common denominator first.",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
       {
         speaker: "Whiskers",
         text: "I'm ready to restore the compass!",
-        background: "Compass Chamber",
+        background: "Backrooms",
       },
     ],
 
@@ -483,117 +483,117 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Squeaks",
         text: "You've got the compass, Whiskers! It'll guide you to the lost pieces of the orb, but remember—fractions aren't just about knowing... they're about doing.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Whiskers",
         text: "Thanks, Squeaks. I can feel it... something important is just ahead.",
-        background: "Fraction Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Squeaks",
         text: "Follow the old stone path outside town. It leads to Borrowdale. Last I heard, the bridge there was acting strange... numbers vanish right off the stones!",
-        background: "Map Pointing",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Whiskers",
         text: "Then it's time to do some subtracting. Let's go!",
-        background: "Leaving Emporium",
+        background: "Squeaks Emporium",
       },
       {
         speaker: "Narrator",
         text: "Whiskers follows the path until he arrives at the edge of a misty ravine. A grand, glowing bridge once stood here—but now, parts of it are missing.",
-        background: "Lessmore Bridge",
+        background: "Broken LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "The compass pulses and glows. Whiskers steps cautiously to the ravine's edge.",
-        background: "Compass Glowing",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Whiskers",
         text: "The compass brought me here... but the bridge is broken!",
-        background: "Lessmore Bridge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "A gentle rumble echoes as an ancient figure rises from the stone—Elder Pebble, the guardian of understanding.",
-        background: "Elder Pebble Rising",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Only those who understand taking away can rebuild what was lost. You must master the art of fraction subtraction to restore the bridge.",
-        background: "Lessmore Bridge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "Elder Pebble conjures a glowing stone plate with 5 of 8 sections lit.",
-        background: "Stone Plate",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Start with 5 out of 8. Take away 2 of the same kind. What remains?",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Examples: 5/8 − 2/8 = 3/8, 3/4 − 1/4 = 2/4 → 1/2, 6/6 − 4/6 = 2/6 → 1/3",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Whiskers",
         text: "So when the parts match, it's like taking blocks from the same pile?",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Exactly. When the pieces share a name, you simply subtract the tops. But not all fractions speak the same tongue...",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Narrator",
         text: "He steps aside. Two glowing stones float between you—2/5 and 3/4.",
-        background: "Floating Stones",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "When parts differ, you must make them agree. This is the art of the Least Common Denominator.",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "To subtract 3/4 and 2/5, we must find a common ground. Their denominators—4 and 5—must become one.",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Find the Least Common Denominator (LCD). Multiples of 4: 4, 8, 12, 16, 20, ... Multiples of 5: 5, 10, 15, 20, ... LCD = 20",
-        background: "Finding LCD",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Convert to Equivalent Fractions: 3/4 → 15/20 (×5), 2/5 → 8/20 (×4)",
-        background: "Converting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Subtract the Numerators: 15/20 − 8/20 = 7/20",
-        background: "Subtracting Numerators",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "By reshaping the parts, you've brought them to unity. Only then can subtraction begin.",
-        background: "Subtracting Fractions",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Now, solve these subtraction problems to prove your worth and cross the bridge!",
-        background: "Subtraction Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "What is 5/8 - 2/8?",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
         isChoice: true,
         choices: ["3/8", "3/16", "7/8", "3/4"],
         correctChoice: 0, // 3/8 is the correct answer (index 0)
@@ -603,12 +603,12 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Elder Pebble",
         text: "Correct! 5/8 - 2/8 = 3/8. Since the denominators are the same, we just subtract the numerators.",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Now try a harder one. What is 3/4 - 1/2?",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
         isChoice: true,
         choices: ["2/4", "1/4", "2/6", "1/2"],
         correctChoice: 1, // 1/4 is the correct answer (index 1)
@@ -618,7 +618,7 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Elder Pebble",
         text: "Excellent! 3/4 - 1/2 = 1/4. We convert 1/2 to 2/4, then subtract: 3/4 - 2/4 = 1/4.",
-        background: "Subtraction Practice",
+        background: "LessMoore Bridge",
       },
     ],
 
@@ -627,22 +627,44 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "After learning about fraction subtraction from Elder Pebble, Whiskers is ready to rebuild the Lessmore Bridge.",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "To restore the bridge, you must solve five subtraction problems. Each correct answer will add a stone to the bridge.",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Elder Pebble",
         text: "Remember, when subtracting fractions with the same denominator, simply subtract the numerators. When the denominators are different, find a common denominator first.",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
       },
       {
         speaker: "Whiskers",
         text: "I'm ready to rebuild the bridge!",
-        background: "Bridge Builder Challenge",
+        background: "LessMoore Bridge",
+      },
+      // Post-game from Bridge scene
+      {
+        speaker: "Elder Pebble",
+        text: "You see, young one... subtraction is not just taking away—it's revealing what remains.",
+        background: "Fixed LessMoore Bridge",
+        
+      },
+      {
+        speaker: "Elder Pebble",
+        text: "Few walk this path with such clarity. Fewer still reach the end.",
+        background: "Fixed LessMoore Bridge",
+      },
+      {
+        speaker: "Elder Pebble",
+        text: "Go forth, traveler. This path is now yours. Let the numbers guide you as they have here.",
+        background: "Fixed LessMoore Bridge",
+      },
+      {
+        speaker: "Squeaks",
+        text: "Bridge complete, tail intact. Onward!",
+        background: "Fixed LessMoore Bridge",
       },
     ],
 
@@ -806,5 +828,9 @@ export const backgroundImages: Record<string, string> = {
   'Squeaks Emporium': '/game backgrounds/Squeaks Emporium.png',
   'CheeseCrate': '/game backgrounds/CheeseCrate.png',
   'Sorting Table': '/game backgrounds/Sorting Table.png',
+  'Backrooms': '/game backgrounds/Backrooms.png',
+  'Broken LessMoore Bridge': '/game backgrounds/Broken LessMoore Bridge.png',
+  'Fixed LessMoore Bridge': '/game backgrounds/Fixed LessMoore Bridge.png',
+  'LessMoore Bridge': '/game backgrounds/LessMoore Bridge.png',
   // Add other mappings as needed
 };
