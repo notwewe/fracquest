@@ -82,14 +82,17 @@ export default async function StudentPracticePage({
       {/* Background Slideshow */}
       <BackgroundSlideshow />
 
-      {/* Back to Dashboard Button */}
+      {/* Back Arrow */}
       <div className="absolute top-8 left-8 z-20">
-        <Button asChild variant="outline" className="font-blaka border-amber-600 text-black bg-amber-50/90 text-lg">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <Link href="/student/dashboard" className="block">
+          <Image
+            src="/backarrow.png"
+            alt="Back to Dashboard"
+            width={48}
+            height={48}
+            className="hover:opacity-80 transition-opacity"
+          />
+        </Link>
       </div>
 
       {/* Main Content */}
