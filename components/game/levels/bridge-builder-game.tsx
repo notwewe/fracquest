@@ -263,107 +263,108 @@ export default function BridgeBuilderGame() {
           </div>
         </div>
       ) : (
-        // Game Screen - styled like dialogue box
+        <>
+          {/* Main game dialogue box (hidden during post-game) */}
+          {!showPostGameDialogue && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6">
+              <div className="text-stone-300 font-pixel text-lg mb-2">
+                Bridge Stones: {bridgeStones}/5 | Score: {score}/100 | Problem {currentProblem + 1}/5
+              </div>
+              <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+                Stone {bridgeStones + 1}: Solve this subtraction problem:
+                {"\n\n"}
+                <span className="text-3xl text-stone-300">{bridgeProblems[currentProblem]?.question} = ?</span>
+                {"\n\n"}
+                <span className="text-sm text-stone-400">Hint: {bridgeProblems[currentProblem]?.hint}</span>
+              </div>
+              <div className="flex justify-between items-center gap-4">
+                <Input
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => setUserAnswer(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter your answer (e.g., 1/2)"
+                  className="text-lg max-w-md bg-gray-800 border-stone-600 text-white"
+                  disabled={gameEnded}
+                />
+                <Button
+                  onClick={checkAnswer}
+                  disabled={!userAnswer.trim() || gameEnded}
+                  className="font-pixel bg-stone-600 hover:bg-stone-700 text-white"
+                >
+                  Place Stone
+                </Button>
+              </div>
+            </div>
+          )}
 
-      {/* Main game dialogue box (hidden during post-game) */}
-      {!showPostGameDialogue && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6">
-          <div className="text-stone-300 font-pixel text-lg mb-2">
-            Bridge Stones: {bridgeStones}/5 | Score: {score}/100 | Problem {currentProblem + 1}/5
-          </div>
-          <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-            Stone {bridgeStones + 1}: Solve this subtraction problem:
-            {"\n\n"}
-            <span className="text-3xl text-stone-300">{bridgeProblems[currentProblem]?.question} = ?</span>
-            {"\n\n"}
-            <span className="text-sm text-stone-400">Hint: {bridgeProblems[currentProblem]?.hint}</span>
-          </div>
-          <div className="flex justify-between items-center gap-4">
-            <Input
-              type="text"
-              value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Enter your answer (e.g., 1/2)"
-              className="text-lg max-w-md bg-gray-800 border-stone-600 text-white"
-              disabled={gameEnded}
-            />
+          {/* Emergency exit button */}
+          <div className="absolute top-4 right-4">
             <Button
-              onClick={checkAnswer}
-              disabled={!userAnswer.trim() || gameEnded}
-              className="font-pixel bg-stone-600 hover:bg-stone-700 text-white"
+              onClick={() => router.push("/student/game")}
+              className="font-pixel bg-red-600 hover:bg-red-700 text-white"
             >
-              Place Stone
+              Exit Bridge
             </Button>
           </div>
-        </div>
-      )}
 
-      {/* Emergency exit button */}
-      <div className="absolute top-4 right-4">
-        <Button
-          onClick={() => router.push("/student/game")}
-          className="font-pixel bg-red-600 hover:bg-red-700 text-white"
-        >
-          Exit Bridge
-        </Button>
-      </div>
-
-      {/* Post-game dialogue box (with styled box) */}
-      {showPostGameDialogue && postGameDialogue.length > 0 && (
-        <div className="absolute inset-0 w-full h-full">
-          <FixedLessMooreBridgeBackground />
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6 z-20">
-            <div className="text-stone-300 font-pixel text-lg mb-2">{postGameDialogue[postGameIndex].speaker}</div>
-            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-              {postGameDialogue[postGameIndex].text}
+          {/* Post-game dialogue box (with styled box) */}
+          {showPostGameDialogue && postGameDialogue.length > 0 && (
+            <div className="absolute inset-0 w-full h-full">
+              <FixedLessMooreBridgeBackground />
+              <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-stone-600 p-6 z-20">
+                <div className="text-stone-300 font-pixel text-lg mb-2">{postGameDialogue[postGameIndex].speaker}</div>
+                <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+                  {postGameDialogue[postGameIndex].text}
+                </div>
+                <div className="flex justify-end mt-6">
+                  <Button
+                    onClick={() => {
+                      if (postGameIndex < postGameDialogue.length - 1) {
+                        setPostGameIndex(postGameIndex + 1)
+                      } else {
+                        setShowPostGameDialogue(false)
+                        setShowCompletionPopup(true)
+                      }
+                    }}
+                    className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    {postGameIndex < postGameDialogue.length - 1 ? "Next" : "Continue"}
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-end mt-6">
-              <Button
-                onClick={() => {
-                  if (postGameIndex < postGameDialogue.length - 1) {
-                    setPostGameIndex(postGameIndex + 1)
-                  } else {
-                    setShowPostGameDialogue(false)
-                    setShowCompletionPopup(true)
-                  }
-                }}
-                className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
-              >
-                {postGameIndex < postGameDialogue.length - 1 ? "Next" : "Continue"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Completion Popup */}
-      <LevelCompletionPopup
-        isOpen={showCompletionPopup}
-        onClose={() => {
-          setShowCompletionPopup(false)
-          router.push("/student/map?location=lessmoore-bridge")
-        }}
-        onRetry={() => {
-          setShowCompletionPopup(false)
-          setGameStarted(false)
-          setGameEnded(false)
-          setGameOver(false)
-          setPassed(false)
-          setCurrentProblem(0)
-          setScore(0)
-          setBridgeStones(0)
-          setMistakes(0)
-          setUserAnswer("")
-          setFeedback(null)
-        }}
-        levelId="7"
-        levelName="Bridge Builder Game"
-        score={score}
-        isGameOver={gameOver}
-        isStory={false}
-        passed={passed}
-      />
+          {/* Completion Popup */}
+          <LevelCompletionPopup
+            isOpen={showCompletionPopup}
+            onClose={() => {
+              setShowCompletionPopup(false)
+              router.push("/student/map?location=lessmoore-bridge")
+            }}
+            onRetry={() => {
+              setShowCompletionPopup(false)
+              setGameStarted(false)
+              setGameEnded(false)
+              setGameOver(false)
+              setPassed(false)
+              setCurrentProblem(0)
+              setScore(0)
+              setBridgeStones(0)
+              setMistakes(0)
+              setUserAnswer("")
+              setFeedback(null)
+            }}
+            levelId="7"
+            levelName="Bridge Builder Game"
+            score={score}
+            isGameOver={gameOver}
+            isStory={false}
+            passed={passed}
+          />
+        </>
+      )}
     </div>
   )
 }
