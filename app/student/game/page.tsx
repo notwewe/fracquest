@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { WorldMap } from "@/components/game/world-map"
+import Image from "next/image"
 
 export default async function GamePage() {
   const supabase = createClient()
@@ -113,19 +114,19 @@ export default async function GamePage() {
       let position = ""
       switch (section.order_index) {
         case 1:
-          position = "top-1/4 left-1/4"
+          position = "top-[30%] left-[15%]"
           break
         case 2:
-          position = "top-1/3 left-1/2"
+          position = "top-1/3 left-[45%]"
           break
         case 3:
-          position = "top-1/2 right-1/4"
+          position = "top-1/4 right-[8%]"
           break
         case 4:
-          position = "bottom-1/4 right-1/3"
+          position = "bottom-1/4 right-[8%]"
           break
         case 5:
-          position = "bottom-1/4 left-1/3"
+          position = "bottom-1/4 left-1/4"
           break
         default:
           position = "top-1/2 left-1/2"
@@ -142,51 +143,65 @@ export default async function GamePage() {
     })
 
     return (
-      <div className="min-h-screen bg-amber-50 p-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-6">
-            <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-              <Link href="/student/dashboard">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Link>
-            </Button>
-          </div>
-
-          <h1 className="text-3xl font-bold text-center mb-8 font-medieval text-amber-900">World of Numeria</h1>
-          <div className="bg-amber-50 border-4 border-amber-800 rounded-xl p-4 shadow-lg">
-            <WorldMap locations={locations} />
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
-              <h3 className="font-pixel text-amber-900 text-lg mb-2">How to Play</h3>
-              <p className="text-amber-700">
-                Click on unlocked locations to start challenges. Complete challenges to unlock new areas!
-              </p>
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <Image
+            src="/dashboard/bg1_castle.png"
+            alt="Castle Background"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+        </div>
+        
+        {/* Content overlay */}
+        <div className="relative z-10 min-h-screen p-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-6">
+              <Button asChild variant="outline" className="font-[Blaka] border-amber-600 text-amber-700 bg-white/90">
+                <Link href="/student/dashboard">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Dashboard
+                </Link>
+              </Button>
             </div>
 
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
-              <h3 className="font-pixel text-amber-900 text-lg mb-2">Your Quest</h3>
-              <p className="text-amber-700">
-                Help Whiskers restore the Fraction Orb by mastering fraction skills in each region!
-              </p>
+            <h1 className="text-6xl text-center mb-8 font-[Blaka] text-white drop-shadow-lg">Welcome To The World Of Numeria!</h1>
+            <div className="bg-white/90 border-4 border-amber-800 rounded-xl p-4 shadow-lg">
+              <WorldMap locations={locations} />
             </div>
 
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
-              <h3 className="font-pixel text-amber-900 text-lg mb-2">Legend</h3>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  <span className="text-amber-700">Completed</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-amber-500"></div>
-                  <span className="text-amber-700">Available</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-gray-400"></div>
-                  <span className="text-amber-700">Locked</span>
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white/90 p-4 rounded-lg border border-amber-300 shadow-lg">
+                <h3 className="font-[Blaka] text-amber-900 text-2xl mb-2">How to Play</h3>
+                <p className="text-amber-700">
+                  Click on unlocked locations to start challenges. Complete challenges to unlock new areas!
+                </p>
+              </div>
+
+              <div className="bg-white/90 p-4 rounded-lg border border-amber-300 shadow-lg">
+                <h3 className="font-[Blaka] text-amber-900 text-2xl mb-2">Your Quest</h3>
+                <p className="text-amber-700">
+                  Help Whiskers restore the Fraction Orb by mastering fraction skills in each region!
+                </p>
+              </div>
+
+              <div className="bg-white/90 p-4 rounded-lg border border-amber-300 shadow-lg">
+                <h3 className="font-[Blaka] text-amber-900 text-2xl mb-2">Legend</h3>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                    <span className="text-amber-700 ">Completed</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-amber-500"></div>
+                    <span className="text-amber-700 ">Available</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-gray-400"></div>
+                    <span className="text-amber-700 ">Locked</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -196,14 +211,28 @@ export default async function GamePage() {
     )
   } catch (error) {
     return (
-      <div className="min-h-screen bg-amber-50 p-4 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">Unable to load game</h1>
-        <Button asChild variant="outline" className="font-pixel border-amber-600 text-amber-700">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <Image
+            src="/dashboard/bg1_castle.png"
+            alt="Castle Background"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+        </div>
+        
+        {/* Content overlay */}
+        <div className="relative z-10 min-h-screen p-4 flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold text-white mb-4 drop-shadow-lg font-[Blaka]">Unable to load game</h1>
+          <Button asChild variant="outline" className="font-[Blaka] border-amber-600 text-amber-700 bg-white/90">
+            <Link href="/student/dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </Button>
+        </div>
       </div>
     )
   }
