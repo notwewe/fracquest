@@ -287,7 +287,6 @@ export default function FractionForestGame() {
       {gameStarted && dialoguePhase === "game" && !gameEnded && !gameOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-20 pb-40">
           <div className="bg-green-800 bg-opacity-80 p-8 rounded-lg mb-8 w-full max-w-5xl mx-auto">
-          <div className="bg-green-800 bg-opacity-80 p-8 rounded-lg mb-8 w-full max-w-3xl mx-auto">
             <h2 className="text-2xl font-pixel text-green-200 mb-4">
               {rounds[currentRound].goal === "ascending"
                 ? "Arrange trees from smallest to largest"
@@ -335,73 +334,13 @@ export default function FractionForestGame() {
                 filter: "drop-shadow(0 0 12px #000)",
                 transform: "scaleX(-1)",
                 position: "relative",
-                left: "43%", 
-                bottom: "300px", 
-                width: "220px", 
-                height: "220px", 
+                left: "0", 
+                bottom: "0", 
+                width: "220px",
+                height: "220px",
+                marginRight: "32px",
               }}
             />
-        <div className="text-green-300 font-pixel text-lg mb-2">Elder Barkroot</div>
-        <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-          {dialoguePhase === "intro" && (
-            <>
-              "The forest breathes in fractions. When their order is disturbed, so is the grove. You must line up the Trees of Fraction from the smallest to the largest, and balance shall return."
-              {"\n\n"}
-              You have 3 lives. 3 mistakes and the game ends.
-              {"\n"}Score 60 or more to pass. Good luck!
-            </>
-          )}
-          {dialoguePhase === "tutorial" && (
-            <>
-              "Each tree bears a fraction. Drag them into the correct order - from smallest to largest or largest to smallest as I instruct. When the trees are in harmony, the forest will flourish again."
-            </>
-          )}
-          {dialoguePhase === "success" && (
-            <>
-              "Beautiful! The grove stands tall and true. The balance is restored. The trees glow with renewed energy!"
-            </>
-          )}
-          {dialoguePhase === "failure" && (
-            <>
-              "Hmm... the roots grumble. Their growth needs better order. Remember, to compare fractions, find a common
-              denominator first."
-            </>
-          )}
-          {dialoguePhase === "complete" && (
-            <>
-              "You've done well, brave traveler. The roots are aligned, and the forest is healing. Beyond these woods
-              lies the Realm of Balance, where harmony isn't just found in order... but in comparison."
-            </>
-          )}
-        </div>
-        <div className="flex justify-between">
-          {dialoguePhase === "intro" && (
-            <Button onClick={startGame} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
-              Continue
-            </Button>
-          )}
-          {dialoguePhase === "tutorial" && (
-            <Button onClick={startRound} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
-              Start Challenge
-            </Button>
-          )}
-          {dialoguePhase === "success" && (
-            <Button onClick={nextRound} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
-              Continue
-            </Button>
-          )}
-          {dialoguePhase === "failure" && (
-            <Button onClick={tryAgain} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
-              Try Again
-            </Button>
-          )}
-          {dialoguePhase === "complete" && !showCompletionPopup && (
-            <Button
-              onClick={() => setShowCompletionPopup(true)}
-              className="font-pixel bg-green-600 hover:bg-green-700 text-white"
-            >
-              Complete Forest
-            </Button>
           )}
           <div className="flex-1">
             <div className="text-green-300 font-pixel text-lg mb-2">Elder Barkroot</div>
@@ -426,14 +365,12 @@ export default function FractionForestGame() {
               )}
               {dialoguePhase === "failure" && (
                 <>
-                  "Hmm... the roots grumble. Their growth needs better order. Remember, to compare fractions, find a common
-                  denominator first."
+              "Hmm... the roots grumble. Their growth needs better order. Remember, to compare fractions, find a common denominator first."
                 </>
               )}
               {dialoguePhase === "complete" && (
                 <>
-                  "You've done well, brave traveler. The roots are aligned, and the forest is healing. Beyond these woods
-                  lies the Realm of Balance, where harmony isn't just found in order... but in comparison."
+              "You've done well, brave traveler. The roots are aligned, and the forest is healing. Beyond these woods lies the Realm of Balance, where harmony isn't just found in order... but in comparison."
                 </>
               )}
             </div>
