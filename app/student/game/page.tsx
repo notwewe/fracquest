@@ -168,7 +168,7 @@ export default async function GamePage() {
             </div>
 
             <h1 className="text-6xl text-center mb-8 font-[Blaka] text-white drop-shadow-lg">Welcome To The World Of Numeria!</h1>
-            <div className="bg-white/90 border-4 border-amber-800 rounded-xl p-4 shadow-lg">
+            <div className="bg-gradient-to-br from-red-900 to-red-950 border-4 border-red-800 rounded-xl p-4 shadow-lg">
               <WorldMap locations={locations} />
             </div>
 
