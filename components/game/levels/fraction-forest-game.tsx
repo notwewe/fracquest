@@ -69,8 +69,14 @@ function SortableTree({ tree }: { tree: FractionTree }) {
       {...listeners}
       className="flex flex-col items-center justify-center cursor-grab active:cursor-grabbing"
     >
-      <div className="w-20 h-32 bg-green-800 rounded-lg flex flex-col items-center justify-center relative">
-        <div className="absolute top-0 w-24 h-12 bg-green-700 rounded-full -mt-4"></div>
+      <div className="w-40 h-36 bg-green-00 rounded-lg flex flex-col items-center justify-center relative"
+      style={{
+        backgroundImage: "url('/auth/tree1.png')", 
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+      >
+        <div className="absolute top-0 w-24 h-12 bg-green-0 rounded-full -mt-4"></div>
         <div className="text-white font-bold text-xl">{tree.fraction}</div>
       </div>
     </div>
@@ -226,7 +232,15 @@ export default function FractionForestGame() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
+    <div className="relative h-screen w-full bg-black overflow-hidden"
+      style={{
+        backgroundImage: "url('/game backgrounds/Fraction Forest Entrance.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
       {/* Background */}
       <div className="absolute inset-0 flex items-center justify-center bg-green-900 bg-opacity-40">
         <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-green-200">
@@ -237,11 +251,11 @@ export default function FractionForestGame() {
       {/* Game Area */}
       {dialoguePhase === "game" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-20 pb-40">
-          <div className="bg-green-800 bg-opacity-80 p-8 rounded-lg mb-8 w-full max-w-3xl mx-auto">
+          <div className="bg-green-800 bg-opacity-100 p-8 rounded-lg mb-8 w-full max-w-5xl mx-auto">
             <h2 className="text-2xl font-pixel text-green-200 mb-4">
               {rounds[currentRound].goal === "ascending"
-                ? "Arrange trees from smallest to largest"
-                : "Arrange trees from largest to smallest"}
+                ? "Drag the trees to arrange from smallest to largest"
+                : "Drag the trees to arrange from largest to smallest"}
             </h2>
             <div className="text-green-300 text-lg mb-6">
               Round {currentRound + 1} of 3 • Score: {score}
@@ -249,7 +263,7 @@ export default function FractionForestGame() {
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={trees.map((tree) => tree.id)}>
-                <div className="flex justify-center space-x-10 mb-8">
+                <div className="flex justify-center space-x-10 mb-8 w-full max-w-5xl mx-auto">
                   {trees.map((tree) => (
                     <SortableTree key={tree.id} tree={tree} />
                   ))}
