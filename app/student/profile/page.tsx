@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
 import { isMobileDevice } from "@/lib/utils/deviceDetection"
+import { BackgroundSlideshow } from "@/components/auth/background-slideshow"
 
 export default function StudentProfilePage() {
   const router = useRouter()
@@ -214,31 +215,18 @@ export default function StudentProfilePage() {
 
   if (isLoadingData) {
     return (
-      <div
-        className="h-screen flex justify-center items-center"
-        style={{
-          backgroundImage: "url('/dashboard/castle-background.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+      <div className="h-screen flex justify-center items-center relative overflow-hidden">
+        <BackgroundSlideshow />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-600 z-20" />
       </div>
     )
   }
 
   return (
-    <div
-      className="h-screen p-4 overflow-hidden flex flex-col justify-center"
-      style={{
-        backgroundImage: "url('/dashboard/castle-background.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
-    >
+    <div className="h-screen p-4 overflow-hidden flex flex-col justify-center relative">
+      {/* Background Slideshow */}
+      <BackgroundSlideshow />
+
       {/* Back to Dashboard Button */}
       <div className="absolute top-8 left-8 z-20">
         <Button asChild variant="outline" className="font-blaka border-amber-600 text-black bg-amber-50/90 text-lg">
@@ -249,7 +237,7 @@ export default function StudentProfilePage() {
         </Button>
       </div>
 
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center relative z-10">
         {/* Profile Title - Using the same style as Practice page */}
         <h1
           className="text-8xl font-bold text-center mb-6 mt-0"
