@@ -14,6 +14,7 @@ import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft } from "lucide-rea
 import { JoinClassForm } from "@/components/student/join-class-form"
 import { isMobileDevice } from "@/lib/utils/deviceDetection"
 import { BackgroundSlideshow } from "@/components/auth/background-slideshow"
+import Image from "next/image"
 
 export default function StudentProfilePage() {
   const router = useRouter()
@@ -227,14 +228,17 @@ export default function StudentProfilePage() {
       {/* Background Slideshow */}
       <BackgroundSlideshow />
 
-      {/* Back to Dashboard Button */}
+      {/* Back Arrow */}
       <div className="absolute top-8 left-8 z-20">
-        <Button asChild variant="outline" className="font-blaka border-amber-600 text-black bg-amber-50/90 text-lg">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <Link href="/student/dashboard" className="block">
+          <Image 
+            src="/backarrow.png" 
+            alt="Back to Dashboard" 
+            width={48} 
+            height={48} 
+            className="hover:opacity-80 transition-opacity"
+          />
+        </Link>
       </div>
 
       <div className="flex flex-col items-center relative z-10">
