@@ -1120,58 +1120,234 @@ export function getLevelDialogue(levelId: string) {
     "4": [
       {
         speaker: "Narrator",
-        text: "The back room of the Emporium. A floating pedestal glows, waiting for the compass pieces to be placed.",
+        text: "The back room of the Emporium. A floating compass glows, waiting for its pieces to be placed.",
         background: "Backrooms",
+        character: "/game assets/BrokenCompass.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "40%",
+          bottom: "400px",
+          position: "absolute",
+          width: "400px",
+          height: "300px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "If you can fix the compass, then you shall continue on your journey to restore the Fraction Orb!",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/BrokenCompass.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "400px",
+              position: "absolute",
+              width: "400px",
+              height: "300px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "When you add fractions with the same bottom number—the denominator—you just add the top numbers!",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
-        text: "For example: 1/4 + 2/4 = 3/4 and 2/8 + 5/8 = 7/8",
+        text: "For example: 1/4 + 2/4 = 3/4. You add the numerators (1 + 2 = 3) and keep the denominator (4).",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/add.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "150px",
+              position: "absolute",
+              width: "700px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "When the denominators are different, we need to do a little more work.",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Look at both denominators. Find the Least Common Denominator (LCD) – the smallest number both can divide into. Rewrite each fraction so they have this shared denominator. Then, add the numerators like usual!",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "For example, 1/2 + 1/4 = ? The denominators are 2 and 4. The LCD is 4. Convert 1/2 to 2/4. Now add: 2/4 + 1/4 = 3/4",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/lcd.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "150px",
+              position: "absolute",
+              width: "700px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Another example: 2/3 + 1/6 = ? The denominators are 3 and 6. The LCD is 6. Convert 2/3 to 4/6. Now add: 4/6 + 1/6 = 5/6",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/lcd2.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "150px",
+              position: "absolute",
+              width: "700px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "So to assemble the compass, I just need to know how much I've added so far?",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Precisely! But be careful—only the exact total will activate it!",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Squeaks",
         text: "Let's try a practice problem. What is 1/3 + 1/3?",
         background: "Backrooms",
+        character: "/game characters/Squeaks.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         isChoice: true,
         choices: ["1/3", "2/3", "2/6", "1/6"],
         correctChoice: 1, // 2/3 is the correct answer (index 1)
@@ -1182,11 +1358,33 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Squeaks",
         text: "Correct! 1/3 + 1/3 = 2/3. Since the denominators are the same, we just add the numerators.",
         background: "Backrooms",
+         character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
       },
       {
         speaker: "Squeaks",
         text: "Now try a harder one. What is 1/2 + 1/4?",
         background: "Backrooms",
+         character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         isChoice: true,
         choices: ["2/6", "3/4", "1/6", "2/4"],
         correctChoice: 1, // 3/4 is the correct answer (index 1)
@@ -1197,6 +1395,17 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Squeaks",
         text: "Excellent! 1/2 + 1/4 = 3/4. We convert 1/2 to 2/4, then add: 2/4 + 1/4 = 3/4.",
         background: "Backrooms",
+         character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
     ],
 
@@ -1227,6 +1436,7 @@ export function getLevelDialogue(levelId: string) {
         text: "I'm ready to restore the compass!",
         background: "Backrooms",
       },
+   
     ],
 
     // Transition to Lessmore Bridge (Level 6)
@@ -1235,21 +1445,95 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Squeaks",
         text: "You've got the compass, Whiskers! It'll guide you to the lost pieces of the orb, but remember—fractions aren't just about knowing... they're about doing.",
         background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/GlowCompass.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "400px",
+              position: "absolute",
+              width: "500px",
+              height: "300px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "Thanks, Squeaks. I can feel it... something important is just ahead.",
         background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/GlowCompass.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "400px",
+              position: "absolute",
+              width: "500px",
+              height: "300px"
+            }
+          }
+        ]
       },
       {
         speaker: "Squeaks",
         text: "Follow the old stone path outside town. It leads to Borrowdale. Last I heard, the bridge there was acting strange... numbers vanish right off the stones!",
         background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
+        
       },
       {
         speaker: "Whiskers",
         text: "Then it's time to do some subtracting. Let's go!",
         background: "Squeaks Emporium",
+        character: "/game characters/Squeaks.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        
       },
       {
         speaker: "Narrator",
@@ -1260,91 +1544,481 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Narrator",
         text: "The compass pulses and glows. Whiskers steps cautiously to the ravine's edge.",
         background: "LessMoore Bridge",
+        assets: [
+          {
+            src: "/game assets/GlowCompass.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "35%",
+              bottom: "400px",
+              position: "absolute",
+              width: "500px",
+              height: "300px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "The compass brought me here... but the bridge is broken!",
         background: "LessMoore Bridge",
+        assets: [
+          {
+            src: "/game assets/GlowCompass.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "35%",
+              bottom: "400px",
+              position: "absolute",
+              width: "500px",
+              height: "300px"
+            }
+          }
+        ]
       },
       {
         speaker: "Narrator",
         text: "A gentle rumble echoes as an ancient figure rises from the stone—Elder Pebble, the guardian of understanding.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Elder Pebble",
         text: "Only those who understand taking away can rebuild what was lost. You must master the art of fraction subtraction to restore the bridge.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Narrator",
         text: "Elder Pebble conjures a glowing stone plate with 5 of 8 sections lit.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/stone.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "30%",
+              bottom: "220px",
+              position: "absolute",
+              width: "600px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "Start with 5 out of 8. Take away 2 of the same kind. What remains?",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/stone1.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "35%",
+              bottom: "220px",
+              position: "absolute",
+              width: "600px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
-        text: "Examples: 5/8 − 2/8 = 3/8, 3/4 − 1/4 = 2/4 → 1/2, 6/6 − 4/6 = 2/6 → 1/3",
+        text: "5/8 − 2/8 = 3/8. When subtracting fractions with the same bottom number, just subtract the top numbers.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/threeeight.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "35%",
+              bottom: "120px",
+              position: "absolute",
+              width: "750px",
+              height: "750px"
+            }
+          }
+        ]
       },
       {
         speaker: "Whiskers",
         text: "So when the parts match, it's like taking blocks from the same pile?",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/threeeight.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "35%",
+              bottom: "120px",
+              position: "absolute",
+              width: "750px",
+              height: "750px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "Exactly. When the pieces share a name, you simply subtract the tops. But not all fractions speak the same tongue...",
         background: "LessMoore Bridge",
+         character: "/game characters/Elder Pebble.png",
+         characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Narrator",
-        text: "He steps aside. Two glowing stones float between you—2/5 and 3/4.",
+        text: "He steps aside. Two glowing stones float between you— 3/4 and 2/5.",
         background: "LessMoore Bridge",
+         character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/stone34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/stone25.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "When parts differ, you must make them agree. This is the art of the Least Common Denominator.",
         background: "LessMoore Bridge",
+         character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/stone34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/stone25.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "To subtract 3/4 and 2/5, we must find a common ground. Their denominators—4 and 5—must become one.",
         background: "LessMoore Bridge",
+         character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/stone34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/stone25.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "Find the Least Common Denominator (LCD). Multiples of 4: 4, 8, 12, 16, 20, ... Multiples of 5: 5, 10, 15, 20, ... LCD = 20",
         background: "LessMoore Bridge",
+         character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/stone34.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "10%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          },
+          {
+            src: "/game assets/stone25.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "60%",
+              bottom: "200px",
+              position: "absolute",
+              width: "500px",
+              height: "500px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "Convert to Equivalent Fractions: 3/4 → 15/20 (×5), 2/5 → 8/20 (×4)",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/lcd1.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "100px",
+              position: "absolute",
+              width: "600px",
+              height: "600px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "Subtract the Numerators: 15/20 − 8/20 = 7/20",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/lcd22.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "100px",
+              position: "absolute",
+              width: "700px",
+              height: "700px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "By reshaping the parts, you've brought them to unity. Only then can subtraction begin.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "10%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
+        assets: [
+          {
+            src: "/game assets/lcd22.png",
+            assetStyle: {
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 0 12px #000)",
+              left: "40%",
+              bottom: "100px",
+              position: "absolute",
+              width: "700px",
+              height: "700px"
+            }
+          }
+        ]
       },
       {
         speaker: "Elder Pebble",
         text: "Now, solve these subtraction problems to prove your worth and cross the bridge!",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        }
       },
       {
         speaker: "Elder Pebble",
         text: "What is 5/8 - 2/8?",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         isChoice: true,
         choices: ["3/8", "3/16", "7/8", "3/4"],
         correctChoice: 0, // 3/8 is the correct answer (index 0)
@@ -1355,11 +2029,31 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Elder Pebble",
         text: "Correct! 5/8 - 2/8 = 3/8. Since the denominators are the same, we just subtract the numerators.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
       },
       {
         speaker: "Elder Pebble",
         text: "Now try a harder one. What is 3/4 - 1/2?",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         isChoice: true,
         choices: ["2/4", "1/4", "2/6", "1/2"],
         correctChoice: 1, // 1/4 is the correct answer (index 1)
@@ -1368,6 +2062,16 @@ export function getLevelDialogue(levelId: string) {
       },
       {
         speaker: "Elder Pebble",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
         text: "Excellent! 3/4 - 1/2 = 1/4. We convert 1/2 to 2/4, then subtract: 3/4 - 2/4 = 1/4.",
         background: "LessMoore Bridge",
       },
@@ -1384,6 +2088,16 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Elder Pebble",
         text: "To restore the bridge, you must solve five subtraction problems. Each correct answer will add a stone to the bridge.",
         background: "LessMoore Bridge",
+        character: "/game characters/Elder Pebble.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "600px",
+          height: "600px"
+        },
       },
       {
         speaker: "Elder Pebble",

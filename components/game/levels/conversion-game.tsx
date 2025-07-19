@@ -213,11 +213,11 @@ export default function ConversionGame(props: any) {
       {/* Overlay for readability - revert to original */}
       <div className="absolute inset-0 bg-amber-900 bg-opacity-20 z-10" />
       {/* Foreground content */}
-      <div className="relative z-20 min-h-screen w-full flex flex-col">
+      <div className="absolute inset-0 z-20 flex items-center justify-center">
         {/* (Test button removed) */}
         {!gameStarted ? (
           // Start Screen - styled like dialogue box
-          <div className="mt-auto mb-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+          <div className="w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl mx-auto flex flex-col items-center justify-center">
             <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
             <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
               Welcome to the Sorting Table! Test your knowledge by converting fractions.
@@ -226,7 +226,7 @@ export default function ConversionGame(props: any) {
               {"\n"}• You have 60 seconds to score as many points as possible
               {"\n"}• Get 5 in a row for bonus time!
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between w-full">
               <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
                 Start the Challenge!
               </Button>
@@ -234,11 +234,11 @@ export default function ConversionGame(props: any) {
           </div>
         ) : (
           // Game Screen - styled like dialogue box
-          <div className="mt-auto mb-8 left-1/2 w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl z-20 mx-auto">
+          <div className="w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl mx-auto flex flex-col items-center justify-center">
             <div className="text-amber-300 font-pixel text-lg mb-2">
               Score: {score} | Time: {timeLeft}s | Streak: {streak}
             </div>
-            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px] text-center">
               {shuffledProblems[currentProblem]?.type === "improper-to-mixed"
                 ? "Convert to Mixed Number:"
                 : "Convert to Improper Fraction:"}
@@ -251,7 +251,7 @@ export default function ConversionGame(props: any) {
                 </span>
               )}
             </div>
-            <div className="flex justify-between items-center gap-4">
+            <div className="flex justify-center items-center gap-4 w-full">
               <Input
                 type="text"
                 value={userAnswer}
@@ -271,30 +271,29 @@ export default function ConversionGame(props: any) {
             </div>
           </div>
         )}
-
-        {/* Emergency exit button - always visible */}
-        <div className="absolute top-4 right-4 z-30">
-          <Button
-            onClick={() => router.push("/student/game")}
-            className="font-pixel bg-red-600 hover:bg-red-700 text-white"
-          >
-            Exit
-          </Button>
-        </div>
-
-        {/* Completion Popup */}
-        <LevelCompletionPopup
-          isOpen={showCompletionPopup}
-          onClose={() => {
-            setShowCompletionPopup(false)
-            router.push("/student/game")
-          }}
-          levelId="3"
-          levelName="Conversion Game"
-          score={score}
-          isStory={false}
-        />
       </div>
+      {/* Emergency exit button - always visible */}
+      <div className="absolute top-4 right-4 z-30">
+        <Button
+          onClick={() => router.push("/student/game")}
+          className="font-pixel bg-red-600 hover:bg-red-700 text-white"
+        >
+          Exit
+        </Button>
+      </div>
+
+      {/* Completion Popup */}
+      <LevelCompletionPopup
+        isOpen={showCompletionPopup}
+        onClose={() => {
+          setShowCompletionPopup(false)
+          router.push("/student/game")
+        }}
+        levelId="3"
+        levelName="Conversion Game"
+        score={score}
+        isStory={false}
+      />
     </div>
   )
 }
