@@ -34,7 +34,7 @@ const locationData = {
   },
   5: {
     name: "Dreadpoint Hollow",
-    image: "/Prac_Dreadpoint.png",
+    image: "/Prac_DreadpointHollow.png",
     description:
       "Venture into the shadowy depths of Dreadpoint Hollow, where the most challenging fraction mysteries await! This treacherous realm tests your mastery of complex fraction operations. Face the trials of subtracting fractions with unlike denominators, solve multi-step fraction problems, and conquer the fearsome mixed number conversions. Only the bravest mathematicians dare to enter these dark caverns!",
   },
