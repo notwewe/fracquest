@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Save, Trophy, BookOpen, UserPlus } from "lucide-react"
+import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
 import { isMobileDevice } from "@/lib/utils/deviceDetection"
 
@@ -240,24 +240,13 @@ export default function StudentProfilePage() {
       }}
     >
       {/* Back to Dashboard Button */}
-      <div className="absolute top-4 left-4 z-10">
-        <Link href="/student/dashboard">
-          <div
-            className="relative w-64 h-20 cursor-pointer hover:scale-105 transition-transform"
-            style={{
-              backgroundImage: "url('/dashboard/logout.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }}
-          >
-            <div className="absolute inset-0 flex items-center justify-center" style={{ marginTop: "-4px" }}>
-              <span className="text-amber-200 font-bold text-2xl" style={{ fontFamily: "var(--font-blaka)" }}>
-                Dashboard
-              </span>
-            </div>
-          </div>
-        </Link>
+      <div className="absolute top-8 left-8 z-20">
+        <Button asChild variant="outline" className="font-blaka border-amber-600 text-black bg-amber-50/90 text-lg">
+          <Link href="/student/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
       </div>
 
       <div className="flex flex-col items-center">
