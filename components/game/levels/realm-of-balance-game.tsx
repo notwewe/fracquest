@@ -27,6 +27,9 @@ export default function RealmOfBalanceGame() {
   const [isLoading, setIsLoading] = useState(false)
   const [showCompletionPopup, setShowLevelCompletionPopup] = useState(false)
   const supabase = createClient()
+  const [mistakes, setMistakes] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [passed, setPassed] = useState(false)
 
   // Generate comparison questions
   useEffect(() => {
@@ -97,6 +100,9 @@ export default function RealmOfBalanceGame() {
     setScore(0)
     setCurrentQuestion(0)
     setFeedback(null)
+    setMistakes(0)
+    setGameOver(false)
+    setPassed(false)
   }
 
   const handleAnswer = (answer: ">" | "<" | "=") => {
@@ -107,35 +113,53 @@ export default function RealmOfBalanceGame() {
     if (isCorrect) {
       setScore(score + 20)
       setFeedback("correct")
-
       toast({
         title: "Correct!",
         description: "The scales are balanced with truth.",
         variant: "default",
       })
+      setDialoguePhase("feedback")
+      setTimeout(() => {
+        if (currentQuestion < questions.length - 1) {
+          setCurrentQuestion(currentQuestion + 1)
+          setDialoguePhase("game")
+          setFeedback(null)
+        } else {
+          // Game is complete, check pass/fail
+          if (score + 20 >= 60) {
+            setPassed(true)
+          } else {
+            setPassed(false)
+          }
+          setShowLevelCompletionPopup(true)
+          setDialoguePhase("complete")
+          endGame()
+        }
+      }, 1500)
     } else {
-      setFeedback("incorrect")
-
-      toast({
-        title: "Incorrect",
-        description: "The scales tilt with uncertainty.",
-        variant: "destructive",
+      setMistakes((prev) => {
+        const newMistakes = prev + 1
+        setFeedback('incorrect')
+        if (newMistakes >= 3) {
+          if (score >= 60) {
+            setPassed(true)
+          } else {
+            setGameOver(true)
+          }
+          setShowLevelCompletionPopup(true)
+          setFeedback(null)
+          setDialoguePhase("complete")
+        } else {
+          toast({
+            title: "Incorrect",
+            description: `Try again!`,
+            variant: "destructive",
+          })
+          setDialoguePhase("feedback")
+        }
+        return newMistakes
       })
     }
-
-    setDialoguePhase("feedback")
-
-    // Move to next question after a delay
-    setTimeout(() => {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1)
-        setDialoguePhase("game")
-        setFeedback(null)
-      } else {
-        setDialoguePhase("complete")
-        endGame()
-      }
-    }, 1500)
   }
 
   const endGame = async () => {
@@ -209,8 +233,20 @@ export default function RealmOfBalanceGame() {
           <div className="bg-blue-800 bg-opacity-90 p-8 rounded-lg mb-8 w-full max-w-6xl mx-auto">
             <h2 className="text-2xl font-pixel text-blue-200 mb-2">The Scale of Judgment</h2>
             <div className="text-blue-300 text-lg mb-4">
-              Question {currentQuestion + 1} of {questions.length} • Score: {score}
+              Question {currentQuestion + 1} of 5 • Score: {score}/100
             </div>
+
+            {gameStarted && dialoguePhase === "game" && !gameEnded && !gameOver && (
+              <div className="absolute top-4 left-4 z-20">
+                <div className="bg-gray-800 rounded-full px-4 py-2 flex items-center">
+                  <span className="font-pixel text-blue-200 mr-2">Mistakes</span>
+                  <div className="w-24 h-4 bg-red-200 rounded-full overflow-hidden">
+                    <div className="h-4 bg-red-600 rounded-full transition-all duration-300" style={{ width: `${(mistakes/3)*100}%` }}></div>
+                  </div>
+                  <span className="font-pixel text-blue-200 ml-2">{mistakes}/3</span>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-center items-center space-x-8 mb-6">
               <div className="bg-blue-600 p-8 rounded-lg text-center w-48">
@@ -254,8 +290,10 @@ export default function RealmOfBalanceGame() {
         <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
           {dialoguePhase === "intro" && (
             <>
-              "To pass through the Realm of Balance, you must decide... Which fraction weighs more? Which weighs less?
-              Or do they match? Choose the correct symbol: &gt;, &lt;, or =."
+              "To pass through the Realm of Balance, you must decide... Which fraction weighs more? Which weighs less? Or do they match? Choose the correct symbol: &gt;, &lt;, or =."
+              {"\n\n"}
+              You have 3 lives. 3 mistakes and the game ends.
+              {"\n"}Score 60 or more to pass. Good luck!
             </>
           )}
           {dialoguePhase === "feedback" && feedback === "correct" && (
@@ -265,6 +303,13 @@ export default function RealmOfBalanceGame() {
             <>
               "The scales tilt with uncertainty. Remember to find a common denominator to compare fractions accurately."
             </>
+          )}
+          {dialoguePhase === "feedback" && feedback === "incorrect" && (
+            <div className="absolute bottom-8 left-8 z-50">
+              <Button onClick={() => { setFeedback(null); setDialoguePhase('game'); }} className="font-pixel bg-blue-600 hover:bg-blue-700 text-white">
+                Try Again
+              </Button>
+            </div>
           )}
           {dialoguePhase === "complete" && (
             <>
@@ -294,7 +339,7 @@ export default function RealmOfBalanceGame() {
       <div className="absolute top-4 right-4">
         <Button
           onClick={() => router.push("/student/game")}
-          className="font-pixel bg-gray-600 hover:bg-gray-700 text-white"
+          className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit Realm
         </Button>
@@ -307,11 +352,25 @@ export default function RealmOfBalanceGame() {
           setShowLevelCompletionPopup(false)
           router.push("/student/game")
         }}
+        onRetry={() => {
+          setShowLevelCompletionPopup(false)
+          setGameStarted(false)
+          setGameEnded(false)
+          setGameOver(false)
+          setPassed(false)
+          setCurrentQuestion(0)
+          setScore(0)
+          setMistakes(0)
+          setFeedback(null)
+          setDialoguePhase("intro")
+        }}
         levelId="9"
         levelName="Realm of Balance"
         score={score}
-        maxScore={100}
+        isGameOver={gameOver}
         isStory={false}
+        passed={passed}
+        maxScore={100}
       />
     </div>
   )

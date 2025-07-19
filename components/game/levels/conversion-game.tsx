@@ -36,16 +36,22 @@ const problems: ConversionProblem[] = [
 
 export default function ConversionGame() {
   const router = useRouter()
+  // Scoring logic
+  const [score, setScore] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [maxStreak, setMaxStreak] = useState(0)
   const [currentProblem, setCurrentProblem] = useState(0)
   const [userAnswer, setUserAnswer] = useState("")
-  const [score, setScore] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(60)
   const [gameStarted, setGameStarted] = useState(false)
   const [gameEnded, setGameEnded] = useState(false)
-  const [streak, setStreak] = useState(0)
-  const [showCompletionPopup, setShowCompletionPopup] = useState(false)
+  const [gameOver, setGameOver] = useState(false)
+  const [passed, setPassed] = useState(false)
+  // Replace questionMistakes with mistakes
+  const [mistakes, setMistakes] = useState(0)
+  const [feedback, setFeedback] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
+  const [timeLeft, setTimeLeft] = useState(60)
 
   // Shuffle problems for variety
   const [shuffledProblems, setShuffledProblems] = useState<ConversionProblem[]>([])
@@ -55,23 +61,37 @@ export default function ConversionGame() {
     setShuffledProblems(shuffled)
   }, [])
 
-  // Timer effect
   useEffect(() => {
-    if (gameStarted && !gameEnded && timeLeft > 0) {
+    if (gameStarted && !gameEnded && !gameOver && timeLeft > 0 && score < 100) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
       return () => clearTimeout(timer)
-    } else if (timeLeft === 0) {
-      endGame()
+    } else if (timeLeft === 0 && gameStarted && !gameEnded && !gameOver) {
+      if (score >= 60) {
+        setPassed(true)
+        setGameEnded(true)
+      } else {
+        setGameOver(true)
+      }
+    } else if (score >= 100 && gameStarted && !gameEnded && !gameOver) {
+      setPassed(true)
+      setGameEnded(true)
     }
-  }, [gameStarted, gameEnded, timeLeft])
+  }, [gameStarted, gameEnded, gameOver, timeLeft, score])
 
   const startGame = () => {
     setGameStarted(true)
     setCurrentProblem(0)
     setScore(0)
     setStreak(0)
-    setTimeLeft(60)
+    setMaxStreak(0)
     setUserAnswer("")
+    // In startGame, reset mistakes to 0
+    setMistakes(0)
+    setFeedback(null)
+    setGameEnded(false)
+    setGameOver(false)
+    setPassed(false)
+    setTimeLeft(60)
   }
 
   const checkAnswer = () => {
@@ -79,44 +99,64 @@ export default function ConversionGame() {
     const isCorrect = userAnswer.trim() === problem.answer
 
     if (isCorrect) {
-      setScore(score + 10)
-      setStreak(streak + 1)
-
-      // Bonus for streak
-      if (streak >= 4) {
-        setScore(score + 20) // Bonus points
-        setTimeLeft(timeLeft + 5) // Bonus time
+      let newStreak = streak + 1
+      let newScore = score + 20
+      setStreak(newStreak)
+      setScore(newScore)
+      setMaxStreak(Math.max(maxStreak, newStreak))
+      // REMOVE: setQuestionMistakes(0)
+      setFeedback(null)
+      if (newStreak === 3) {
+        setTimeLeft((prev) => prev + 10)
         toast({
-          title: "Perfect Streak!",
-          description: "5 in a row! +5 seconds bonus time!",
-          variant: "default",
-        })
-      } else {
-        toast({
-          title: "Correct!",
-          description: "Great job converting that fraction!",
+          title: "Streak Bonus!",
+          description: "3 in a row! +10 seconds!",
           variant: "default",
         })
       }
+      if (newStreak === 5) {
+        toast({
+          title: "Streak Bonus!",
+          description: "5 in a row! Bonus points!",
+          variant: "default",
+        })
+      }
+      // Next question
+      if (currentProblem < shuffledProblems.length - 1) {
+        setCurrentProblem(currentProblem + 1)
+        setUserAnswer("")
+      } else {
+        // End of questions
+        if (newScore >= 60) {
+          setPassed(true)
+          setGameEnded(true)
+        } else {
+          setGameOver(true)
+        }
+      }
     } else {
+      // Streak broken
       setStreak(0)
+      setMistakes((prev) => {
+        const newMistakes = prev + 1
+        if (newMistakes >= 3) {
+          if (score >= 60) {
+            setPassed(true)
+            setGameEnded(true)
+          } else {
+            setGameOver(true)
+          }
+          setFeedback(null)
+        } else {
+          setFeedback("Incorrect. Try again!")
+        }
+        return newMistakes
+      })
       toast({
         title: "Incorrect",
-        description: `The correct answer was ${problem.answer}. Try the next one!`,
+        description: `The correct answer was ${problem.answer}. Try again!`,
         variant: "destructive",
       })
-    }
-
-    // Move to next problem
-    if (currentProblem < shuffledProblems.length - 1) {
-      setCurrentProblem(currentProblem + 1)
-      setUserAnswer("")
-    } else {
-      // Restart with new shuffled problems
-      const newShuffled = [...problems].sort(() => Math.random() - 0.5)
-      setShuffledProblems(newShuffled)
-      setCurrentProblem(0)
-      setUserAnswer("")
     }
   }
 
@@ -172,11 +212,11 @@ export default function ConversionGame() {
         }
       }
 
-      setShowCompletionPopup(true)
+      // setShowCompletionPopup(true) // This line is removed as per new logic
     } catch (error: any) {
       console.error("Error saving game progress:", error.message || error)
       // Still show completion popup even if save fails
-      setShowCompletionPopup(true)
+      // setShowCompletionPopup(true) // This line is removed as per new logic
     } finally {
       setIsLoading(false)
     }
@@ -201,6 +241,17 @@ export default function ConversionGame() {
     )
   }
 
+  // Add a renderGameOver function
+  const renderGameOver = () => (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
+      <div className="bg-red-100 p-8 rounded-lg border-4 border-red-600 shadow-lg text-center">
+        <h2 className="text-3xl font-pixel text-red-800 mb-4">Game Over</h2>
+        <p className="text-lg font-pixel text-red-700 mb-6">You made 3 mistakes on the same question.</p>
+        <Button onClick={() => { setGameOver(false); setGameEnded(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false); }} className="font-pixel bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4">Retry</Button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
       {/* Background - same as story levels */}
@@ -215,11 +266,12 @@ export default function ConversionGame() {
         <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
           <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
           <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-            Welcome to the Sorting Table! Test your knowledge by converting fractions.
-            {"\n\n"}• Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)
-            {"\n"}• Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)
-            {"\n"}• You have 60 seconds to score as many points as possible
-            {"\n"}• Get 5 in a row for bonus time!
+            Convert between improper fractions and mixed numbers.
+            {"\n\n"}
+            • You have 1 minute.
+            {"\n"}• 3 correct answers in a row: +10 seconds.
+            {"\n"}• 3 mistakes: game over.
+            {"\n"}• Reach 100 points or run out of time to finish.
           </div>
           <div className="flex justify-between">
             <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
@@ -231,7 +283,7 @@ export default function ConversionGame() {
         // Game Screen - styled like dialogue box
         <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
           <div className="text-amber-300 font-pixel text-lg mb-2">
-            Score: {score} | Time: {timeLeft}s | Streak: {streak}
+            Score: {score} | Streak: {streak} | Time: {timeLeft}s
           </div>
           <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
             {shuffledProblems[currentProblem]?.type === "improper-to-mixed"
@@ -265,6 +317,11 @@ export default function ConversionGame() {
               Submit
             </Button>
           </div>
+          {feedback && (
+            <div className="text-center mt-4">
+              <span className={`font-pixel text-lg ${feedback.startsWith('Correct') ? 'text-green-600' : feedback.startsWith('Incorrect') ? 'text-red-600' : feedback.startsWith('Game over') ? 'text-red-600' : 'text-amber-600'}`}>{feedback}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -274,21 +331,38 @@ export default function ConversionGame() {
           onClick={() => router.push("/student/game")}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
-          Exit
+          Exit Sorting Table
         </Button>
       </div>
 
+      {/* Add a healthbar in the top left */}
+      {gameStarted && !gameEnded && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className="bg-gray-800 rounded-full px-4 py-2 flex items-center">
+            <span className="font-pixel text-amber-200 mr-2">Mistakes</span>
+            <div className="w-24 h-4 bg-red-200 rounded-full overflow-hidden">
+              <div className="h-4 bg-red-600 rounded-full transition-all duration-300" style={{ width: `${(mistakes/3)*100}%` }}></div>
+            </div>
+            <span className="font-pixel text-amber-200 ml-2">{mistakes}/3</span>
+          </div>
+        </div>
+      )}
+
       {/* Completion Popup */}
       <LevelCompletionPopup
-        isOpen={showCompletionPopup}
+        isOpen={gameOver || gameEnded}
         onClose={() => {
-          setShowCompletionPopup(false)
-          router.push("/student/game")
+          router.push("/student/map")
+        }}
+        onRetry={() => {
+          setGameOver(false); setGameEnded(false); setPassed(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false);
         }}
         levelId="3"
         levelName="Conversion Game"
         score={score}
+        isGameOver={gameOver}
         isStory={false}
+        passed={passed}
       />
     </div>
   )

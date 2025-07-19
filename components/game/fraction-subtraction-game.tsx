@@ -32,6 +32,7 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const [questionMistakes, setQuestionMistakes] = useState(0)
 
   // Generate a fraction subtraction question
   const generateQuestion = (): Question => {
@@ -143,7 +144,7 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
 
     if (selectedAnswer === currentQuestion.answer) {
       // Correct answer
-      setScore((prev) => prev + 10)
+      setScore((prev) => Math.min(prev + 10, 100))
       setFeedback("Correct! Another stone finds its place.")
       setBridgeTiles((prev) => {
         const newValue = prev + 1
@@ -155,6 +156,7 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
         }
         return newValue
       })
+      setQuestionMistakes(0)
 
       // Next question after a short delay
       setTimeout(() => {
@@ -163,20 +165,28 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
       }, 1500)
     } else {
       // Wrong answer
-      setMistakes((prev) => prev + 1)
-      setFeedback("Numbers crumble under pressure. Look again, traveler.")
-
-      // Clear feedback after 1.5 seconds
-      setTimeout(() => {
-        setFeedback(null)
-      }, 1500)
+      if (questionMistakes + 1 >= 3) {
+        setGameState("complete")
+      } else {
+        setQuestionMistakes((prev) => prev + 1)
+        setScore((prev) => Math.max(0, prev - 10)) // Deduct 10 points for wrong answer
+        setMistakes((prev) => prev + 1)
+        setFeedback("Numbers crumble under pressure. Look again, traveler.")
+        setTimeout(() => {
+          setFeedback(null)
+        }, 1500)
+      }
+      // Do NOT advance to next question, let user retry
     }
   }
 
   // Complete game effect
   useEffect(() => {
+    if (mistakes >= 3 && gameState === "playing") {
+      setGameState("complete")
+    }
     if (gameState === "complete") {
-      onComplete(score, mistakes, attempts)
+      onComplete(Math.min(score, 100), mistakes, attempts)
     }
   }, [gameState, score, mistakes, attempts, onComplete])
 
@@ -224,7 +234,7 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <Award className="h-5 w-5 text-amber-600 mr-1" />
-          <span className="font-pixel text-amber-900">Score: {score}</span>
+          <span className="font-pixel text-amber-900">Score: {score}/100</span>
         </div>
         <div className="font-pixel text-amber-900">Bridge Tiles: {bridgeTiles}/5</div>
       </div>
@@ -298,7 +308,7 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
         <div className="grid grid-cols-3 gap-4">
           <div>
             <h3 className="font-pixel text-amber-900">Score</h3>
-            <p className="text-3xl font-pixel text-amber-800">{score}</p>
+            <p className="text-3xl font-pixel text-amber-800">{score}/100</p>
           </div>
           <div>
             <h3 className="font-pixel text-amber-900">Mistakes</h3>
@@ -313,6 +323,15 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
     </div>
   )
 
+  // Game over screen
+  const renderGameOver = () => (
+    <div className="space-y-6 text-center">
+      <h2 className="text-2xl font-pixel text-red-900">Game Over</h2>
+      <p className="font-pixel text-amber-800">You made 3 mistakes. Try again to master this level!</p>
+      <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">Retry</Button>
+    </div>
+  )
+
   return (
     <Card className="border-2 border-amber-800 bg-amber-50">
       <CardHeader>
@@ -320,12 +339,14 @@ export function FractionSubtractionGame({ waypointId, userId, onComplete }: Frac
           {gameState === "tutorial" && "Bridge Builder Challenge"}
           {gameState === "playing" && "Restoring Lessmore Bridge"}
           {gameState === "complete" && "Bridge Restored!"}
+          {gameState === "gameover" && "Game Over"}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {gameState === "tutorial" && renderTutorial()}
         {gameState === "playing" && renderGame()}
         {gameState === "complete" && renderComplete()}
+        {gameState === "gameover" && renderGameOver()}
       </CardContent>
     </Card>
   )

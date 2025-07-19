@@ -119,7 +119,7 @@ export function getLevelDialogue(levelId: string) {
       {
         speaker: "Narrator",
         text: "Whiskers enters a small wooden shop with shelves filled with fraction-themed items—half-cheese wheels, quarter-apples, and fraction potions.",
-        background: "Fraction Emporium",
+        background: "Fraction Emporium Test",
       },
       {
         speaker: "Narrator",
