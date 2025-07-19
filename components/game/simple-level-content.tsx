@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "./level-completion-popup"
+import { backgroundImages } from "@/lib/game-content"
 
 type DialogueLine = {
   speaker: string
@@ -16,6 +17,9 @@ type DialogueLine = {
   correctChoice?: number
   wrongAnswerText?: string
   wrongAnswerLine?: number // Index to jump to if answer is wrong
+  character?: string // Character image path
+  characterStyle?: React.CSSProperties // Character image style
+  assets?: { src: string; assetStyle?: React.CSSProperties }[] // Additional assets for the dialogue line
 }
 
 type LevelProps = {
@@ -382,15 +386,49 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - text only */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-          {currentDialogue.background || "Fraction Practice"}
+      {/* Background image if available */}
+      {currentDialogue.background && backgroundImages[currentDialogue.background] ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{ backgroundImage: `url('${backgroundImages[currentDialogue.background]}')` }}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20 z-0">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+            {currentDialogue.background || "Fraction Practice"}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Character image if present - fixed position, above background, below dialogue box */}
+      {currentDialogue.character && (
+        <img
+          src={currentDialogue.character}
+          alt={currentDialogue.speaker}
+          width={600}
+          height={600}
+          style={currentDialogue.characterStyle || {
+            imageRendering: "pixelated",
+            filter: "drop-shadow(0 0 12px #000)",
+            transform: "scaleX(-1)"
+          }}
+        />
+      )}
+      {/* Additional assets if present */}
+      {currentDialogue.assets &&
+        currentDialogue.assets.map((asset, idx) => (
+          <img
+            key={idx}
+            src={asset.src}
+            alt={`asset-${idx}`}
+            width={600}
+            height={600}
+            style={asset.assetStyle}
+          />
+        ))}
 
       {/* Dialogue box */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-30">
         <div className="text-amber-300 font-pixel text-lg mb-2">{currentDialogue.speaker}</div>
         <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
           {currentDialogue.text}
