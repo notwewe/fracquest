@@ -251,26 +251,36 @@ export function FractionAddition({ waypointId }: { waypointId: number }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[500px] p-4">
-      <Card className="w-full max-w-3xl p-6 bg-gradient-to-b from-amber-50 to-amber-100 shadow-lg">
-        <h2 className="text-2xl font-bold text-amber-800 mb-4">{steps[currentStep].title}</h2>
-        <div className="min-h-[350px]">{steps[currentStep].content}</div>
-        <div className="flex justify-between mt-6">
-          <Button onClick={handlePrevious} disabled={currentStep === 0} className="bg-amber-600 hover:bg-amber-700">
-            Previous
-          </Button>
-          <div className="text-sm text-amber-700">
-            Step {currentStep + 1} of {steps.length}
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Background image */}
+      <div className="absolute inset-0 z-0 bg-[url('/game backgrounds/Backrooms.png')] bg-cover bg-center" />
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 z-10 bg-amber-900 bg-opacity-20" />
+      {/* Foreground content */}
+      <div className="relative z-20 min-h-screen w-full flex flex-col">
+        {/* ...existing interactive content... */}
+        {/* Place the rest of your FractionAddition JSX here, starting with the Card and stepper UI */}
+        {/* Example: */}
+        <Card className="w-full max-w-2xl mx-auto p-6 bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl my-8">
+          <h2 className="text-2xl font-bold text-amber-800 mb-4">{steps[currentStep].title}</h2>
+          <div className="min-h-[350px]">{steps[currentStep].content}</div>
+          <div className="flex justify-between mt-6">
+            <Button onClick={handlePrevious} disabled={currentStep === 0} className="bg-amber-600 hover:bg-amber-700">
+              Previous
+            </Button>
+            <div className="text-sm text-amber-700">
+              Step {currentStep + 1} of {steps.length}
+            </div>
+            <Button
+              onClick={handleNext}
+              disabled={currentStep === steps.length - 1}
+              className="bg-amber-600 hover:bg-amber-700"
+            >
+              Next
+            </Button>
           </div>
-          <Button
-            onClick={handleNext}
-            disabled={currentStep === steps.length - 1}
-            className="bg-amber-600 hover:bg-amber-700"
-          >
-            Next
-          </Button>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }

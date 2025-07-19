@@ -51,7 +51,19 @@ const rounds: Round[] = [
     ],
     goal: "ascending",
   },
+  // New round
+  {
+    trees: [
+      { id: "1", fraction: "3/5", value: 3 / 5 },
+      { id: "2", fraction: "2/3", value: 2 / 3 },
+      { id: "3", fraction: "7/8", value: 7 / 8 },
+      { id: "4", fraction: "1/4", value: 1 / 4 },
+      { id: "5", fraction: "3/10", value: 3 / 10 },
+    ],
+    goal: "descending",
+  },
 ]
+const roundPoints = [25, 25, 25, 25]
 
 function SortableTree({ tree }: { tree: FractionTree }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: tree.id })
@@ -96,6 +108,10 @@ export default function FractionForestGame() {
   const [isLoading, setIsLoading] = useState(false)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const supabase = createClient()
+  const [mistakes, setMistakes] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [passed, setPassed] = useState(false)
+  const [feedback, setFeedback] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -113,6 +129,10 @@ export default function FractionForestGame() {
   const startGame = () => {
     setGameStarted(true)
     setDialoguePhase("tutorial")
+    setMistakes(0)
+    setGameOver(false)
+    setPassed(false)
+    setFeedback(null)
   }
 
   const startRound = () => {
@@ -138,21 +158,37 @@ export default function FractionForestGame() {
     const isCorrect = trees.every((tree, index) => tree.id === sortedTrees[index].id)
 
     if (isCorrect) {
-      setScore(score + 25)
+      setScore(score + roundPoints[currentRound])
       setDialoguePhase("success")
-
+      setFeedback(null)
       toast({
         title: "Correct!",
         description: "The trees are in perfect order!",
         variant: "default",
       })
     } else {
-      setDialoguePhase("failure")
-
-      toast({
-        title: "Not quite right",
-        description: "The trees need to be rearranged. Try again!",
-        variant: "destructive",
+      setMistakes((prev) => {
+        const newMistakes = prev + 1
+        setFeedback("Incorrect. Try again!")
+        if (newMistakes >= 3) {
+          if (score >= 60) {
+            setPassed(true)
+            setGameEnded(true)
+          } else {
+            setGameOver(true)
+          }
+          setShowCompletionPopup(true)
+          setFeedback(null)
+          setDialoguePhase("complete")
+        } else {
+          setDialoguePhase("failure")
+          toast({
+            title: "Incorrect",
+            description: `Try again!`,
+            variant: "destructive",
+          })
+        }
+        return newMistakes
       })
     }
   }
@@ -248,21 +284,22 @@ export default function FractionForestGame() {
       </div>
 
       {/* Game Area */}
-      {dialoguePhase === "game" && (
+      {gameStarted && dialoguePhase === "game" && !gameEnded && !gameOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center pt-20 pb-40">
           <div className="bg-green-800 bg-opacity-80 p-8 rounded-lg mb-8 w-full max-w-5xl mx-auto">
+          <div className="bg-green-800 bg-opacity-80 p-8 rounded-lg mb-8 w-full max-w-3xl mx-auto">
             <h2 className="text-2xl font-pixel text-green-200 mb-4">
               {rounds[currentRound].goal === "ascending"
-                ? "Drag the trees to arrange from smallest to largest"
-                : "Drag the trees to arrange from largest to smallest"}
+                ? "Arrange trees from smallest to largest"
+                : "Arrange trees from largest to smallest"}
             </h2>
             <div className="text-green-300 text-lg mb-6">
-              Round {currentRound + 1} of 3 • Score: {score}
+              Round {currentRound + 1} of {rounds.length} • Score: {score}/100
             </div>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={trees.map((tree) => tree.id)}>
-                <div className="flex justify-center space-x-10 mb-8 w-full max-w-5xl mx-auto">
+                <div className="flex justify-center space-x-10 mb-8">
                   {trees.map((tree) => (
                     <SortableTree key={tree.id} tree={tree} />
                   ))}
@@ -304,6 +341,67 @@ export default function FractionForestGame() {
                 height: "220px", 
               }}
             />
+        <div className="text-green-300 font-pixel text-lg mb-2">Elder Barkroot</div>
+        <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+          {dialoguePhase === "intro" && (
+            <>
+              "The forest breathes in fractions. When their order is disturbed, so is the grove. You must line up the Trees of Fraction from the smallest to the largest, and balance shall return."
+              {"\n\n"}
+              You have 3 lives. 3 mistakes and the game ends.
+              {"\n"}Score 60 or more to pass. Good luck!
+            </>
+          )}
+          {dialoguePhase === "tutorial" && (
+            <>
+              "Each tree bears a fraction. Drag them into the correct order - from smallest to largest or largest to smallest as I instruct. When the trees are in harmony, the forest will flourish again."
+            </>
+          )}
+          {dialoguePhase === "success" && (
+            <>
+              "Beautiful! The grove stands tall and true. The balance is restored. The trees glow with renewed energy!"
+            </>
+          )}
+          {dialoguePhase === "failure" && (
+            <>
+              "Hmm... the roots grumble. Their growth needs better order. Remember, to compare fractions, find a common
+              denominator first."
+            </>
+          )}
+          {dialoguePhase === "complete" && (
+            <>
+              "You've done well, brave traveler. The roots are aligned, and the forest is healing. Beyond these woods
+              lies the Realm of Balance, where harmony isn't just found in order... but in comparison."
+            </>
+          )}
+        </div>
+        <div className="flex justify-between">
+          {dialoguePhase === "intro" && (
+            <Button onClick={startGame} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
+              Continue
+            </Button>
+          )}
+          {dialoguePhase === "tutorial" && (
+            <Button onClick={startRound} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
+              Start Challenge
+            </Button>
+          )}
+          {dialoguePhase === "success" && (
+            <Button onClick={nextRound} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
+              Continue
+            </Button>
+          )}
+          {dialoguePhase === "failure" && (
+            <Button onClick={tryAgain} className="font-pixel bg-green-600 hover:bg-green-700 text-white">
+              Try Again
+            </Button>
+          )}
+          {dialoguePhase === "complete" && !showCompletionPopup && (
+            <Button
+              onClick={() => setShowCompletionPopup(true)}
+              className="font-pixel bg-green-600 hover:bg-green-700 text-white"
+            >
+              Complete Forest
+            </Button>
           )}
           <div className="flex-1">
             <div className="text-green-300 font-pixel text-lg mb-2">Elder Barkroot</div>
@@ -377,7 +475,7 @@ export default function FractionForestGame() {
       <div className="absolute top-4 right-4">
         <Button
           onClick={() => router.push("/student/game")}
-          className="font-pixel bg-gray-600 hover:bg-gray-700 text-white"
+          className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit Forest
         </Button>
@@ -390,11 +488,41 @@ export default function FractionForestGame() {
           setShowCompletionPopup(false)
           router.push("/student/game")
         }}
+        onRetry={() => {
+          setShowCompletionPopup(false)
+          setGameStarted(false)
+          setGameEnded(false)
+          setGameOver(false)
+          setPassed(false)
+          setCurrentRound(0)
+          setScore(0)
+          setMistakes(0)
+          setFeedback(null)
+          setDialoguePhase("intro")
+        }}
         levelId="8"
         levelName="Fraction Forest"
         score={score}
+        isGameOver={gameOver}
         isStory={false}
+        passed={passed}
       />
+
+      {/* Show feedback below the game area */}
+      {/* Remove feedback display below the game area */}
+
+      {/* Add health bar UI */}
+      {gameStarted && dialoguePhase === "game" && !gameEnded && !gameOver && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className="bg-gray-800 rounded-full px-4 py-2 flex items-center">
+            <span className="font-pixel text-green-200 mr-2">Mistakes</span>
+            <div className="w-24 h-4 bg-red-200 rounded-full overflow-hidden">
+              <div className="h-4 bg-red-600 rounded-full transition-all duration-300" style={{ width: `${(mistakes/3)*100}%` }}></div>
+            </div>
+            <span className="font-pixel text-green-200 ml-2">{mistakes}/3</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

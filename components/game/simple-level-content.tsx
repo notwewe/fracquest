@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "./level-completion-popup"
+import CreditsScroll from "@/components/game/credits-scroll" // or use a placeholder if not present
+import { backgroundImages } from "@/lib/game-content"
 
 type DialogueLine = {
   speaker: string
@@ -16,6 +18,9 @@ type DialogueLine = {
   correctChoice?: number
   wrongAnswerText?: string
   wrongAnswerLine?: number // Index to jump to if answer is wrong
+  character?: string // Character image path
+  characterStyle?: React.CSSProperties // Character image style
+  assets?: { src: string; assetStyle?: React.CSSProperties }[] // Additional assets for the dialogue line
 }
 
 type LevelProps = {
@@ -36,6 +41,7 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
   const [selectedChoice, setSelectedChoice] = useState<number | null>(null)
   const [skipNextLine, setSkipNextLine] = useState(false)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
+  const [showCredits, setShowCredits] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const supabase = createClient()
 
@@ -305,8 +311,11 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
 
       setIsCompleted(true)
 
-      // Show completion popup
-      setShowCompletionPopup(true)
+      if (levelId === "11") {
+        setShowCredits(true)
+      } else {
+        setShowCompletionPopup(true)
+      }
     } catch (error) {
       console.error("Error marking level as completed:", error)
       toast({
@@ -378,19 +387,81 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
     )
   }
 
+  // After dialogue, render credits if showCredits is true and levelId is 11
+  if (showCredits && levelId === "11") {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black">
+        {/* Replace with your actual credits scroll component */}
+        <CreditsScroll />
+      </div>
+    )
+  }
+
   const currentDialogue = dialogue[currentLine]
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - text only */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
-        <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
-          {currentDialogue.background || "Fraction Practice"}
+      {/* Background - show image for 'Fraction Emporium Test', otherwise text */}
+      {currentDialogue.background === "Fraction Emporium Test" ? (
+        <div className="absolute inset-0">
+          <img
+            src="/game-backgrounds/testimage.jpg"
+            alt="Fraction Emporium Test Background"
+            className="w-full h-full object-cover"
+            style={{ zIndex: 0 }}
+          />
         </div>
-      </div>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+            {currentDialogue.background || "Fraction Practice"}
+          </div>
+        </div>
+      )}
+
+      {/* Background image if available */}
+      {currentDialogue.background && backgroundImages[currentDialogue.background] ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center z-0"
+          style={{ backgroundImage: `url('${backgroundImages[currentDialogue.background]}')` }}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20 z-0">
+          <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
+            {currentDialogue.background || "Fraction Practice"}
+          </div>
+        </div>
+      )}
+
+      {/* Character image if present - fixed position, above background, below dialogue box */}
+      {currentDialogue.character && (
+        <img
+          src={currentDialogue.character}
+          alt={currentDialogue.speaker}
+          width={600}
+          height={600}
+          style={currentDialogue.characterStyle || {
+            imageRendering: "pixelated",
+            filter: "drop-shadow(0 0 12px #000)",
+            transform: "scaleX(-1)"
+          }}
+        />
+      )}
+      {/* Additional assets if present */}
+      {currentDialogue.assets &&
+        currentDialogue.assets.map((asset, idx) => (
+          <img
+            key={idx}
+            src={asset.src}
+            alt={`asset-${idx}`}
+            width={600}
+            height={600}
+            style={asset.assetStyle}
+          />
+        ))}
 
       {/* Dialogue box */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+      <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-30">
         <div className="text-amber-300 font-pixel text-lg mb-2">{currentDialogue.speaker}</div>
         <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
           {currentDialogue.text}
@@ -440,17 +511,19 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
       </div>
 
       {/* Completion Popup */}
-      <LevelCompletionPopup
-        isOpen={showCompletionPopup}
-        onClose={() => {
-          setShowCompletionPopup(false)
-          router.push("/student/game")
-        }}
-        levelId={levelId}
-        levelName={levelName}
-        score={100}
-        isStory={true}
-      />
+      {levelId !== "11" && (
+        <LevelCompletionPopup
+          isOpen={showCompletionPopup}
+          onClose={() => {
+            setShowCompletionPopup(false)
+            router.push("/student/game")
+          }}
+          levelId={levelId}
+          levelName={levelName}
+          score={100}
+          isStory={true}
+        />
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
+import BackroomsBackground from "./backrooms-bg"
 
 type AdditionProblem = {
   question: string
@@ -57,6 +58,10 @@ export default function AdditionGame() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [compassPieces, setCompassPieces] = useState(0)
+  const [mistakes, setMistakes] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [passed, setPassed] = useState(false)
+  const [feedback, setFeedback] = useState<string | null>(null)
   const supabase = createClient()
 
   const startGame = () => {
@@ -64,10 +69,13 @@ export default function AdditionGame() {
     setCurrentProblem(0)
     setScore(0)
     setCompassPieces(0)
+    setMistakes(0)
+    setGameOver(false)
+    setPassed(false)
   }
 
-  const handleAnswer = async (choiceIndex: number) => {
-    if (selectedAnswer !== null) return
+  const handleAnswer = (choiceIndex: number) => {
+    if (selectedAnswer !== null || gameEnded || gameOver) return
 
     setSelectedAnswer(choiceIndex)
     const problem = problems[currentProblem]
@@ -76,28 +84,53 @@ export default function AdditionGame() {
     if (isCorrect) {
       setScore(score + 20)
       setCompassPieces(compassPieces + 1)
+      setFeedback(null)
       toast({
         title: "Correct!",
         description: `The compass piece glows! ${compassPieces + 1}/5 pieces restored.`,
         variant: "default",
       })
+      setTimeout(() => {
+        setFeedback(null)
+        if (currentProblem < problems.length - 1) {
+          setCurrentProblem(currentProblem + 1)
+          setSelectedAnswer(null)
+        } else {
+          // End of questions
+          if (score + 20 >= 60) {
+            setPassed(true)
+            setGameEnded(true)
+            setShowCompletionPopup(true)
+          } else {
+            setGameOver(true)
+            setShowCompletionPopup(true)
+          }
+        }
+      }, 1200)
     } else {
-      toast({
-        title: "Incorrect",
-        description: `The correct answer was ${problem.answer}. Try again!`,
-        variant: "destructive",
+      setMistakes((prev) => {
+        const newMistakes = prev + 1
+        setFeedback("Incorrect. Try again!")
+        if (newMistakes >= 3) {
+          if (score >= 60) {
+            setPassed(true)
+            setGameEnded(true)
+          } else {
+            setGameOver(true)
+          }
+          setShowCompletionPopup(true)
+          setFeedback(null)
+        } else {
+          toast({
+            title: "Incorrect",
+            description: `Try again!`,
+            variant: "destructive",
+          })
+          setSelectedAnswer(null)
+        }
+        return newMistakes
       })
     }
-
-    // Move to next problem after delay
-    setTimeout(() => {
-      if (currentProblem < problems.length - 1) {
-        setCurrentProblem(currentProblem + 1)
-        setSelectedAnswer(null)
-      } else {
-        endGame()
-      }
-    }, 2000)
   }
 
   const endGame = async () => {
@@ -163,9 +196,11 @@ export default function AdditionGame() {
   }
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Background - same as story levels */}
-      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20">
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* Backrooms background image */}
+      <BackroomsBackground />
+      {/* Overlay tint for ambience */}
+      <div className="absolute inset-0 flex items-center justify-center bg-amber-900 bg-opacity-20 z-10">
         <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-amber-200">
           Compass Chamber
         </div>
@@ -173,13 +208,16 @@ export default function AdditionGame() {
 
       {!gameStarted ? (
         // Start Screen - styled like dialogue box
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-20">
           <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
           <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
             Welcome to the Compass Chamber! Here, you'll need to add fractions correctly to restore the magical Fraction
             Compass.
             {"\n\n"}
             Each correct answer will add a piece to the compass. Complete all five pieces to activate it!
+            {"\n\n"}
+            You have 3 lives. 3 mistakes and the game ends.
+            {"\n"}Score 60 or more to pass. Good luck!
             {"\n\n"}
             Remember, when adding fractions with the same denominator, just add the numerators. When the denominators
             are different, find a common denominator first.
@@ -192,7 +230,7 @@ export default function AdditionGame() {
         </div>
       ) : (
         // Game Screen - styled like dialogue box
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6">
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 z-20">
           <div className="text-amber-300 font-pixel text-lg mb-2">
             Compass Pieces: {compassPieces}/5 | Score: {score}
           </div>
@@ -219,18 +257,36 @@ export default function AdditionGame() {
               </Button>
             ))}
           </div>
+          {feedback && (
+            <div className="text-center mt-4">
+              <span className={`font-pixel text-lg ${feedback.startsWith('Correct') ? 'text-green-600' : feedback.startsWith('Incorrect') ? 'text-red-600' : 'text-amber-600'}`}>{feedback}</span>
+            </div>
+          )}
         </div>
       )}
 
       {/* Emergency exit button - always visible */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-20">
         <Button
           onClick={() => router.push("/student/game")}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
-          Exit
+          Exit Compass Chamber
         </Button>
       </div>
+
+      {/* Add health bar UI */}
+      {gameStarted && !gameEnded && !gameOver && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className="bg-gray-800 rounded-full px-4 py-2 flex items-center">
+            <span className="font-pixel text-amber-200 mr-2">Mistakes</span>
+            <div className="w-24 h-4 bg-red-200 rounded-full overflow-hidden">
+              <div className="h-4 bg-red-600 rounded-full transition-all duration-300" style={{ width: `${(mistakes/3)*100}%` }}></div>
+            </div>
+            <span className="font-pixel text-amber-200 ml-2">{mistakes}/3</span>
+          </div>
+        </div>
+      )}
 
       {/* Completion Popup */}
       <LevelCompletionPopup
@@ -239,10 +295,24 @@ export default function AdditionGame() {
           setShowCompletionPopup(false)
           router.push("/student/game")
         }}
+        onRetry={() => {
+          setShowCompletionPopup(false)
+          setGameStarted(false)
+          setGameEnded(false)
+          setGameOver(false)
+          setPassed(false)
+          setCurrentProblem(0)
+          setScore(0)
+          setCompassPieces(0)
+          setMistakes(0)
+          setSelectedAnswer(null)
+        }}
         levelId="5"
         levelName="Addition Game"
         score={score}
+        isGameOver={gameOver}
         isStory={false}
+        passed={passed}
       />
     </div>
   )

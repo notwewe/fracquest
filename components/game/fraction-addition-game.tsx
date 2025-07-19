@@ -23,7 +23,7 @@ interface Question {
 }
 
 export function FractionAdditionGame({ waypointId, userId, onComplete }: FractionAdditionGameProps) {
-  const [gameState, setGameState] = useState<"tutorial" | "playing" | "complete">("tutorial")
+  const [gameState, setGameState] = useState<"tutorial" | "playing" | "complete" | "gameover">("tutorial")
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
   const [score, setScore] = useState(0)
   const [mistakes, setMistakes] = useState(0)
@@ -33,6 +33,7 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const [questionMistakes, setQuestionMistakes] = useState(0)
 
   // Generate a fraction addition question
   const generateQuestion = (): Question => {
@@ -139,7 +140,7 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
 
     if (selectedAnswer === currentQuestion.answer) {
       // Correct answer
-      setScore((prev) => prev + 10)
+      setScore((prev) => Math.min(prev + 10, 100))
       setFeedback("Correct! The compass piece fits perfectly!")
       setCompassPieces((prev) => {
         const newValue = prev + 1
@@ -151,6 +152,7 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
         }
         return newValue
       })
+      setQuestionMistakes(0)
 
       // Next question after a short delay
       setTimeout(() => {
@@ -159,18 +161,26 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
       }, 1500)
     } else {
       // Wrong answer
-      setMistakes((prev) => prev + 1)
-      setFeedback("That doesn't align with the others. Try again!")
-
-      // Clear feedback after 1.5 seconds
-      setTimeout(() => {
-        setFeedback(null)
-      }, 1500)
+      if (questionMistakes + 1 >= 3) {
+        setGameState("complete")
+      } else {
+        setQuestionMistakes((prev) => prev + 1)
+        setScore((prev) => Math.max(0, prev - 10)) // Deduct 10 points for wrong answer
+        setMistakes((prev) => prev + 1)
+        setFeedback("That doesn't align with the others. Try again!")
+        setTimeout(() => {
+          setFeedback(null)
+        }, 1500)
+      }
+      // Do NOT advance to next question, let user retry
     }
   }
 
   // Complete game effect
   useEffect(() => {
+    if (mistakes >= 3 && gameState === "playing") {
+      setGameState("complete")
+    }
     if (gameState === "complete") {
       onComplete(score, mistakes, attempts)
     }
@@ -220,7 +230,7 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <Award className="h-5 w-5 text-amber-600 mr-1" />
-          <span className="font-pixel text-amber-900">Score: {score}</span>
+          <span className="font-pixel text-amber-900">Score: {score}/100</span>
         </div>
         <div className="font-pixel text-amber-900">Compass Pieces: {compassPieces}/5</div>
       </div>
@@ -308,7 +318,7 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
         <div className="grid grid-cols-3 gap-4">
           <div>
             <h3 className="font-pixel text-amber-900">Score</h3>
-            <p className="text-3xl font-pixel text-amber-800">{score}</p>
+            <p className="text-3xl font-pixel text-amber-800">{score}/100</p>
           </div>
           <div>
             <h3 className="font-pixel text-amber-900">Mistakes</h3>
@@ -320,6 +330,15 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
           </div>
         </div>
       </div>
+    </div>
+  )
+
+  // Game over screen
+  const renderGameOver = () => (
+    <div className="space-y-6 text-center">
+      <h2 className="text-2xl font-pixel text-red-900">Game Over</h2>
+      <p className="font-pixel text-amber-800">You made 3 mistakes. Try again to master this level!</p>
+      <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">Retry</Button>
     </div>
   )
 
@@ -367,7 +386,7 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
     // Update progress with completion data
     await updateStudentProgress(userId, waypointId, {
       completed: true,
-      score,
+      score: Math.min(score, 100),
       mistakes,
       attempts,
       timeSpent: totalTimeSpent,
@@ -382,44 +401,6 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
     onComplete(score, mistakes, attempts)
   }
 
-  // Handle attempt
-  const handleAnswerUpdated = (selectedAnswer: string) => {
-    if (!currentQuestion) return
-
-    setAttempts((prev) => prev + 1)
-
-    if (selectedAnswer === currentQuestion.answer) {
-      // Correct answer
-      setScore((prev) => prev + 10)
-      setFeedback("Correct! The compass piece fits perfectly!")
-      setCompassPieces((prev) => {
-        const newValue = prev + 1
-        if (newValue >= 5) {
-          // Game complete after 5 correct answers
-          setTimeout(() => {
-            handleGameComplete()
-          }, 1500)
-        }
-        return newValue
-      })
-
-      // Next question after a short delay
-      setTimeout(() => {
-        setCurrentQuestion(generateQuestion())
-        setFeedback(null)
-      }, 1500)
-    } else {
-      // Wrong answer
-      setMistakes((prev) => prev + 1)
-      setFeedback("That doesn't align with the others. Try again!")
-
-      // Clear feedback after 1.5 seconds
-      setTimeout(() => {
-        setFeedback(null)
-      }, 1500)
-    }
-  }
-
   return (
     <Card className="border-2 border-amber-800 bg-amber-50">
       <CardHeader>
@@ -427,12 +408,14 @@ export function FractionAdditionGame({ waypointId, userId, onComplete }: Fractio
           {gameState === "tutorial" && "Compass Completion Quest"}
           {gameState === "playing" && "Assembling the Fraction Compass"}
           {gameState === "complete" && "Compass Assembled!"}
+          {gameState === "gameover" && "Game Over"}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {gameState === "tutorial" && renderTutorial()}
         {gameState === "playing" && renderGame()}
         {gameState === "complete" && renderComplete()}
+        {gameState === "gameover" && renderGameOver()}
       </CardContent>
     </Card>
   )

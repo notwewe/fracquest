@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { SimpleGameContent } from "@/components/game/simple-game-content"
 
-export default async function BossGamePage({ params }: { params: { id: string } }) {
+export default async function BossGamePage(props: any) {
+  const { params } = await props;
   const supabase = createClient()
   const waypointId = Number.parseInt(params.id)
 

@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Save, Trophy, BookOpen, UserPlus } from "lucide-react"
+import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
 import { isMobileDevice } from "@/lib/utils/deviceDetection"
+import { BackgroundSlideshow } from "@/components/auth/background-slideshow"
+import Image from "next/image"
 
 export default function StudentProfilePage() {
   const router = useRouter()
@@ -214,78 +216,52 @@ export default function StudentProfilePage() {
 
   if (isLoadingData) {
     return (
-      <div
-        className="h-screen flex justify-center items-center"
-        style={{
-          backgroundImage: "url('/dashboard/castle-background.jpg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <Loader2 className="h-8 w-8 animate-spin text-amber-600" />
+      <div className="h-screen flex justify-center items-center relative overflow-hidden">
+        <BackgroundSlideshow />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-600 z-20" />
       </div>
     )
   }
 
   return (
-    <div
-      className="h-screen p-4 overflow-hidden flex flex-col justify-center"
-      style={{
-        backgroundImage: "url('/dashboard/castle-background.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
-    >
-      {/* Back to Dashboard Button */}
-      <div className="absolute top-4 left-4 z-10">
-        <Link href="/student/dashboard">
-          <div
-            className="relative w-64 h-20 cursor-pointer hover:scale-105 transition-transform"
-            style={{
-              backgroundImage: "url('/dashboard/logout.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }}
-          >
-            <div className="absolute inset-0 flex items-center justify-center" style={{ marginTop: "-4px" }}>
-              <span className="text-amber-200 font-bold text-2xl" style={{ fontFamily: "var(--font-blaka)" }}>
-                Dashboard
-              </span>
-            </div>
-          </div>
+    <div className="h-screen p-4 overflow-hidden flex flex-col justify-center relative">
+      {/* Background Slideshow */}
+      <BackgroundSlideshow />
+
+      {/* Back Arrow */}
+      <div className="absolute top-8 left-8 z-20">
+        <Link href="/student/dashboard" className="block">
+          <Image 
+            src="/backarrow.png" 
+            alt="Back to Dashboard" 
+            width={48} 
+            height={48} 
+            className="hover:opacity-80 transition-opacity"
+          />
         </Link>
       </div>
 
-      <div className="flex flex-col items-center">
-        {/* Profile Title */}
-        <div
-          className="relative mb-6"
+      <div className="flex flex-col items-center relative z-10">
+        {/* Profile Title - Using the same style as Practice page */}
+        <h1
+          className="text-8xl font-bold text-center mb-6 mt-0"
           style={{
-            backgroundImage: "url('/dashboard/welcome.png')",
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            width: "500px",
-            height: "100px",
+            fontFamily: "var(--font-blaka)",
+            color: "#FFFFFF", // White color
+            WebkitTextStroke: "3px #000000", // Black outline (increased thickness)
+            textStroke: "3px #000000", // Black outline (for non-webkit browsers)
+            textShadow: "4px 4px 8px rgba(0, 0, 0, 0.5)", // Enhanced shadow for better visibility
           }}
         >
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="text-4xl font-bold text-amber-900 font-blaka" style={{ fontFamily: "var(--font-blaka)" }}>
-              Profile
-            </h1>
-          </div>
-        </div>
+          Profile
+        </h1>
 
         {!isEnrolled && (
           <Alert className="mb-4 bg-amber-100 border-amber-300 max-w-2xl">
             <AlertDescription className="text-amber-800">
               You need to join a class to play the game and see leaderboards. Join a class below!
             </AlertDescription>
-          </Alert>
+          </Alert>  
         )}
 
         {/* Row layout with responsive sizing */}

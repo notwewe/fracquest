@@ -22,19 +22,19 @@ const locationData = {
   },
   3: {
     name: "Fraction Forest",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_FractionForest.png",
     description:
       "Enter the enchanted Fraction Forest, where every tree represents a different part of the whole! In this magical woodland, you'll learn the fundamental concepts of fractions. Discover how to identify numerators and denominators, understand what fractions represent, and practice recognizing fractions in everyday objects. The forest spirits will guide you through the basics of fractional thinking!",
   },
   4: {
     name: "Realm of Balance",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_RealmOfBalance.png",
     description:
       "Welcome to the Realm of Balance, where harmony and equality reign supreme! Here, the ancient scales of justice teach the mysteries of equivalent fractions. Learn to find fractions that represent the same value, master the art of simplifying fractions to their lowest terms, and discover how to create equivalent fractions by multiplying or dividing. Balance is the key to unlocking these mathematical secrets!",
   },
   5: {
     name: "Dreadpoint Hollow",
-    image: "/placeholder.svg?height=280&width=280",
+    image: "/Prac_Dread.png",
     description:
       "Venture into the shadowy depths of Dreadpoint Hollow, where the most challenging fraction mysteries await! This treacherous realm tests your mastery of complex fraction operations. Face the trials of subtracting fractions with unlike denominators, solve multi-step fraction problems, and conquer the fearsome mixed number conversions. Only the bravest mathematicians dare to enter these dark caverns!",
   },
@@ -82,14 +82,17 @@ export default async function StudentPracticePage({
       {/* Background Slideshow */}
       <BackgroundSlideshow />
 
-      {/* Back to Dashboard Button */}
+      {/* Back Arrow */}
       <div className="absolute top-8 left-8 z-20">
-        <Button asChild variant="outline" className="font-blaka border-amber-600 text-black bg-amber-50/90 text-lg">
-          <Link href="/student/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <Link href="/student/dashboard" className="block">
+          <Image
+            src="/backarrow.png"
+            alt="Back to Dashboard"
+            width={48}
+            height={48}
+            className="hover:opacity-80 transition-opacity"
+          />
+        </Link>
       </div>
 
       {/* Main Content */}
