@@ -214,7 +214,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
                 </button>
               )}
 
-              {isEnrolled ? (
+              {/* {isEnrolled ? (
                 <Link href="/student/practice" className="w-2/5 mx-auto">
                   <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
                     Practice
@@ -227,7 +227,7 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
                 >
                   Practice
                 </button>
-              )}
+              )} */}
 
               <Link href="/student/profile" className="w-2/5 mx-auto">
                 <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
