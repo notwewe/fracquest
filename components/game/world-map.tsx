@@ -117,8 +117,8 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
   return (
     <div className="w-full">
       {/* Map with locations */}
-      <div className="relative w-full h-[300px] md:h-[400px] bg-amber-100 rounded-lg border-4 border-amber-800 overflow-hidden mb-4">
-        <div className="absolute inset-0 bg-[url('/fantasy-map-pixel-art.png')] bg-cover bg-center opacity-50"></div>
+      <div className="relative w-full h-[600px] md:h-[700px] bg-amber-100 rounded-lg border-4 border-amber-800 overflow-hidden mb-4">
+        <div className="absolute inset-0 bg-[url('/world_map.png')] bg-cover bg-center opacity-100"></div>
 
         {/* Locations */}
         {locations.map((location) => {
@@ -128,24 +128,35 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
             location.waypoints.length > 0 &&
             location.waypoints.every((waypoint) => waypoint.completed)
 
+          // Find the current (latest) uncompleted waypoint for this location
+          const sortedWaypoints = location.waypoints
+            ? location.waypoints.sort((a, b) => a.order_index - b.order_index)
+            : []
+          
+          const firstUncompletedWaypoint = sortedWaypoints.find(wp => !wp.completed)
+          const hasCurrentWaypoint = firstUncompletedWaypoint && location.unlocked
+
           return (
             <div
               key={location.id}
-              className={`absolute ${location.position} transform -translate-x-1/2 -translate-y-1/2`}
+              className={`absolute ${location.position} transform -translate-x-1/4 -translate-y-1/6`}
             >
-              <button
+              <p
                 onClick={() => handleLocationClick(location)}
-                disabled={!location.unlocked || isLoading}
-                className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-                  allWaypointsCompleted
-                    ? "bg-green-500 border-4 border-green-700"
-                    : location.unlocked
-                      ? "bg-amber-500 border-4 border-amber-700"
-                      : "bg-gray-400 border-4 border-gray-600 opacity-50"
-                } ${selectedLocation?.id === location.id ? "ring-4 ring-white" : ""}`}
+                className={`relative z-10 cursor-pointer text-center font-blaka text-4xl transition-all select-none ${
+                  hasCurrentWaypoint && !allWaypointsCompleted
+                    ? "text-orange-600 drop-shadow-[0_0_10px_rgba(251,146,60,0.8)] animate-pulse font-bold"
+                    : allWaypointsCompleted
+                      ? "text-gray-600 drop-shadow-lg"
+                      : location.unlocked
+                        ? "text-gray-600 drop-shadow-lg hover:text-gray-700"
+                        : "text-gray-500 opacity-50 cursor-not-allowed"
+                } ${selectedLocation?.id === location.id ? "text-gray-700 drop-shadow-xl font-bold" : ""} ${
+                  !location.unlocked || isLoading ? "pointer-events-none" : ""
+                }`}
               >
-                <span className="text-xs font-bold text-white">{location.name}</span>
-              </button>
+                {location.name}
+              </p>
             </div>
           )
         })}
@@ -154,12 +165,12 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
       {/* Selected location waypoints */}
       {selectedLocation && (
         <div className="bg-amber-800 rounded-lg p-4 text-white">
-          <h3 className="text-xl font-bold mb-4">{selectedLocation.name}</h3>
+          <h3 className="text-3xl font-medium mb-4 font-[Blaka]">{selectedLocation.name}</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
             {selectedLocation.waypoints && selectedLocation.waypoints.length > 0 ? (
               selectedLocation.waypoints
                 .sort((a, b) => a.order_index - b.order_index)
-                .map((waypoint, index) => {
+                .map((waypoint) => {
                   // Check if all previous waypoints are completed
                   const previousWaypoints = selectedLocation.waypoints
                     .filter((w) => w.order_index < waypoint.order_index)
@@ -176,10 +187,11 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
 
                   return (
                     <button
+                      type="button"
                       key={waypoint.id}
                       onClick={() => handleWaypointClick(waypoint)}
                       disabled={!isAvailable || isLoading}
-                      className={`p-4 rounded-lg text-center transition-all ${
+                      className={`p-4 rounded-lg text-center transition-all min-h-[120px] flex flex-col justify-center ${
                         isCompleted
                           ? "bg-green-600 hover:bg-green-700"
                           : isAvailable
