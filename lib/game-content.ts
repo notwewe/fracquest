@@ -800,3 +800,18 @@ export function getLevelDialogue(levelId: string) {
 
   return levelDialogues[levelId] || defaultDialogue
 }
+
+// Add this mapping for backgrounds to image paths
+export const backgroundImages: Record<string, string> = {
+  'Squeaks Emporium': '/game backgrounds/Squeaks Emporium.png',
+  'CheeseCrate': '/game backgrounds/CheeseCrate.png',
+  'Sorting Table': '/game backgrounds/Sorting Table.png',
+  'Backrooms': '/game backgrounds/Backrooms.png',
+  'Broken LessMoore Bridge': '/game backgrounds/Broken LessMoore Bridge.png',
+  'Fixed LessMoore Bridge': '/game backgrounds/Fixed LessMoore Bridge.png',
+  'LessMoore Bridge': '/game backgrounds/LessMoore Bridge.png',
+  'Fraction Forest Entrance': '/game backgrounds/Fraction Forest Entrance.png',
+  'Fraction Forest': '/game backgrounds/Fraction Forest.png',
+  'Realm of Balance': '/game backgrounds/Realm of Balance.png',
+  // Add other mappings as needed
+};
