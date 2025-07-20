@@ -230,17 +230,19 @@ export default function ConversionGame(props: any) {
       <div className="absolute inset-0 z-20 flex items-center justify-center">
         {/* (Test button removed) */}
         {!gameStarted ? (
-          // Start Screen - styled like dialogue box
-          <div className="w-full max-w-2xl bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 rounded-2xl shadow-2xl mx-auto flex flex-col items-center justify-center">
-            <div className="text-amber-300 font-pixel text-lg mb-2">Squeaks</div>
-            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-              Welcome to the Sorting Table! Test your knowledge by converting fractions.
-              {"\n\n"}• Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)
-              {"\n"}• Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)
-              {"\n"}• You have 60 seconds to score as many points as possible
-              {"\n"}• Get 5 in a row for bonus time!
+          // Start Screen - styled like dialogue box at the bottom
+          <div className="absolute bottom-0 left-0 right-0 w-full bg-gray-900 bg-opacity-80 border-t-4 border-amber-800 p-6 shadow-2xl flex flex-col items-start justify-center">
+            <div className="text-amber-300 font-pixel text-lg mb-2 text-left w-full">Squeaks</div>
+            <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px] text-left w-full">
+              <span>Welcome to the Sorting Table! Test your knowledge by converting fractions.</span>
+              <ul className="list-disc pl-6 mt-4">
+                <li>Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)</li>
+                <li>Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)</li>
+                <li>You have 60 seconds to score as many points as possible</li>
+                <li>Get 5 in a row for bonus time!</li>
+              </ul>
             </div>
-            <div className="flex justify-between w-full">
+            <div className="flex justify-start w-full">
               <Button onClick={startGame} className="font-pixel bg-amber-600 hover:bg-amber-700 text-white">
                 Start the Challenge!
               </Button>

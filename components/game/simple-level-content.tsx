@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { AnimatedClouds } from "./animated-clouds"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -401,6 +402,8 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
+      {/* Render animated clouds for bg1 scenes */}
+      {currentDialogue.background === "bg1" && <AnimatedClouds />}
       {/* Background - show image for 'Fraction Emporium Test', otherwise text */}
       {currentDialogue.background === "Fraction Emporium Test" ? (
         <div className="absolute inset-0">
@@ -454,8 +457,6 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
             key={idx}
             src={asset.src}
             alt={`asset-${idx}`}
-            width={600}
-            height={600}
             style={asset.assetStyle}
           />
         ))}
