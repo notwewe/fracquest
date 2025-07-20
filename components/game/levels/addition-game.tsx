@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -51,6 +51,7 @@ const problems: AdditionProblem[] = [
 
 export default function AdditionGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentProblem, setCurrentProblem] = useState(0)
   const [score, setScore] = useState(0)
   const [gameStarted, setGameStarted] = useState(false)
@@ -102,10 +103,10 @@ export default function AdditionGame() {
           if (score + 20 >= 60) {
             setPassed(true)
             setGameEnded(true)
-            setShowCompletionPopup(true)
+            endGame();
           } else {
             setGameOver(true)
-            setShowCompletionPopup(true)
+            endGame();
           }
         }
       }, 1200)
@@ -117,10 +118,11 @@ export default function AdditionGame() {
           if (score >= 60) {
             setPassed(true)
             setGameEnded(true)
+            endGame();
           } else {
             setGameOver(true)
+            endGame();
           }
-          setShowCompletionPopup(true)
           setFeedback(null)
         } else {
           toast({
@@ -285,7 +287,10 @@ export default function AdditionGame() {
       {/* Emergency exit button - always visible */}
       <div className="absolute top-4 right-4 z-20">
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'arithmetown';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit Compass Chamber
@@ -310,7 +315,8 @@ export default function AdditionGame() {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'arithmetown';
+          router.push(`/student/game?location=${location}`);
         }}
         onRetry={() => {
           setShowCompletionPopup(false)

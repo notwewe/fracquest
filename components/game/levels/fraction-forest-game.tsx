@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
@@ -97,6 +97,7 @@ function SortableTree({ tree }: { tree: FractionTree }) {
 
 export default function FractionForestGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentRound, setCurrentRound] = useState(0)
   const [trees, setTrees] = useState<FractionTree[]>([])
   const [gameStarted, setGameStarted] = useState(false)
@@ -410,7 +411,10 @@ export default function FractionForestGame() {
       {/* Emergency exit button */}
       <div className="absolute top-4 right-4">
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'fraction-forest';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit Forest
@@ -422,7 +426,8 @@ export default function FractionForestGame() {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'fraction-forest';
+          router.push(`/student/game?location=${location}`);
         }}
         onRetry={() => {
           setShowCompletionPopup(false)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -17,6 +17,7 @@ type ComparisonQuestion = {
 
 export default function RealmOfBalanceGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [score, setScore] = useState(0)
   const [gameStarted, setGameStarted] = useState(false)
@@ -387,7 +388,10 @@ export default function RealmOfBalanceGame() {
       {/* Emergency exit button */}
       <div className="absolute top-4 right-4">
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'realm-of-balance';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit Realm
@@ -399,7 +403,8 @@ export default function RealmOfBalanceGame() {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowLevelCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'realm-of-balance';
+          router.push(`/student/game?location=${location}`);
         }}
         onRetry={() => {
           setShowLevelCompletionPopup(false)

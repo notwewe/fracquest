@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { ArrowLeft } from "lucide-react"
@@ -25,6 +25,7 @@ export function SimpleGameContent({
   levelName = "Practice Game",
 }: GameProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isCompleted, setIsCompleted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [progress, setProgress] = useState(0)
@@ -183,7 +184,8 @@ export function SimpleGameContent({
         variant: "destructive",
       })
       // Still redirect even if there's an error
-      router.push("/student/game")
+      const location = searchParams.get('location') || 'arithmetown';
+      router.push(`/student/game?location=${location}`);
     } finally {
       setIsLoading(false)
       // Clear the interval
@@ -250,7 +252,10 @@ export function SimpleGameContent({
 
         <div className="flex justify-between">
           <Button
-            onClick={() => router.push("/student/game")}
+            onClick={() => {
+              const location = searchParams.get('location') || 'arithmetown';
+              router.push(`/student/game?location=${location}`);
+            }}
             className="font-pixel bg-gray-700 hover:bg-gray-800 text-white"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -264,7 +269,8 @@ export function SimpleGameContent({
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'arithmetown';
+          router.push(`/student/game?location=${location}`);
         }}
         levelId={waypointId.toString()}
         levelName={levelName}

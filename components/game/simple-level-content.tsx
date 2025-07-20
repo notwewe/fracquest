@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { AnimatedClouds } from "./animated-clouds"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "./level-completion-popup"
@@ -33,6 +33,7 @@ type LevelProps = {
 
 export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = "Story Level" }: LevelProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentLine, setCurrentLine] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -504,7 +505,10 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
       {/* Emergency exit button - always visible */}
       <div className="absolute top-4 right-4">
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'arithmetown';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit
@@ -517,7 +521,8 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
           isOpen={showCompletionPopup}
           onClose={() => {
             setShowCompletionPopup(false)
-            router.push("/student/game")
+            const location = searchParams.get('location') || 'arithmetown';
+            router.push(`/student/game?location=${location}`);
           }}
           levelId={levelId}
           levelName={levelName}

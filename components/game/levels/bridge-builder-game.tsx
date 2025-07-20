@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -49,6 +49,7 @@ const bridgeProblems: SubtractionProblem[] = [
 
 export default function BridgeBuilderGame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentProblem, setCurrentProblem] = useState(0)
   const [userAnswer, setUserAnswer] = useState("")
   const [score, setScore] = useState(0)
@@ -333,7 +334,10 @@ export default function BridgeBuilderGame() {
       {/* Emergency exit button */}
       <div className="absolute top-4 right-4">
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'lessmore-bridge';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit Bridge
@@ -384,7 +388,8 @@ export default function BridgeBuilderGame() {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'lessmore-bridge'
+          router.push(`/student/game?location=${location}`)
         }}
         onRetry={() => {
           setShowCompletionPopup(false)

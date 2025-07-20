@@ -3,11 +3,12 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 
 export function ImproperFractions({ waypointId }: { waypointId: number }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(0)
 
   const steps = [
@@ -154,7 +155,10 @@ export function ImproperFractions({ waypointId }: { waypointId: number }) {
               <div className="flex justify-center mt-4">
                 <Button
                   className="bg-amber-600 hover:bg-amber-700 text-lg px-6 py-3"
-                  onClick={() => router.push("/student/game/play/4")}
+                  onClick={() => {
+                    const location = searchParams.get('location') || 'arithmetown';
+                    router.push(`/student/game?location=${location}`);
+                  }}
                 >
                   Start Game
                 </Button>

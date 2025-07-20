@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import DreadpointHollowGameOverPopup from "./DreadpointHollowGameOverPopup"
@@ -162,6 +162,14 @@ const bossProblems: BossProblem[] = [
 
 export default function DreadpointHollowGame() {
   const router = useRouter()
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : undefined;
+  function getLocationSlug() {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('location') || 'dreadpoint-hollow';
+    }
+    return 'dreadpoint-hollow';
+  }
   const [currentProblem, setCurrentProblem] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState("")
   const [score, setScore] = useState(0)
@@ -684,7 +692,10 @@ export default function DreadpointHollowGame() {
       {(battlePhase === "intro" || battlePhase === "battle" || battlePhase === "phase-transition") && (
         <div className="absolute top-4 right-4">
           <Button
-            onClick={() => router.push("/student/game")}
+            onClick={() => {
+              const location = getLocationSlug();
+              router.push(`/student/game?location=${location}`);
+            }}
             className="font-pixel bg-red-600 hover:bg-red-700 text-white"
           >
             Exit Hollow
@@ -808,7 +819,8 @@ export default function DreadpointHollowGame() {
         }}
         onQuit={() => {
           setShowEerieGameOver(false);
-          router.push("/student/game");
+          const location = getLocationSlug();
+          router.push(`/student/game?location=${location}`);
         }}
       />
     </div>

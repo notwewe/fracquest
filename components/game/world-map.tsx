@@ -16,6 +16,7 @@ interface Waypoint {
 interface Location {
   id: number
   name: string
+  slug: string
   position: string
   unlocked: boolean
   completed: boolean
@@ -24,9 +25,10 @@ interface Location {
 
 interface WorldMapProps {
   locations: Location[]
+  selectedLocationSlug?: string | null
 }
 
-export function WorldMap({ locations = [] }: WorldMapProps) {
+export function WorldMap({ locations = [], selectedLocationSlug }: WorldMapProps) {
   const router = useRouter()
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -50,9 +52,16 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     }
   `
 
-  // Auto-select the first location when the component mounts
+  // Auto-select the first location or the one from the query param when the component mounts
   useState(() => {
     if (locations && locations.length > 0 && !selectedLocation) {
+      if (selectedLocationSlug) {
+        const match = locations.find((loc) => loc.slug === selectedLocationSlug)
+        if (match) {
+          setSelectedLocation(match)
+          return
+        }
+      }
       const firstUnlockedLocation = locations.find((loc) => loc.unlocked)
       if (firstUnlockedLocation) {
         setSelectedLocation(firstUnlockedLocation)
@@ -74,7 +83,8 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
     }
 
     setSelectedLocation(location)
-    
+    // Update the URL with the location slug
+    router.replace(`?location=${location.slug}`, { scroll: false })
     // Smooth scroll to the levels section
     setTimeout(() => {
       const waypointsSection = document.querySelector('[data-waypoints-section]')
@@ -113,13 +123,17 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
         return
       }
 
+      // Get the current location slug
+      const locationSlug = selectedLocation?.slug
+      const locationParam = locationSlug ? `?location=${locationSlug}` : ""
+
       // Navigate based on waypoint type
       if (waypoint.type === "intro" || waypoint.type === "story") {
-        router.push(`/student/game/level/${waypoint.id}`)
+        router.push(`/student/game/level/${waypoint.id}${locationParam}`)
       } else if (waypoint.type === "game") {
-        router.push(`/student/game/play/${waypoint.id}`)
+        router.push(`/student/game/play/${waypoint.id}${locationParam}`)
       } else if (waypoint.type === "boss") {
-        router.push(`/student/game/boss/${waypoint.id}`)
+        router.push(`/student/game/boss/${waypoint.id}${locationParam}`)
       }
     } catch (error) {
       toast({
@@ -244,16 +258,32 @@ export function WorldMap({ locations = [] }: WorldMapProps) {
                       key={waypoint.id}
                       onClick={() => handleWaypointClick(waypoint)}
                       disabled={!isAvailable || isLoading}
-                      className={`p-4 rounded-lg text-center transition-all min-h-[120px] flex flex-col justify-center
+                      className={`
+                        p-5 rounded-2xl text-center transition-all min-h-[140px] flex flex-col justify-center items-center shadow-lg border-4
                         ${isCompleted
-                          ? "bg-green-500 text-white"
+                          ? "bg-emerald-500 border-emerald-700"
                           : isAvailable
-                            ? "bg-amber-500 text-white hover:bg-amber-600"
-                            : "bg-gray-400 text-gray-200 opacity-60 cursor-not-allowed"}`}
+                            ? "bg-yellow-300 border-yellow-500 hover:scale-105 hover:shadow-xl"
+                            : "bg-gray-200 border-gray-400 cursor-not-allowed"}
+                      `}
+                      style={{
+                        boxShadow: isAvailable && !isCompleted ? "0 6px 24px 0 rgba(0,0,0,0.12)" : undefined,
+                        position: "relative"
+                      }}
                     >
-                      <div className="font-bold mb-1">{waypoint.name}</div>
-                      <div className="text-xs">
-                        {waypoint.type === "intro" || waypoint.type === "story" ? "Story" : "Game"}
+                      {/* Icon at the top center */}
+                      <div className="flex justify-center w-full mb-3">
+                        {waypoint.type === "story" ? (
+                          <span role="img" aria-label="book" className="text-4xl">📖</span>
+                        ) : (
+                          <span role="img" aria-label="sword" className="text-4xl">🗡️</span>
+                        )}
+                      </div>
+                      {/* Level title */}
+                      <div className="mb-2 text-xl tracking-wide font-blaka text-black">{waypoint.name}</div>
+                      {/* Label */}
+                      <div className="text-base mt-1 font-blaka text-black">
+                        {waypoint.type === "story" ? "Story" : "Game"}
                       </div>
                     </button>
                   )

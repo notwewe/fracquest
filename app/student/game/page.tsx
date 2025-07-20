@@ -6,8 +6,9 @@ import { ArrowLeft } from "lucide-react"
 import { WorldMap } from "@/components/game/world-map"
 import Image from "next/image"
 
-export default async function GamePage() {
+export default async function GamePage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   const supabase = createClient()
+  const selectedLocationName = typeof searchParams.location === 'string' ? searchParams.location : Array.isArray(searchParams.location) ? searchParams.location[0] : undefined;
 
   try {
     // Check if user is authenticated and is a student
@@ -132,9 +133,13 @@ export default async function GamePage() {
           position = "top-1/2 left-1/2"
       }
 
+      // Add slug property
+      const slug = section.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+
       return {
         id: section.id,
         name: section.name,
+        slug,
         position,
         unlocked: isUnlocked,
         completed: isCompleted,
@@ -174,7 +179,7 @@ export default async function GamePage() {
               Welcome To The World Of Numeria!
             </h1>
             <div className="bg-gradient-to-br from-red-900 to-red-950 border-4 border-red-800 rounded-xl p-4 shadow-lg">
-              <WorldMap locations={locations} />
+              <WorldMap locations={locations} selectedLocationSlug={selectedLocationName && selectedLocationName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")} />
             </div>
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">

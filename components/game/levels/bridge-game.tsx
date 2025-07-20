@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -36,6 +36,7 @@ export function BridgeGame({ waypointId, userId, levelName = "Bridge Builder Cha
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Generate a fraction subtraction question
   const generateQuestion = (): Question => {
@@ -361,7 +362,10 @@ export function BridgeGame({ waypointId, userId, levelName = "Bridge Builder Cha
           Play Again
         </Button>
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'lessmore-bridge';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
         >
           Return to Map
@@ -388,7 +392,10 @@ export function BridgeGame({ waypointId, userId, levelName = "Bridge Builder Cha
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button
-              onClick={() => router.push("/student/game")}
+              onClick={() => {
+                const location = searchParams.get('location') || 'lessmore-bridge';
+                router.push(`/student/game?location=${location}`);
+              }}
               variant="outline"
               className="font-pixel border-amber-600 text-amber-700"
             >
@@ -403,7 +410,8 @@ export function BridgeGame({ waypointId, userId, levelName = "Bridge Builder Cha
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'lessmore-bridge';
+          router.push(`/student/game?location=${location}`);
         }}
         levelId={waypointId.toString()}
         levelName={levelName}

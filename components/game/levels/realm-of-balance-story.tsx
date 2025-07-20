@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -49,6 +49,7 @@ const balanceProblems: ComparisonProblem[] = [
 
 export default function RealmOfBalanceStory() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentProblem, setCurrentProblem] = useState(0)
   const [selectedSymbol, setSelectedSymbol] = useState("")
   const [score, setScore] = useState(0)
@@ -246,7 +247,13 @@ export default function RealmOfBalanceStory() {
             </div>
 
             {/* Exit Button */}
-            <Button onClick={() => router.push("/student/game")} className="bg-red-600 hover:bg-red-700 text-white">
+            <Button
+              onClick={() => {
+                const location = searchParams.get('location') || 'realm-of-balance';
+                router.push(`/student/game?location=${location}`);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
               Exit Realm
             </Button>
           </div>
@@ -258,7 +265,8 @@ export default function RealmOfBalanceStory() {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'realm-of-balance';
+          router.push(`/student/game?location=${location}`);
         }}
         levelId="9"
         levelName="Realm of Balance"

@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -39,6 +39,7 @@ const problems: ConversionProblem[] = [
 export default function ConversionGame(props: any) {
   const { params } = props || {};
   const router = useRouter()
+  const searchParams = useSearchParams()
   // Scoring logic
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
@@ -144,12 +145,9 @@ export default function ConversionGame(props: any) {
       setMistakes((prev) => {
         const newMistakes = prev + 1
         if (newMistakes >= 3) {
-          if (score >= 60) {
-            setPassed(true)
-            setGameEnded(true)
-          } else {
-            setGameOver(true)
-          }
+          setGameOver(true)
+          setGameEnded(true)
+          setShowCompletionPopup(true)
           setFeedback(null)
         } else {
           setFeedback("Incorrect. Try again!")
@@ -206,16 +204,8 @@ export default function ConversionGame(props: any) {
     )
   }
 
-  // Add a renderGameOver function
-  const renderGameOver = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black p-4">
-      <div className="bg-red-100 p-8 rounded-lg border-4 border-red-600 shadow-lg text-center">
-        <h2 className="text-3xl font-pixel text-red-800 mb-4">Game Over</h2>
-        <p className="text-lg font-pixel text-red-700 mb-6">You made 3 mistakes on the same question.</p>
-        <Button onClick={() => { setGameOver(false); setGameEnded(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false); }} className="font-pixel bg-red-600 hover:bg-red-700 text-white text-xl px-8 py-4">Retry</Button>
-      </div>
-    </div>
-  )
+  // Remove the renderGameOver function and the if (gameOver) return renderGameOver();
+  // Only use LevelCompletionPopup for both pass and fail/game over states
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -239,7 +229,7 @@ export default function ConversionGame(props: any) {
                 <li>Convert improper fractions to mixed numbers (e.g., 9/4 = 2 1/4)</li>
                 <li>Convert mixed numbers to improper fractions (e.g., 3 2/5 = 17/5)</li>
                 <li>You have 60 seconds to score as many points as possible</li>
-                <li>Get 5 in a row for bonus time!</li>
+                <li>Get 3 in a row for bonus time!</li>
               </ul>
             </div>
             <div className="flex justify-start w-full">
@@ -297,7 +287,10 @@ export default function ConversionGame(props: any) {
       {/* Emergency exit button - always visible */}
       <div className="absolute top-4 right-4 z-30">
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'arithmetown';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-red-600 hover:bg-red-700 text-white"
         >
           Exit
@@ -322,10 +315,21 @@ export default function ConversionGame(props: any) {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'arithmetown';
+          router.push(`/student/game?location=${location}`);
         }}
         onRetry={() => {
-          setGameOver(false); setGameEnded(false); setPassed(false); setCurrentProblem(0); setStreak(0); setUserAnswer(""); setMistakes(0); setFeedback(null); setGameStarted(false);
+          setShowCompletionPopup(false);
+          setGameOver(false);
+          setGameEnded(false);
+          setPassed(false);
+          setMistakes(0);
+          setFeedback(null);
+          setGameStarted(false);
+          setScore(0);
+          setStreak(0);
+          setUserAnswer("");
+          setCurrentProblem(0);
         }}
         levelId="3"
         levelName="Conversion Game"

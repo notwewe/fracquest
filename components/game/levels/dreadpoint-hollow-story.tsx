@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -70,6 +70,7 @@ const bossProblems: BossProblem[] = [
 
 export default function DreadpointHollowStory() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentProblem, setCurrentProblem] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState("")
   const [score, setScore] = useState(0)
@@ -270,7 +271,7 @@ export default function DreadpointHollowStory() {
             </div>
 
             {/* Exit Button */}
-            <Button onClick={() => router.push("/student/game")} className="bg-gray-600 hover:bg-gray-700 text-white">
+            <Button onClick={() => router.push(`/student/game?location=${searchParams.get('location') || 'dreadpoint-hollow'}`)} className="bg-gray-600 hover:bg-gray-700 text-white">
               Retreat
             </Button>
           </div>
@@ -282,7 +283,8 @@ export default function DreadpointHollowStory() {
         isOpen={showCompletionPopup}
         onClose={() => {
           setShowCompletionPopup(false)
-          router.push("/student/game")
+          const location = searchParams.get('location') || 'dreadpoint-hollow';
+          router.push(`/student/game?location=${location}`);
         }}
         levelId="10"
         levelName="Dreadpoint Hollow"

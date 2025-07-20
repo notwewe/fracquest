@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
 import { LevelCompletionPopup } from "../level-completion-popup"
@@ -16,6 +16,7 @@ type CompassGameProps = {
 
 export function CompassGame({ levelId, onComplete }: CompassGameProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [gameState, setGameState] = useState<"intro" | "tutorial" | "playing" | "completed">("intro")
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [score, setScore] = useState(0)
@@ -351,7 +352,8 @@ export function CompassGame({ levelId, onComplete }: CompassGameProps) {
           isOpen={showCompletionPopup}
           onClose={() => {
             setShowCompletionPopup(false)
-            router.push("/student/game")
+            const location = searchParams.get('location') || 'arithmetown';
+            router.push(`/student/game?location=${location}`);
           }}
           levelId={levelId}
           levelName="Fraction Addition"
@@ -373,7 +375,10 @@ export function CompassGame({ levelId, onComplete }: CompassGameProps) {
           Time: {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}
         </p>
         <Button
-          onClick={() => router.push("/student/game")}
+          onClick={() => {
+            const location = searchParams.get('location') || 'arithmetown';
+            router.push(`/student/game?location=${location}`);
+          }}
           className="font-pixel bg-amber-600 hover:bg-amber-700 text-white px-6 py-2"
         >
           Return to Map
