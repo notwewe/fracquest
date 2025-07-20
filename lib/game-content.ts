@@ -8,6 +8,7 @@ import BridgeBuilderGame from "@/components/game/levels/bridge-builder-game"
 import FractionForestGame from "@/components/game/levels/fraction-forest-game"
 import RealmOfBalanceGame from "@/components/game/levels/realm-of-balance-game"
 import DreadpointHollowGame from "@/components/game/levels/dreadpoint-hollow-game"
+import { transform } from "next/dist/build/swc"
 
 export const gameContent = {
   // Arithmetown
@@ -2159,17 +2160,6 @@ export function getLevelDialogue(levelId: string) {
         speaker: "Elder Barkroot",
         text: "The forest breathes in fractions. When their order is disturbed, so is the grove. You must line up the Trees of Fraction from the smallest to the largest, and balance shall return.",
         background: "Elder Barkroot",
-        character: "/game characters/Elder Barkroot.png",
-        characterStyle: {
-          imageRendering: "pixelated",
-          filter: "drop-shadow(0 0 12px #000)",
-          transform: "scaleX(-1)",
-          left: "32%",
-          bottom: "32px",
-          position: "absolute",
-          width: "600px",
-          height: "600px"
-        }
       },
       {
         speaker: "Whiskers",
@@ -2255,43 +2245,119 @@ export function getLevelDialogue(levelId: string) {
     "11": [
       {
         speaker: "Narrator",
-        text: "And so, with courage in his paws and fractions in his heart, Whiskers the Brave stood atop the cliffs of Dreadpoint Hollow.",
-        background: "Victory Scene",
+        text: "And so, with courage in his paws and fractions in his heart, Whiskers the Brave stood in front of Dreadpoint Hollow.",
+        background: "Victory",
+         character: "/game characters/Whiskers.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "37%",
+          bottom: "32px",
+          position: "absolute",
+          width: "500px",
+          height: "500px"
+        },
       },
       {
         speaker: "Narrator",
-        text: "Above him, the restored Fraction Orb pulsed with radiant energy — no longer shattered, but whole once more.",
-        background: "Restored Orb",
+        text: "The restored Fraction Orb pulsed with radiant energy — no longer shattered, but whole once more.",
+        background: "Victory",
+        character: "/game characters/Whiskers.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "37%",
+          bottom: "32px",
+          position: "absolute",
+          width: "500px",
+          height: "500px"
+        },
+        assets: [
+          {
+            src: "/pixel-items/orb.png",
+            assetStyle: {
+              position: "absolute",
+              left: "25%",
+              bottom: "160px",
+              width: "450px",
+              height: "450px",
+              zIndex: 22,
+              pointerEvents: "none",
+              animation: "floatOrb 2s ease-in-out infinite"
+            }
+          }
+        ]
       },
       {
         speaker: "Narrator",
         text: "As its light spread across the land, Numeria began to heal. The trees of Fraction Forest straightened their branches.",
-        background: "Healing Land",
+        background: "Forest",
       },
       {
         speaker: "Narrator",
-        text: "The scales of the Realm of Balance shimmered with harmony. Even the once-shadowed paths of Dreadpoint Hollow grew warm with morning light.",
-        background: "Restored Kingdom",
+        text: "The scales of the Realm of Balance shimmered with harmony.",
+        background: "Realm",
+      },
+      {
+        speaker: "Narrator",
+        text: "Lessmoore Bridge stood prouder and stronger.",
+        background: "Bridge",
       },
       {
         speaker: "King Equalis",
         text: "You've done more than defeat the Decimal Phantom, young Whiskers. You've restored knowledge, courage, and clarity to all corners of our world.",
-        background: "King's Gratitude",
+        background: "Castle",
+         character: "/game characters/King Equalis.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          transform: "scaleX(-1)",
+          left: "32%",
+          bottom: "32px",
+          position: "absolute",
+          width: "500px",
+          height: "500px"
+        },
       },
       {
         speaker: "Whiskers",
         text: "Fractions helped me see the world in parts... but they also taught me how everything fits together.",
-        background: "Wise Whiskers",
+        background: "Castle",
+        character: "/game characters/Whiskers.png",
+        characterStyle: {
+          imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 12px #000)",
+          left: "60%",
+          bottom: "32px",
+          position: "absolute",
+          width: "500px",
+          height: "500px"
+        },
+         assets: [
+           {
+             src: "/game characters/King Equalis.png",
+             assetStyle: {
+               imageRendering: "pixelated",
+               filter: "drop-shadow(0 0 12px #000)",
+               transform: "scaleX(-1)",
+               left: "32%",
+               bottom: "32px",
+               position: "absolute",
+               width: "500px",
+               height: "500px"
+             }
+           }
+         ]
       },
       {
         speaker: "Narrator",
         text: "A grand festival is held with lanterns shaped like fractions floating into the night sky, and Whiskers is crowned Guardian of the Fraction Orb.",
-        background: "Celebration",
+        background: "bg1",
       },
       {
         speaker: "Narrator",
         text: "When the world falls out of balance... remember: even the smallest piece has a place in the whole.",
-        background: "Final Message",
+        background: "bg1",
       },
     ],
   }
@@ -2312,5 +2378,11 @@ export const backgroundImages: Record<string, string> = {
   'Fraction Forest': '/game backgrounds/Fraction Forest.png',
   'Realm of Balance': '/game backgrounds/Realm of Balance.png',
   'Dreadpoint Hollow Entrance': '/game backgrounds/Dreadpoint Hollow Entrance.png',
+  'Victory': '/game backgrounds/Victory.png',
+  'Forest': '/game backgrounds/Forest.png',
+  'Realm': '/game backgrounds/Realm.png',
+  'Bridge': '/game backgrounds/Bridge.png',
+  'bg1': '/game backgrounds/bg1.png',
+  'Castle': '/game backgrounds/Castle.png',
   // Add other mappings as needed
 };
