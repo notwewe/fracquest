@@ -438,7 +438,7 @@ export default function DreadpointHollowGame() {
         }`}
       >
         <div className="w-full h-full flex items-center justify-center text-4xl font-pixel text-red-200">
-          {battlePhase !== "credits" && "Dreadpoint Hollow"}
+          {/* Removed "Dreadpoint Hollow" text from background */}
         </div>
       </div>
 
@@ -530,55 +530,152 @@ export default function DreadpointHollowGame() {
 
       {/* Dialogue Box */}
       {battlePhase !== "credits" && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 border-t-4 border-red-800 p-6">
-          <div className="text-red-300 font-pixel text-lg mb-2">
-            {battlePhase === "intro" && introDialogues[dialogueIndex]?.speaker}
-            {(battlePhase === "battle" || battlePhase === "phase-transition" || battlePhase === "final-blow") &&
-              "Decimal Phantom"}
-            {battlePhase === "victory" && (dialogueIndex < 2 ? "Decimal Phantom" : "Whiskers")}
-          </div>
-          <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
-            {battlePhase === "intro" && introDialogues[dialogueIndex]?.text}
-            {battlePhase === "phase-transition" && (
-              <>
-                {currentPhase === 2 && "Two become one—but which two? Only balance will reveal the answer."}
-                {currentPhase === 3 && "Let's take something precious away..."}
-                {currentPhase === 4 &&
-                  "Trees once stood tall—arranged in perfect order. Now they grow wild. Can you bring order to chaos?"}
-                {currentPhase === 5 && "You've seen the pieces—but can you compare the whole?"}
-                {currentPhase === 6 && "Let's twist your mind with forms—mixed or improper, you decide."}
-              </>
-            )}
-            {battlePhase === "final-blow" && <>"I've learned. I've failed. I've grown. Now let's end this!"</>}
-            {battlePhase === "victory" && <>{victoryDialogues[dialogueIndex]}</>}
-          </div>
-          <div className="flex justify-between">
-            {battlePhase === "intro" && (
-              <Button onClick={continueDialogue} className="font-pixel bg-red-600 hover:bg-red-700 text-white">
-                Continue
-              </Button>
-            )}
-            {battlePhase === "phase-transition" && (
-              <Button onClick={continuePhase} className="font-pixel bg-red-600 hover:bg-red-700 text-white">
-                Continue Battle
-              </Button>
-            )}
-            {battlePhase === "final-blow" && (
-              <Button
-                onClick={() => {
-                  setBattlePhase("victory")
-                  setDialogueIndex(0)
-                }}
-                className="font-pixel bg-red-600 hover:bg-red-700 text-white"
-              >
-                Final Attack!
-              </Button>
-            )}
-            {battlePhase === "victory" && (
-              <Button onClick={continueDialogue} className="font-pixel bg-red-600 hover:bg-red-700 text-white">
-                Continue
-              </Button>
-            )}
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-90 border-t-4 border-red-800 p-6 z-30">
+          {/* Character images behind the dialogue box */}
+          {(battlePhase === "intro" && introDialogues[dialogueIndex]?.speaker === "Whiskers") && (
+            <img
+              src="/pixel-characters/whiskers-flipped.png"
+              alt="Whiskers"
+              style={{
+                position: "absolute",
+                left: "10px",
+                bottom: "250px",
+                width: "350px",
+                height: "350px",
+                zIndex: 10,
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 32px #000)",
+                opacity: 1,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          {(battlePhase === "intro" && introDialogues[dialogueIndex]?.speaker === "Decimal Phantom") && (
+            <img
+              src="/pixel-characters/decimal-phantom-new.png"
+              alt="Decimal Phantom"
+              style={{
+                position: "absolute",
+                right: "10px",
+                bottom: "250px",
+                width: "350px",
+                height: "350px",
+                zIndex: 10,
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 32px #000)",
+                opacity: 1,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          {/* Show Decimal Phantom during phase-transition */}
+          {battlePhase === "phase-transition" && (
+            <img
+              src="/pixel-characters/decimal-phantom-new.png"
+              alt="Decimal Phantom"
+              style={{
+                position: "absolute",
+                right: "0",
+                bottom: "250px",
+                width: "350px",
+                height: "350px",
+                zIndex: 10,
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 32px #000)",
+                opacity: 1,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          {/* Victory Dialogues: Whiskers left, Phantom right for first two */}
+          {battlePhase === "victory" && dialogueIndex < 2 && (
+            <img
+              src="/pixel-characters/decimal-phantom-new.png"
+              alt="Decimal Phantom"
+              style={{
+                position: "absolute",
+                right: "10px",
+                bottom: "250px",
+                width: "350px",
+                height: "350px",
+                zIndex: 10,
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 32px #000)",
+                opacity: 1,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          {battlePhase === "victory" && dialogueIndex >= 2 && (
+            <img
+              src="/pixel-characters/whiskers-flipped.png"
+              alt="Whiskers"
+              style={{
+                position: "absolute",
+                left: "10px",
+                bottom: "250px",
+                width: "350px",
+                height: "350px",
+                zIndex: 10,
+                imageRendering: "pixelated",
+                filter: "drop-shadow(0 0 32px #000)",
+                opacity: 1,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          <div className="flex items-end relative z-20">
+            <div className="flex-1">
+              <div className="text-red-300 font-pixel text-lg mb-2">
+                {battlePhase === "intro" && introDialogues[dialogueIndex]?.speaker}
+                {(battlePhase === "battle" || battlePhase === "phase-transition" || battlePhase === "final-blow") &&
+                  "Decimal Phantom"}
+                {battlePhase === "victory" && (dialogueIndex < 2 ? "Decimal Phantom" : "Whiskers")}
+              </div>
+              <div className="text-white font-pixel text-xl mb-4 whitespace-pre-wrap min-h-[100px]">
+                {battlePhase === "intro" && introDialogues[dialogueIndex]?.text}
+                {battlePhase === "phase-transition" && (
+                  <>
+                    {currentPhase === 2 && "Two become one—but which two? Only balance will reveal the answer."}
+                    {currentPhase === 3 && "Let's take something precious away..."}
+                    {currentPhase === 4 &&
+                      "Trees once stood tall—arranged in perfect order. Now they grow wild. Can you bring order to chaos?"}
+                    {currentPhase === 5 && "You've seen the pieces—but can you compare the whole?"}
+                    {currentPhase === 6 && "Let's twist your mind with forms—mixed or improper, you decide."}
+                  </>
+                )}
+                {battlePhase === "final-blow" && <>"I've learned. I've failed. I've grown. Now let's end this!"</>}
+                {battlePhase === "victory" && <>{victoryDialogues[dialogueIndex]}</>}
+              </div>
+              <div className="flex justify-between">
+                {battlePhase === "intro" && (
+                  <Button onClick={continueDialogue} className="font-pixel bg-red-600 hover:bg-red-700 text-white">
+                    Continue
+                  </Button>
+                )}
+                {battlePhase === "phase-transition" && (
+                  <Button onClick={continuePhase} className="font-pixel bg-red-600 hover:bg-red-700 text-white">
+                    Continue Battle
+                  </Button>
+                )}
+                {battlePhase === "final-blow" && (
+                  <Button
+                    onClick={() => {
+                      setBattlePhase("victory")
+                      setDialogueIndex(0)
+                    }}
+                    className="font-pixel bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Final Attack!
+                  </Button>
+                )}
+                {battlePhase === "victory" && (
+                  <Button onClick={continueDialogue} className="font-pixel bg-red-600 hover:bg-red-700 text-white">
+                    Continue
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
