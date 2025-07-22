@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${blaka.variable}`}>{children}</body>
+      <body className={`${inter.className} ${blaka.variable} min-h-screen bg-[#f5e9d0] overflow-y-auto`}>{children}</body>
     </html>
   )
 }

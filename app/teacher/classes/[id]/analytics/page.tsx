@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import React from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -24,7 +25,7 @@ import {
 } from "recharts"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-export default function ClassAnalyticsPage({ params }: { params: { id: string } }) {
+export default function ClassAnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,7 +45,8 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
     averageAttempts: 0,
   })
   const supabase = createClient()
-  const classId = Number.parseInt(params.id)
+  const unwrappedParams = React.use(params)
+  const classId = Number.parseInt(unwrappedParams.id)
 
   // const COLORS = ["#f59e0b", "#d97706", "#b45309", "#92400e", "#78350f", "#a16207"] // Amber colors, can be adjusted
 
@@ -193,24 +195,19 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
             setStudentScatterData(scatterData)
 
             const difficultyByWaypoint = waypointsData
+              .filter((waypoint) => waypoint.type === "game")
               .map((waypoint) => {
-                const waypointProgress = progress.filter((p) => p.waypoint_id === waypoint.id && p.completed)
-                const totalWpAttempts = waypointProgress.reduce((sum, p) => sum + (p.attempts || 0), 0)
-                const totalWpMistakes = waypointProgress.reduce((sum, p) => sum + (p.mistakes || 0), 0)
-                const avgAttempts = waypointProgress.length > 0 ? totalWpAttempts / waypointProgress.length : 0
-                const avgMistakes = waypointProgress.length > 0 ? totalWpMistakes / waypointProgress.length : 0
-                const difficultyScore = avgAttempts + avgMistakes
+                // For each waypoint, sum the attempts field from student_progress for all students
+                const totalAttempts = progress
+                  .filter((p) => p.waypoint_id === waypoint.id)
+                  .reduce((sum, p) => sum + (p.attempts || 0), 0);
                 return {
                   id: waypoint.id,
                   name: waypoint.name,
                   section: sectionsData.find((s) => s.id === waypoint.section_id)?.name || "Unknown",
-                  attempts: Math.round(avgAttempts * 10) / 10,
-                  mistakes: Math.round(avgMistakes * 10) / 10,
-                  difficulty: Math.round(difficultyScore * 10) / 10,
-                }
-              })
-              .filter((w) => w.difficulty > 0)
-              .sort((a, b) => b.difficulty - a.difficulty)
+                  studentsRetried: totalAttempts,
+                };
+              });
             setDifficultyData(difficultyByWaypoint)
           }
         }
@@ -437,8 +434,7 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                                 <strong className="text-[#8B4513]">Most Challenging:</strong>{" "}
                                 {section.mostDifficultWaypoint.name}
                                 <p className="text-xs text-[#a0522d] pl-2">
-                                  Avg. {section.mostDifficultWaypoint.averageMistakes.toFixed(1)} mistakes,{" "}
-                                  {section.mostDifficultWaypoint.averageAttempts.toFixed(1)} attempts
+                                  Avg. {section.mostDifficultWaypoint.averageAttempts.toFixed(1)} attempts
                                 </p>
                               </div>
                             )}
@@ -619,7 +615,7 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                   <CardHeader>
                     <CardTitle className="text-xl font-bold text-[#8B4513]">Most Challenging Waypoints</CardTitle>
                     <CardDescription className="text-[#a0522d]">
-                      Top 10 waypoints with highest difficulty scores (Avg. Attempts + Avg. Mistakes)
+                      Waypoints with the most students who had to retry (failed at least once before passing)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -647,9 +643,7 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                               labelStyle={{ color: "#8B4513", fontWeight: "bold" }}
                             />
                             <Legend wrapperStyle={chartLegendStyle} />
-                            <Bar dataKey="attempts" name="Avg. Attempts" fill="#8B4513" radius={[0, 4, 4, 0]} />
-                            <Bar dataKey="mistakes" name="Avg. Mistakes" fill="#a0522d" radius={[0, 4, 4, 0]} />
-                            <Bar dataKey="difficulty" name="Difficulty Score" fill="#b45309" radius={[0, 4, 4, 0]} />
+                            <Bar dataKey="studentsRetried" name="Students Who Retried" fill="#8B4513" radius={[0, 4, 4, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       ) : (
@@ -671,10 +665,10 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                       <Table>
                         <TableHeader className="bg-[#e5d9c0]">
                           <TableRow>
-                            {["Waypoint", "Section", "Avg. Attempts", "Avg. Mistakes", "Difficulty"].map((head) => (
+                            {["Level", "Waypoint", "Students Who Retried"].map((head) => (
                               <TableHead
                                 key={head}
-                                className={`font-semibold text-[#8B4513] ${["Avg. Attempts", "Avg. Mistakes", "Difficulty"].includes(head) ? "text-right" : ""}`}
+                                className={`font-semibold text-[#8B4513] ${["Students Who Retried"].includes(head) ? "text-right" : ""}`}
                               >
                                 {head}
                               </TableHead>
@@ -684,11 +678,9 @@ export default function ClassAnalyticsPage({ params }: { params: { id: string } 
                         <TableBody>
                           {difficultyData.map((waypoint, index) => (
                             <TableRow key={waypoint.id} className={index % 2 === 0 ? "bg-[#FAF7F0]" : "bg-[#f5e9d0]"}>
-                              <TableCell className="font-medium text-[#8B4513]">{waypoint.name}</TableCell>
-                              <TableCell className="text-[#8B4513]">{waypoint.section}</TableCell>
-                              <TableCell className="text-right text-[#8B4513]">{waypoint.attempts}</TableCell>
-                              <TableCell className="text-right text-[#8B4513]">{waypoint.mistakes}</TableCell>
-                              <TableCell className="text-right text-[#8B4513]">{waypoint.difficulty}</TableCell>
+                              <TableCell className="font-medium text-[#8B4513]">{waypoint.section}</TableCell>
+                              <TableCell className="text-[#8B4513]">{waypoint.name.replace(/ Game$/, "")}</TableCell>
+                              <TableCell className="text-right text-[#8B4513]">{waypoint.studentsRetried}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>

@@ -71,18 +71,15 @@ export default async function ClassDetailPage(props: any) {
 
   // Combine student_classes with profiles and progress data
   const studentsWithProgress =
-    studentClasses?.map((sc) => {
+    (studentClasses?.map((sc) => {
       const profile = profileMap.get(sc.student_id)
       const progressEntries = progressByStudent.get(sc.student_id) || []
-
       // Calculate total score, mistakes, and completed levels
-      const totalScore = progressEntries.reduce((sum, entry) => sum + (entry.score || 0), 0)
-      const totalMistakes = progressEntries.reduce((sum, entry) => sum + (entry.mistakes || 0), 0)
-      const completedLevels = progressEntries.filter((entry) => entry.completed).length
-
+      const totalScore = progressEntries.reduce((sum: number, entry: any) => sum + (entry.score || 0), 0)
+      const totalMistakes = progressEntries.reduce((sum: number, entry: any) => sum + (entry.mistakes || 0), 0)
+      const completedLevels = progressEntries.filter((entry: any) => entry.completed).length
       // Determine current level (just use "In Progress" if they have any entries)
       const currentLevel = progressEntries.length > 0 ? "In Progress" : "Not started"
-
       return {
         id: sc.id,
         student_id: sc.student_id,
@@ -94,7 +91,7 @@ export default async function ClassDetailPage(props: any) {
           currentLevel,
         },
       }
-    }) || []
+    }) || []).sort((a, b) => b.progress.totalScore - a.progress.totalScore)
 
   // Fetch all students in the class
   const { data: students } = await supabase.from("student_classes").select("student_id").eq("class_id", classId)
@@ -208,7 +205,6 @@ export default async function ClassDetailPage(props: any) {
                             <TableCell className="text-center">
                               <RemoveStudentButton
                                 studentClassId={studentItem.id}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-100"
                               />
                             </TableCell>
                           </TableRow>

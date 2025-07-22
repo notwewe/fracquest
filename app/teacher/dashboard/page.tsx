@@ -186,7 +186,7 @@ export default function TeacherDashboard() {
     <div
       className="min-h-screen p-6 font-sans"
       style={{
-        backgroundImage: "url('/dashboard/castle-background.jpg')",
+        backgroundImage: "url('/dashboard/bg1_castle.png')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -194,7 +194,6 @@ export default function TeacherDashboard() {
         WebkitBackgroundSize: 'cover',
         MozBackgroundSize: 'cover',
         OBackgroundSize: 'cover',
-        msBackgroundSize: 'cover',
       }}
     >
       <motion.div className="max-w-7xl mx-auto font-sans" variants={container} initial="hidden" animate="show">

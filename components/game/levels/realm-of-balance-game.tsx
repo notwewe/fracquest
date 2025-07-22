@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -28,9 +28,16 @@ export default function RealmOfBalanceGame() {
   const [isLoading, setIsLoading] = useState(false)
   const [showCompletionPopup, setShowLevelCompletionPopup] = useState(false)
   const supabase = createClient()
-  const [mistakes, setMistakes] = useState(0)
+  const [mistakes, setMistakes] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  // Remove all mistakes/attempts state and logic
+  // In answer handler, if user makes 3 mistakes and score < passing, setGameOver(true) and require retry
+  // If user passes, allow completion regardless of mistakes
+  // Only write score and completed to student_progress in endGame
   const [gameOver, setGameOver] = useState(false)
   const [passed, setPassed] = useState(false)
+  const [gameOverReason, setGameOverReason] = useState<'mistakes' | null>(null);
+  const endGameCalled = useRef(false);
 
   // Generate comparison questions
   useEffect(() => {
@@ -101,72 +108,96 @@ export default function RealmOfBalanceGame() {
     setScore(0)
     setCurrentQuestion(0)
     setFeedback(null)
-    setMistakes(0)
     setGameOver(false)
     setPassed(false)
+    setMistakes(0)
+    setGameOverReason(null)
+    endGameCalled.current = false;
   }
 
-  const handleAnswer = (answer: ">" | "<" | "=") => {
-    if (currentQuestion >= questions.length) return
-
-    const isCorrect = answer === questions[currentQuestion].correctAnswer
-
-    if (isCorrect) {
-      setScore(score + 20)
-      setFeedback("correct")
-      toast({
-        title: "Correct!",
-        description: "The scales are balanced with truth.",
-        variant: "default",
-      })
-      setDialoguePhase("feedback")
+  const handleAnswer = (answer: "<" | ">" | "=") => {
+    if (currentQuestion >= questions.length) return;
+    const isCorrect = answer === questions[currentQuestion].correctAnswer;
+    if (!isCorrect) {
+      setMistakes((prev) => prev + 1);
+      setFeedback('incorrect');
+      setDialoguePhase('feedback');
+      if (mistakes + 1 >= 3) {
+        if (score >= 60) {
+          setPassed(true);
+          setGameEnded(true);
+          setShowLevelCompletionPopup(true);
+          setDialoguePhase('complete');
+        } else {
+          setGameOver(true);
+          setShowLevelCompletionPopup(true);
+          setDialoguePhase('complete');
+          setGameOverReason('mistakes');
+          handleFailedAttempt();
+        }
+        if (!endGameCalled.current) {
+          endGameCalled.current = true;
+          endGame(score);
+        }
+        return;
+      }
+      // After feedback, auto-return to question after 3 seconds
+      setTimeout(() => {
+        setFeedback(null);
+        setDialoguePhase('game');
+      }, 3000);
+      return;
+    } else {
+      const newScore = Math.min(score + 20, 100);
+      setScore(newScore);
+      setFeedback('correct');
+      setDialoguePhase('feedback');
       setTimeout(() => {
         if (currentQuestion < questions.length - 1) {
-          setCurrentQuestion(currentQuestion + 1)
-          setDialoguePhase("game")
-          setFeedback(null)
+          setCurrentQuestion(currentQuestion + 1);
+          setDialoguePhase('game');
         } else {
-          // Game is complete, check pass/fail
-          if (score + 20 >= 60) {
-            setPassed(true)
-          } else {
-            setPassed(false)
+          setPassed(newScore >= 60);
+          setGameEnded(true);
+          setShowLevelCompletionPopup(true);
+          setDialoguePhase('complete');
+          if (!endGameCalled.current) {
+            endGameCalled.current = true;
+            endGame(newScore);
           }
-          setShowLevelCompletionPopup(true)
-          setDialoguePhase("complete")
-          endGame()
         }
-      }, 1500)
-    } else {
-      setMistakes((prev) => {
-        const newMistakes = prev + 1
-        setFeedback('incorrect')
-        if (newMistakes >= 3) {
-          if (score >= 60) {
-            setPassed(true)
-          } else {
-            setGameOver(true)
-          }
-          setShowLevelCompletionPopup(true)
-          setFeedback(null)
-          setDialoguePhase("complete")
-        } else {
-          toast({
-            title: "Incorrect",
-            description: `Try again!`,
-            variant: "destructive",
-          })
-          setDialoguePhase("feedback")
-        }
-        return newMistakes
-      })
+      }, 3000);
     }
-  }
+  };
 
-  const endGame = async () => {
-    setGameEnded(true)
+  const handleFailedAttempt = async () => {
+    // Increment attempts in student_progress
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: existingProgress } = await supabase
+        .from("student_progress")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("waypoint_id", 9)
+        .maybeSingle();
+      if (existingProgress) {
+        await supabase
+          .from("student_progress")
+          .update({ attempts: (existingProgress.attempts || 0) + 1 })
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 9);
+      } else {
+        await supabase.from("student_progress").insert({
+          student_id: user.id,
+          waypoint_id: 9,
+          attempts: 1,
+        });
+      }
+    }
+  };
+
+  const endGame = async (finalScore: number) => {
     setIsLoading(true)
-
     try {
       const {
         data: { user },
@@ -183,7 +214,7 @@ export default function RealmOfBalanceGame() {
 
         if (existingProgress) {
           // Update existing record only if new score is higher
-          const newScore = Math.max(existingProgress.score || 0, score)
+          const newScore = Math.max(existingProgress.score || 0, finalScore)
           const { error: updateError } = await supabase
             .from("student_progress")
             .update({
@@ -203,7 +234,7 @@ export default function RealmOfBalanceGame() {
             student_id: user.id,
             waypoint_id: 9,
             completed: true,
-            score: score,
+            score: finalScore,
             last_updated: new Date().toISOString(),
           })
 
@@ -354,8 +385,11 @@ export default function RealmOfBalanceGame() {
               )}
               {dialoguePhase === "complete" && (
                 <>
-                  "You have judged with wisdom. The scales are balanced. The path to Dreadpoint Hollow is now open. Proceed,
-                  Whiskers, and face your final challenge."
+                  {passed ? (
+                    "You have judged with wisdom. The scales are balanced. The path to Dreadpoint Hollow is now open. Proceed, Whiskers, and face your final challenge."
+                  ) : (
+                    ""
+                  )}
                 </>
               )}
             </div>
@@ -365,22 +399,8 @@ export default function RealmOfBalanceGame() {
                   Begin Trial
                 </Button>
               )}
-              {dialoguePhase === "complete" && !showCompletionPopup && (
-                <Button
-                  onClick={() => setShowLevelCompletionPopup(true)}
-                  className="font-pixel bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Complete Trial
-                </Button>
-              )}
             </div>
-            {dialoguePhase === "feedback" && feedback === "incorrect" && (
-              <div className="absolute bottom-8 left-8 z-50">
-                <Button onClick={() => { setFeedback(null); setDialoguePhase('game'); }} className="font-pixel bg-blue-600 hover:bg-blue-700 text-white">
-                  Try Again
-                </Button>
-              </div>
-            )}
+            {/* Remove the Try Again button from the feedback dialogue for wrong answers. */}
           </div>
         </div>
       </div>
@@ -414,9 +434,9 @@ export default function RealmOfBalanceGame() {
           setPassed(false)
           setCurrentQuestion(0)
           setScore(0)
-          setMistakes(0)
-          setFeedback(null)
           setDialoguePhase("intro")
+          setMistakes(0)
+          setGameOverReason(null)
         }}
         levelId="9"
         levelName="Realm of Balance"
@@ -425,6 +445,7 @@ export default function RealmOfBalanceGame() {
         isStory={false}
         passed={passed}
         maxScore={100}
+        gameOverReason={gameOverReason}
       />
     </div>
   )

@@ -161,6 +161,25 @@ export function WorldMap({ locations = [], selectedLocationSlug }: WorldMapProps
   return (
     <div className="w-full">
       <style jsx global>{levitateStyle}</style>
+      <style jsx global>{`
+  @keyframes location-title-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px) scale(1.05); }
+  }
+  /* For current/active location */
+  .animate-location-title {
+    color: #ff9800;
+    text-shadow:
+      0 2px 8px #b45309,
+      0 0 2px #000,
+      2px 0 2px #000,
+      -2px 0 2px #000,
+      0 2px 2px #000,
+      0 -2px 2px #000,
+      0 0 32px #fff7ae;
+    letter-spacing: 1px;
+  }
+`}</style>
       {/* Map with locations */}
       <div className="relative w-full h-[600px] md:h-[700px] bg-amber-100 rounded-lg border-4 border-amber-800 overflow-hidden mb-4">
         <div className="absolute inset-0 bg-[url('/world_map.png')] bg-cover bg-center opacity-100"></div>
@@ -205,21 +224,17 @@ export function WorldMap({ locations = [], selectedLocationSlug }: WorldMapProps
               )}
               <p
                 onClick={() => handleLocationClick(location)}
-                className={`relative z-10 cursor-pointer text-center font-blaka text-4xl transition-all select-none
-                  ${hasCurrentWaypoint && !allWaypointsCompleted
-                    ? "text-orange-600 drop-shadow-[0_0_10px_rgba(251,146,60,0.8)] animate-pulse font-bold"
-                    : allWaypointsCompleted && isSelectedLocation
-                      ? "selected-gold text-black"
-                      : allWaypointsCompleted
-                        ? "completed-gold text-gray-600"
-                        : location.unlocked && isSelectedLocation
-                          ? "selected-gold text-black"
-                          : location.unlocked
-                            ? "text-gray-600 drop-shadow-lg hover:text-gray-700"
-                            : "text-gray-300 opacity-50 cursor-not-allowed"}
+                className={`
+                  relative z-10 cursor-pointer text-center font-blaka text-4xl transition-all select-none
+                  ${isSelectedLocation ? "animate-location-title" : ""}
+                  ${isSelectedLocation
+                    ? "scale-125"
+                    : location.unlocked
+                      ? "text-black font-bold"
+                      : "text-gray-300 opacity-50 cursor-not-allowed"}
                   ${(isSelectedLocation || location.unlocked) ? "transition-transform duration-200" : ""}
                   ${(isSelectedLocation || location.unlocked) ? "hover:scale-125" : ""}
-                  ${isSelectedLocation ? "scale-125" : ""}`}
+                `}
               >
                 {location.name}
               </p>

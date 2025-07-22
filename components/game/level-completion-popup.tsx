@@ -16,6 +16,7 @@ interface LevelCompletionPopupProps {
   isGameOver?: boolean
   onRetry?: () => void
   passed?: boolean
+  gameOverReason?: 'mistakes' | 'timeout' | null
 }
 
 export function LevelCompletionPopup({
@@ -29,6 +30,7 @@ export function LevelCompletionPopup({
   isGameOver = false,
   onRetry,
   passed = false,
+  gameOverReason = null,
 }: LevelCompletionPopupProps) {
   const [stars, setStars] = useState(0)
 
@@ -86,7 +88,9 @@ export function LevelCompletionPopup({
           <div className="bg-amber-100 p-4 rounded-lg border-2 border-amber-300 text-center">
             <p className="font-pixel text-amber-800">
               {isGameOver
-                ? "You made 3 mistakes on the same question. Would you like to retry?"
+                ? gameOverReason === 'timeout'
+                  ? "Time's up! Would you like to retry?"
+                  : "You made 3 mistakes on the same question. Would you like to retry?"
                 : isStory
                   ? "You've completed this part of the story! Continue your journey to save Numeria!"
                   : passed

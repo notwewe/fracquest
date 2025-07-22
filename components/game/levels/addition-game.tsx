@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -61,11 +61,13 @@ export default function AdditionGame() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [compassPieces, setCompassPieces] = useState(0)
   const [mistakes, setMistakes] = useState(0)
+  const [attempts, setAttempts] = useState(0)
   const [gameOver, setGameOver] = useState(false)
   const [passed, setPassed] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
   
   const supabase = createClient()
+  const endGameCalled = useRef(false);
 
   const startGame = () => {
     setGameStarted(true)
@@ -73,19 +75,49 @@ export default function AdditionGame() {
     setScore(0)
     setCompassPieces(0)
     setMistakes(0)
+    setAttempts(0)
     setGameOver(false)
     setPassed(false)
+    endGameCalled.current = false;
   }
+
+  const handleFailedAttempt = async () => {
+    // Increment attempts in student_progress
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: existingProgress } = await supabase
+        .from("student_progress")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("waypoint_id", 5)
+        .maybeSingle();
+      if (existingProgress) {
+        await supabase
+          .from("student_progress")
+          .update({ attempts: (existingProgress.attempts || 0) + 1 })
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 5);
+      } else {
+        await supabase.from("student_progress").insert({
+          student_id: user.id,
+          waypoint_id: 5,
+          attempts: 1,
+        });
+      }
+    }
+  };
 
   const handleAnswer = (choiceIndex: number) => {
     if (selectedAnswer !== null || gameEnded || gameOver) return
 
+    setAttempts((prev) => prev + 1);
     setSelectedAnswer(choiceIndex)
     const problem = problems[currentProblem]
     const isCorrect = choiceIndex === problem.correctIndex
 
     if (isCorrect) {
-      setScore(score + 20)
+      const newScore = score + 20;
+      setScore(newScore)
       setCompassPieces(compassPieces + 1)
       setFeedback(null)
       toast({
@@ -100,13 +132,14 @@ export default function AdditionGame() {
           setSelectedAnswer(null)
         } else {
           // End of questions
-          if (score + 20 >= 60) {
-            setPassed(true)
+          const didPass = newScore >= 60;
+          if (!endGameCalled.current) {
+            endGameCalled.current = true;
             setGameEnded(true)
-            endGame();
-          } else {
-            setGameOver(true)
-            endGame();
+            if (didPass) {
+              setPassed(true)
+            }
+            endGame(newScore, didPass);
           }
         }
       }, 1200)
@@ -115,13 +148,14 @@ export default function AdditionGame() {
         const newMistakes = prev + 1
         setFeedback("Incorrect. Try again!")
         if (newMistakes >= 3) {
-          if (score >= 60) {
-            setPassed(true)
+          const didPass = score >= 60;
+          if (!endGameCalled.current) {
+            endGameCalled.current = true;
             setGameEnded(true)
-            endGame();
-          } else {
-            setGameOver(true)
-            endGame();
+            if (didPass) {
+              setPassed(true)
+            }
+            endGame(score, didPass);
           }
           setFeedback(null)
         } else {
@@ -137,10 +171,8 @@ export default function AdditionGame() {
     }
   }
 
-  const endGame = async () => {
-    setGameEnded(true)
+  const endGame = async (finalScore: number, didPass: boolean) => {
     setIsLoading(true)
-
     try {
       const {
         data: { user },
@@ -157,7 +189,7 @@ export default function AdditionGame() {
 
         if (existingProgress) {
           // Update existing record only if new score is higher
-          const newScore = Math.max(existingProgress.score || 0, score)
+          const newScore = Math.max(existingProgress.score || 0, finalScore)
           const { error: updateError } = await supabase
             .from("student_progress")
             .update({
@@ -178,7 +210,7 @@ export default function AdditionGame() {
             student_id: user.id,
             waypoint_id: 5,
             completed: true,
-            score: score,
+            score: finalScore,
             can_revisit: true,
             last_updated: new Date().toISOString(),
           })
@@ -186,6 +218,10 @@ export default function AdditionGame() {
           if (insertError) {
             console.error("Error inserting progress:", insertError)
           }
+        }
+        // Only log failed attempt if the player did NOT pass
+        if (!didPass) {
+          await handleFailedAttempt();
         }
       }
 
@@ -328,6 +364,7 @@ export default function AdditionGame() {
           setScore(0)
           setCompassPieces(0)
           setMistakes(0)
+          setAttempts(0)
           setSelectedAnswer(null)
         }}
         levelId="5"

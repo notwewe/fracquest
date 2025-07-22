@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Users, BookOpen, UserCheck, UserX } from "lucide-react"
+import { Loader2, Users, BookOpen, UserCheck, UserX, GraduationCap, School } from "lucide-react"
 import { AdminUsers } from "@/components/admin/admin-users"
 import { AdminClasses } from "@/components/admin/admin-classes"
 import { motion } from "framer-motion"
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="h-screen overflow-hidden p-6 bg-[#FAF7F0]">
+    <div className="min-h-screen w-full bg-[#FAF7F0] overflow-y-auto p-6">
       <motion.div
         className="max-w-7xl mx-auto font-sans h-full flex flex-col"
         variants={container}
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
                 <p className="text-3xl md:text-4xl font-sans font-bold text-[#a0522d]">{stats.totalTeachers}</p>
               </div>
               <div className="h-12 w-12 md:h-16 md:w-16 bg-[#a0522d] rounded-full flex items-center justify-center">
-                <UserCheck className="text-[#f5e9d0] h-6 w-6 md:h-8 md:w-8" />
+                <School className="text-[#f5e9d0] h-6 w-6 md:h-8 md:w-8" />
               </div>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function AdminDashboard() {
                 <p className="text-3xl md:text-4xl font-sans font-bold text-[#a0522d]">{stats.totalStudents}</p>
               </div>
               <div className="h-12 w-12 md:h-16 md:w-16 bg-[#a0522d] rounded-full flex items-center justify-center">
-                <UserX className="text-[#f5e9d0] h-6 w-6 md:h-8 md:w-8" />
+                <GraduationCap className="text-[#f5e9d0] h-6 w-6 md:h-8 md:w-8" />
               </div>
             </div>
           </div>
@@ -236,11 +236,11 @@ export default function AdminDashboard() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="flex-1 overflow-hidden">
+            <TabsContent value="users" className="flex-1 overflow-hidden min-h-[400px] md:min-h-[600px] max-h-[70vh] overflow-y-auto">
               <AdminUsers />
             </TabsContent>
 
-            <TabsContent value="classes" className="flex-1 overflow-hidden">
+            <TabsContent value="classes" className="flex-1 overflow-hidden min-h-[400px] md:min-h-[600px] max-h-[70vh] overflow-y-auto">
               <AdminClasses />
             </TabsContent>
           </Tabs>

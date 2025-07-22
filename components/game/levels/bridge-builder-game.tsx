@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -61,10 +61,17 @@ export default function BridgeBuilderGame() {
   const [showPostGameDialogue, setShowPostGameDialogue] = useState(false)
   const [postGameIndex, setPostGameIndex] = useState(0)
   const supabase = createClient()
-  const [mistakes, setMistakes] = useState(0)
+    // Remove all mistakes/attempts state and logic
+  // In answer handler, if user makes 3 mistakes and score < passing, setGameOver(true) and require retry
+  // If user passes, allow completion regardless of mistakes
+  // Only write score and completed to student_progress in endGame
   const [gameOver, setGameOver] = useState(false)
   const [passed, setPassed] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [mistakes, setMistakes] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [gameOverReason, setGameOverReason] = useState<'mistakes' | null>(null);
+  const endGameCalled = useRef(false);
 
   const startGame = () => {
     setGameStarted(true)
@@ -72,18 +79,36 @@ export default function BridgeBuilderGame() {
     setScore(0)
     setBridgeStones(0)
     setUserAnswer("")
-    setMistakes(0)
     setGameOver(false)
     setPassed(false)
     setFeedback(null)
+    endGameCalled.current = false;
   }
 
   const checkAnswer = () => {
     const problem = bridgeProblems[currentProblem]
     const isCorrect = userAnswer.trim() === problem.answer
 
-    if (isCorrect) {
-      setScore(Math.min(score + 20, 100))
+    if (!isCorrect) {
+      setMistakes((prev) => prev + 1);
+      setFeedback("Incorrect. Try again!")
+      if (mistakes + 1 >= 3) {
+        if (score >= 60) {
+          setPassed(true);
+          setGameEnded(true);
+          setShowCompletionPopup(true);
+        } else {
+          setGameOver(true);
+          setShowCompletionPopup(true);
+          setGameOverReason('mistakes');
+          handleFailedAttempt();
+        }
+        return;
+      }
+      setFeedback(null)
+    } else {
+      const newScore = Math.min(score + 20, 100);
+      setScore(newScore)
       setBridgeStones(bridgeStones + 1)
       setFeedback(null)
       toast({
@@ -97,7 +122,10 @@ export default function BridgeBuilderGame() {
           if (score + 20 >= 60) {
             setPassed(true)
             setGameEnded(true)
-            endGame()
+            if (!endGameCalled.current) {
+              endGameCalled.current = true;
+              endGame(newScore);
+            }
           } else {
             setGameOver(true)
             setShowCompletionPopup(true)
@@ -110,29 +138,6 @@ export default function BridgeBuilderGame() {
         setCurrentProblem(currentProblem + 1)
         setUserAnswer("")
       }, 1200)
-    } else {
-      setMistakes((prev) => {
-        const newMistakes = prev + 1
-        setFeedback("Incorrect. Try again!")
-        if (newMistakes >= 3) {
-          if (score >= 60) {
-            setPassed(true)
-            setGameEnded(true)
-            endGame()
-          } else {
-            setGameOver(true)
-            setShowCompletionPopup(true)
-          }
-          setFeedback(null)
-        } else {
-          toast({
-            title: "Incorrect",
-            description: `Try again!`,
-            variant: "destructive",
-          })
-        }
-        return newMistakes
-      })
     }
   }
 
@@ -142,7 +147,7 @@ export default function BridgeBuilderGame() {
     }
   }
 
-  const endGame = async () => {
+  const endGame = async (finalScore: number) => {
     setGameEnded(true)
     setIsLoading(true)
     setShowPostGameDialogue(true)
@@ -163,7 +168,7 @@ export default function BridgeBuilderGame() {
 
         if (existingProgress) {
           // Update existing record only if new score is higher
-          const newScore = Math.max(existingProgress.score || 0, Math.min(score, 100))
+          const newScore = Math.max(existingProgress.score || 0, finalScore)
           const { error: updateError } = await supabase
             .from("student_progress")
             .update({
@@ -184,7 +189,7 @@ export default function BridgeBuilderGame() {
             student_id: user.id,
             waypoint_id: 7,
             completed: true,
-            score: Math.min(score, 100),
+            score: finalScore,
             can_revisit: true,
             last_updated: new Date().toISOString(),
           })
@@ -204,6 +209,32 @@ export default function BridgeBuilderGame() {
       setIsLoading(false)
     }
   }
+
+  const handleFailedAttempt = async () => {
+    // Increment attempts in student_progress
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: existingProgress } = await supabase
+        .from("student_progress")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("waypoint_id", 7)
+        .maybeSingle();
+      if (existingProgress) {
+        await supabase
+          .from("student_progress")
+          .update({ attempts: (existingProgress.attempts || 0) + 1 })
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 7);
+      } else {
+        await supabase.from("student_progress").insert({
+          student_id: user.id,
+          waypoint_id: 7,
+          attempts: 1,
+        });
+      }
+    }
+  };
 
   // Get post-game dialogue from game-content
   const postGameDialogue = (getLevelDialogue("7") as Array<{ speaker: string; text: string; background: string }>).filter(
@@ -315,11 +346,11 @@ export default function BridgeBuilderGame() {
                     onKeyPress={handleKeyPress}
                     placeholder="Enter your answer (e.g., 1/2)"
                     className="text-lg max-w-md bg-gray-800 border-stone-600 text-white"
-                    disabled={gameEnded}
+                    disabled={gameEnded || gameOver}
                   />
                   <Button
                     onClick={checkAnswer}
-                    disabled={!userAnswer.trim() || gameEnded}
+                    disabled={!userAnswer.trim() || gameEnded || gameOver}
                     className="font-pixel bg-stone-600 hover:bg-stone-700 text-white"
                   >
                     Place Stone
@@ -402,9 +433,10 @@ export default function BridgeBuilderGame() {
           setCurrentProblem(0)
           setScore(0)
           setBridgeStones(0)
-          setMistakes(0)
           setUserAnswer("")
           setFeedback(null)
+          setMistakes(0)
+          setGameOverReason(null)
         }}
         levelId="7"
         levelName="Bridge Builder Game"
@@ -412,6 +444,7 @@ export default function BridgeBuilderGame() {
         isGameOver={gameOver}
         isStory={false}
         passed={passed}
+        gameOverReason={gameOverReason}
       />
     </div>
   )

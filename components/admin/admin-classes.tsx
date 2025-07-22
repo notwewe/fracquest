@@ -176,6 +176,11 @@ export function AdminClasses() {
       c.teacher_name.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
+  const classesPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredClasses.length / classesPerPage);
+  const paginatedClasses = filteredClasses.slice((currentPage - 1) * classesPerPage, currentPage * classesPerPage);
+
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
@@ -233,38 +238,38 @@ export function AdminClasses() {
           <div className="h-full border-2 border-[#a0522d] bg-white mx-6 mb-6 rounded-md flex flex-col">
             {/* Fixed Header */}
             <div className="bg-[#8B4513] rounded-t-md">
-              <div className="grid grid-cols-6 gap-4 px-4 py-3">
-                <div className="font-sans text-[#f5e9d0] font-bold">Name</div>
-                <div className="font-sans text-[#f5e9d0] font-bold">Code</div>
-                <div className="font-sans text-[#f5e9d0] font-bold">Teacher</div>
-                <div className="font-sans text-[#f5e9d0] font-bold">Students</div>
-                <div className="font-sans text-[#f5e9d0] font-bold">Created</div>
-                <div className="font-sans text-[#f5e9d0] font-bold text-right">Actions</div>
+              <div className="grid grid-cols-6 gap-2 px-3 py-2">
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Name</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Code</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Teacher</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Students</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Created</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base text-right">Actions</div>
               </div>
             </div>
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto">
-              {filteredClasses.length === 0 ? (
+              {paginatedClasses.length === 0 ? (
                 <div className="text-center py-8 text-[#8B4513] font-sans">No classes found</div>
               ) : (
-                filteredClasses.map((classItem, index) => (
+                paginatedClasses.map((classItem, index) => (
                   <motion.div
                     key={classItem.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="grid grid-cols-6 gap-4 px-4 py-4 border-b border-[#a0522d]/20 transition-colors hover:bg-[#FAF7F0]"
+                    className="grid grid-cols-6 gap-2 px-3 py-2 border-b border-[#a0522d]/20 transition-colors hover:bg-[#FAF7F0] text-base"
                   >
-                    <div className="font-medium text-[#8B4513] font-sans">{classItem.name}</div>
+                    <div className="font-medium text-[#8B4513] font-sans text-base">{classItem.name}</div>
                     <div className="text-[#8B4513]">
                       <code className="bg-[#FAF7F0] px-2 py-1 rounded border border-[#a0522d]/30 font-sans text-sm">
                         {classItem.class_code}
                       </code>
                     </div>
-                    <div className="text-[#8B4513] font-sans">{classItem.teacher_name}</div>
-                    <div className="text-[#8B4513] font-sans">{classItem.student_count}</div>
-                    <div className="text-[#8B4513] font-sans">
+                    <div className="text-[#8B4513] font-sans text-base">{classItem.teacher_name}</div>
+                    <div className="text-[#8B4513] font-sans text-base">{classItem.student_count}</div>
+                    <div className="text-[#8B4513] font-sans text-base">
                       {new Date(classItem.created_at).toLocaleDateString()}
                     </div>
                     <div className="text-right">
@@ -413,6 +418,17 @@ export function AdminClasses() {
             </div>
           </div>
         </CardContent>
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center py-3 gap-2 bg-[#f5e9d0] border-t border-[#a0522d]/30">
+            <Button size="sm" variant="outline" className="font-sans" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
+              Previous
+            </Button>
+            <span className="font-sans text-[#8B4513]">Page {currentPage} of {totalPages}</span>
+            <Button size="sm" variant="outline" className="font-sans" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>
+              Next
+            </Button>
+          </div>
+        )}
       </Card>
     </motion.div>
   )

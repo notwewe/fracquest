@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Loader2, Pencil, Trash, Info, Search } from "lucide-react"
+import { Loader2, Pencil, Trash, Info, Search, GraduationCap, BookOpen } from "lucide-react"
 import { motion } from "framer-motion"
 
 type User = {
@@ -36,6 +36,7 @@ type User = {
   role_id: number
   role_name: string
   created_at: string
+  school_name?: string // School name
 }
 
 export function AdminUsers() {
@@ -54,6 +55,19 @@ export function AdminUsers() {
     newRoleId: number
     newRoleName: string
   } | null>(null)
+  const [roleFilter, setRoleFilter] = useState('all');
+  const filteredUsers = users.filter(
+    (user) => {
+      const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.role_name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRole = roleFilter === 'all' || user.role_name === roleFilter;
+      return matchesSearch && matchesRole;
+    }
+  );
+  const usersPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -76,19 +90,18 @@ export function AdminUsers() {
 
         if (profilesError) throw profilesError
 
-        // Map profiles to users with role names
+        // For each user, fetch their class/school name
         const usersWithDetails = profilesData.map((profile) => {
           const roleName = rolesData?.find((r) => r.id === profile.role_id)?.name || "unknown"
-
           return {
             id: profile.id,
             username: profile.username || "Unknown",
             role_id: profile.role_id,
             role_name: roleName,
             created_at: profile.created_at,
+            school_name: profile.school_name || "-",
           }
         })
-
         setUsers(usersWithDetails)
       } catch (error: any) {
         console.error("Error fetching users:", error)
@@ -192,12 +205,6 @@ export function AdminUsers() {
     }
   }
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role_name.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
-
   // Filter out admin roles from the dropdown
   const nonAdminRoles = roles.filter((role) => role.id !== 3)
 
@@ -216,8 +223,8 @@ export function AdminUsers() {
       transition={{ duration: 0.5 }}
       className="h-full"
     >
-      <Card className="border-2 border-[#a0522d] bg-[#f5e9d0] h-full flex flex-col">
-        <CardHeader className="flex-shrink-0">
+      <Card className="border-2 border-[#a0522d] bg-[#f5e9d0]">
+        <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl font-sans text-[#8B4513]">Users Management</CardTitle>
           </div>
@@ -258,32 +265,32 @@ export function AdminUsers() {
           )}
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-hidden p-0">
+        <CardContent>
           <div className="h-full border-2 border-[#a0522d] bg-white mx-6 mb-6 rounded-md flex flex-col">
             {/* Fixed Header */}
             <div className="bg-[#8B4513] rounded-t-md">
-              <div className="grid grid-cols-4 gap-4 px-4 py-3">
-                <div className="font-sans text-[#f5e9d0] font-bold">Username</div>
-                <div className="font-sans text-[#f5e9d0] font-bold">Role</div>
-                <div className="font-sans text-[#f5e9d0] font-bold">Created</div>
-                <div className="font-sans text-[#f5e9d0] font-bold text-right">Actions</div>
+              <div className="grid grid-cols-4 gap-2 px-3 py-2">
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Username</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">Role</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base">School</div>
+                <div className="font-sans text-[#f5e9d0] font-semibold text-base text-right">Actions</div>
               </div>
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto">
-              {filteredUsers.length === 0 ? (
+            <div>
+              {paginatedUsers.length === 0 ? (
                 <div className="text-center py-8 text-[#8B4513] font-sans">No users found</div>
               ) : (
-                filteredUsers.map((user, index) => (
+                paginatedUsers.map((user, index) => (
                   <motion.div
                     key={user.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="grid grid-cols-4 gap-4 px-4 py-4 border-b border-[#a0522d]/20 transition-colors hover:bg-[#FAF7F0]"
+                    className="grid grid-cols-4 gap-2 px-3 py-2 border-b border-[#a0522d]/20 transition-colors hover:bg-[#FAF7F0] text-base"
                   >
-                    <div className="font-medium font-sans text-[#8B4513]">{user.username}</div>
+                    <div className="font-medium font-sans text-[#8B4513] text-base">{user.username}</div>
                     <div>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-semibold font-sans ${
@@ -297,7 +304,7 @@ export function AdminUsers() {
                         {user.role_name}
                       </span>
                     </div>
-                    <div className="font-sans text-[#8B4513]">{new Date(user.created_at).toLocaleDateString()}</div>
+                    <div className="font-sans text-[#8B4513] text-base">{user.school_name || '-'}</div>
                     <div className="text-right">
                       <div className="flex justify-end gap-2">
                         <Dialog>
@@ -456,6 +463,17 @@ export function AdminUsers() {
             </div>
           </div>
         </CardContent>
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center py-3 gap-2 bg-[#f5e9d0] border-t border-[#a0522d]/30">
+            <Button size="sm" variant="outline" className="font-sans" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
+              Previous
+            </Button>
+            <span className="font-sans text-[#8B4513]">Page {currentPage} of {totalPages}</span>
+            <Button size="sm" variant="outline" className="font-sans" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>
+              Next
+            </Button>
+          </div>
+        )}
       </Card>
     </motion.div>
   )

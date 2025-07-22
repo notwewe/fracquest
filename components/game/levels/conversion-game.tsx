@@ -50,13 +50,18 @@ export default function ConversionGame(props: any) {
   const [gameEnded, setGameEnded] = useState(false)
   const [gameOver, setGameOver] = useState(false)
   const [passed, setPassed] = useState(false)
-  // Replace questionMistakes with mistakes
-  const [mistakes, setMistakes] = useState(0)
+  // Remove all mistakes/attempts state and logic
+  // In checkAnswer, if user makes 3 mistakes and score < passing, setGameOver(true) and require retry
+  // If user passes, allow completion regardless of mistakes
+  // Only write score and completed to student_progress in endGame
   const [feedback, setFeedback] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
   const [timeLeft, setTimeLeft] = useState(60)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
+  const [mistakes, setMistakes] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [gameOverReason, setGameOverReason] = useState<'mistakes' | 'timeout' | null>(null);
 
   // Shuffle problems for variety
   const [shuffledProblems, setShuffledProblems] = useState<ConversionProblem[]>([])
@@ -76,6 +81,9 @@ export default function ConversionGame(props: any) {
         endGame(); // Ensure DB update and popup
       } else {
         setGameOver(true)
+        setShowCompletionPopup(true)
+        setGameOverReason('timeout');
+        handleFailedAttempt();
       }
     } else if (score >= 100 && gameStarted && !gameEnded && !gameOver) {
       setPassed(true)
@@ -91,76 +99,75 @@ export default function ConversionGame(props: any) {
     setMaxStreak(0)
     setUserAnswer("")
     // In startGame, reset mistakes to 0
-    setMistakes(0)
+    // setMistakes(0) // Removed
+    // setAttempts(0) // Removed
     setFeedback(null)
     setGameEnded(false)
     setGameOver(false)
     setPassed(false)
     setTimeLeft(60)
+    setGameOverReason(null);
   }
 
   const checkAnswer = () => {
-    const problem = shuffledProblems[currentProblem]
-    const isCorrect = userAnswer.trim() === problem.answer
+    const problem = shuffledProblems[currentProblem];
+    const isCorrect = userAnswer.trim() === problem.answer;
 
     if (isCorrect) {
-      let newStreak = streak + 1
-      let newScore = score + 20
-      setStreak(newStreak)
-      setScore(newScore)
-      setMaxStreak(Math.max(maxStreak, newStreak))
-      // REMOVE: setQuestionMistakes(0)
-      setFeedback(null)
-      if (newStreak === 3) {
-        setTimeLeft((prev) => prev + 10)
-        toast({
-          title: "Streak Bonus!",
-          description: "3 in a row! +10 seconds!",
-          variant: "default",
-        })
-      }
-      if (newStreak === 5) {
-        toast({
-          title: "Streak Bonus!",
-          description: "5 in a row! Bonus points!",
-          variant: "default",
-        })
-      }
-      // Next question
+      setScore((prev) => prev + 20);
+      setMistakes(0); // Reset mistakes on correct answer
+      setFeedback(null);
       if (currentProblem < shuffledProblems.length - 1) {
-        setCurrentProblem(currentProblem + 1)
-        setUserAnswer("")
+        setCurrentProblem(currentProblem + 1);
+        setUserAnswer("");
       } else {
-        // End of questions
-        if (newScore >= 60) {
-          setPassed(true)
+        if (score + 20 >= 60) {
+          setPassed(true);
           endGame();
         } else {
-          setGameOver(true)
+          setGameOver(true);
+          handleFailedAttempt();
         }
       }
     } else {
-      // Streak broken
-      setStreak(0)
-      setMistakes((prev) => {
-        const newMistakes = prev + 1
-        if (newMistakes >= 3) {
-          setGameOver(true)
-          setGameEnded(true)
-          setShowCompletionPopup(true)
-          setFeedback(null)
-        } else {
-          setFeedback("Incorrect. Try again!")
-        }
-        return newMistakes
-      })
-      toast({
-        title: "Incorrect",
-        description: `The correct answer was ${problem.answer}. Try again!`,
-        variant: "destructive",
-      })
+      setMistakes((prev) => prev + 1);
+      setFeedback("Incorrect. Try again!");
+      if (mistakes + 1 >= 3) {
+        setGameOver(true);
+        setShowCompletionPopup(true);
+        setGameOverReason('mistakes');
+        handleFailedAttempt();
+        return;
+      }
+      // After feedback, allow retry (do not end game)
     }
-  }
+  };
+
+  const handleFailedAttempt = async () => {
+    // Increment attempts in student_progress
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: existingProgress } = await supabase
+        .from("student_progress")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("waypoint_id", 3)
+        .maybeSingle();
+      if (existingProgress) {
+        await supabase
+          .from("student_progress")
+          .update({ attempts: (existingProgress.attempts || 0) + 1 })
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 3);
+      } else {
+        await supabase.from("student_progress").insert({
+          student_id: user.id,
+          waypoint_id: 3,
+          attempts: 1,
+        });
+      }
+    }
+  };
 
   const endGame = async () => {
     setGameEnded(true)
@@ -174,6 +181,8 @@ export default function ConversionGame(props: any) {
         await updateStudentProgress(user.id, 3, {
           completed: true,
           score: score,
+          // mistakes: mistakes, // Removed
+          // attempts: attempts, // Removed
         })
       }
       setShowCompletionPopup(true)
@@ -265,11 +274,11 @@ export default function ConversionGame(props: any) {
                 onKeyPress={handleKeyPress}
                 placeholder="Enter your answer (e.g., 2 1/4 or 17/5)"
                 className="text-lg max-w-md bg-gray-800 border-amber-600 text-white"
-                disabled={gameEnded}
+                disabled={gameOver || gameEnded}
               />
               <Button
                 onClick={checkAnswer}
-                disabled={!userAnswer.trim() || gameEnded}
+                disabled={!userAnswer.trim() || gameOver || gameEnded}
                 className="font-pixel bg-amber-600 hover:bg-amber-700 text-white"
               >
                 Submit
@@ -330,6 +339,7 @@ export default function ConversionGame(props: any) {
           setStreak(0);
           setUserAnswer("");
           setCurrentProblem(0);
+          setGameOverReason(null);
         }}
         levelId="3"
         levelName="Conversion Game"
@@ -337,6 +347,7 @@ export default function ConversionGame(props: any) {
         isGameOver={gameOver}
         isStory={false}
         passed={passed}
+        gameOverReason={gameOverReason}
       />
     </div>
   )

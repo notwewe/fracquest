@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -109,10 +109,13 @@ export default function FractionForestGame() {
   const [isLoading, setIsLoading] = useState(false)
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const supabase = createClient()
-  const [mistakes, setMistakes] = useState(0)
+  const [mistakes, setMistakes] = useState(0);
+  const [attempts, setAttempts] = useState(0);
   const [gameOver, setGameOver] = useState(false)
   const [passed, setPassed] = useState(false)
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [gameOverReason, setGameOverReason] = useState<'mistakes' | null>(null);
+  const endGameCalled = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -130,10 +133,14 @@ export default function FractionForestGame() {
   const startGame = () => {
     setGameStarted(true)
     setDialoguePhase("tutorial")
-    setMistakes(0)
+    // Remove all mistakes/attempts state and logic
+    // In answer handler, if user makes 3 mistakes and score < passing, setGameOver(true) and require retry
+    // If user passes, allow completion regardless of mistakes
+    // Only write score and completed to student_progress in endGame
     setGameOver(false)
     setPassed(false)
     setFeedback(null)
+    endGameCalled.current = false;
   }
 
   const startRound = () => {
@@ -152,6 +159,32 @@ export default function FractionForestGame() {
     }
   }
 
+  const handleFailedAttempt = async () => {
+    // Increment attempts in student_progress
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: existingProgress } = await supabase
+        .from("student_progress")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("waypoint_id", 8)
+        .maybeSingle();
+      if (existingProgress) {
+        await supabase
+          .from("student_progress")
+          .update({ attempts: (existingProgress.attempts || 0) + 1 })
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 8);
+      } else {
+        await supabase.from("student_progress").insert({
+          student_id: user.id,
+          waypoint_id: 8,
+          attempts: 1,
+        });
+      }
+    }
+  };
+
   const checkOrder = () => {
     const round = rounds[currentRound]
     const sortedTrees = [...trees].sort((a, b) => (round.goal === "ascending" ? a.value - b.value : b.value - a.value))
@@ -159,38 +192,44 @@ export default function FractionForestGame() {
     const isCorrect = trees.every((tree, index) => tree.id === sortedTrees[index].id)
 
     if (isCorrect) {
-      setScore(score + roundPoints[currentRound])
-      setDialoguePhase("success")
-      setFeedback(null)
-      toast({
-        title: "Correct!",
-        description: "The trees are in perfect order!",
-        variant: "default",
-      })
-    } else {
-      setMistakes((prev) => {
-        const newMistakes = prev + 1
-        setFeedback("Incorrect. Try again!")
-        if (newMistakes >= 3) {
-          if (score >= 60) {
-            setPassed(true)
-            setGameEnded(true)
-          } else {
-            setGameOver(true)
+      const newScore = Math.min(score + 25, 100);
+      setScore(newScore);
+      setFeedback("Correct!");
+      if (currentRound + 1 >= rounds.length) {
+        setTimeout(() => {
+          setPassed(newScore >= 60);
+          setGameEnded(true);
+          if (!endGameCalled.current) {
+            endGameCalled.current = true;
+            endGame(newScore);
           }
-          setShowCompletionPopup(true)
-          setFeedback(null)
-          setDialoguePhase("complete")
+        }, 1500);
+        return;
+      }
+      setTimeout(() => {
+        setCurrentRound(currentRound + 1);
+        setDialoguePhase("game");
+      }, 1500);
+    } else {
+      setMistakes((prev) => prev + 1);
+      setFeedback("Incorrect Order. Try again!");
+      if (mistakes + 1 >= 3) {
+        if (score >= 60) {
+          setPassed(true);
+          setGameEnded(true);
+          if (!endGameCalled.current) {
+            endGameCalled.current = true;
+            endGame(score);
+          }
         } else {
-          setDialoguePhase("failure")
-          toast({
-            title: "Incorrect",
-            description: `Try again!`,
-            variant: "destructive",
-          })
+          setGameOver(true);
+          setShowCompletionPopup(true);
+          setGameOverReason('mistakes');
+          handleFailedAttempt();
         }
-        return newMistakes
-      })
+        return;
+      }
+      // After feedback, allow retry (do not end game)
     }
   }
 
@@ -200,7 +239,7 @@ export default function FractionForestGame() {
       setDialoguePhase("game")
     } else {
       setDialoguePhase("complete")
-      endGame()
+      // endGame() will be called automatically after last round in checkOrder
     }
   }
 
@@ -209,53 +248,27 @@ export default function FractionForestGame() {
     setDialoguePhase("game")
   }
 
-  const endGame = async () => {
-    setGameEnded(true)
+  const endGame = async (finalScore: number) => {
     setIsLoading(true)
-
     try {
       const {
         data: { user },
       } = await supabase.auth.getUser()
 
       if (user) {
-        // Check if record exists first
-        const { data: existingProgress } = await supabase
+        // Only write score and completed to student_progress in endGame
+        const { error: updateError } = await supabase
           .from("student_progress")
-          .select("*")
-          .eq("student_id", user.id)
-          .eq("waypoint_id", 8) // Fraction Forest waypoint ID
-          .maybeSingle()
-
-        if (existingProgress) {
-          // Update existing record only if new score is higher
-          const newScore = Math.max(existingProgress.score || 0, score)
-          const { error: updateError } = await supabase
-            .from("student_progress")
-            .update({
-              completed: true,
-              score: newScore,
-              last_updated: new Date().toISOString(),
-            })
-            .eq("student_id", user.id)
-            .eq("waypoint_id", 8)
-
-          if (updateError) {
-            console.error("Error updating progress:", updateError)
-          }
-        } else {
-          // Insert new record
-          const { error: insertError } = await supabase.from("student_progress").insert({
-            student_id: user.id,
-            waypoint_id: 8,
+          .update({
             completed: true,
-            score: score,
+            score: finalScore,
             last_updated: new Date().toISOString(),
           })
+          .eq("student_id", user.id)
+          .eq("waypoint_id", 8)
 
-          if (insertError) {
-            console.error("Error inserting progress:", insertError)
-          }
+        if (updateError) {
+          console.error("Error updating progress:", updateError)
         }
       }
 
@@ -395,14 +408,6 @@ export default function FractionForestGame() {
                   Try Again
                 </Button>
               )}
-              {dialoguePhase === "complete" && !showCompletionPopup && (
-                <Button
-                  onClick={() => setShowCompletionPopup(true)}
-                  className="font-pixel bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Complete Forest
-                </Button>
-              )}
             </div>
           </div>
         </div>
@@ -437,9 +442,9 @@ export default function FractionForestGame() {
           setPassed(false)
           setCurrentRound(0)
           setScore(0)
-          setMistakes(0)
-          setFeedback(null)
           setDialoguePhase("intro")
+          setMistakes(0)
+          setGameOverReason(null)
         }}
         levelId="8"
         levelName="Fraction Forest"
@@ -447,6 +452,7 @@ export default function FractionForestGame() {
         isGameOver={gameOver}
         isStory={false}
         passed={passed}
+        gameOverReason={gameOverReason}
       />
 
       {/* Show feedback below the game area */}
@@ -460,7 +466,7 @@ export default function FractionForestGame() {
             <div className="w-24 h-4 bg-red-200 rounded-full overflow-hidden">
               <div className="h-4 bg-red-600 rounded-full transition-all duration-300" style={{ width: `${(mistakes/3)*100}%` }}></div>
             </div>
-            <span className="font-pixel text-green-200 ml-2">{mistakes}/3</span>
+            <span className="font-pixel text-green-200 ml-2">{gameOver ? "Game Over" : `${mistakes}/3`}</span>
           </div>
         </div>
       )}

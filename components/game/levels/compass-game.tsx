@@ -26,6 +26,8 @@ export function CompassGame({ levelId, onComplete }: CompassGameProps) {
   const [showCompletionPopup, setShowCompletionPopup] = useState(false)
   const [currentDialogue, setCurrentDialogue] = useState(0)
   const supabase = createClient()
+  const [mistakes, setMistakes] = useState(0);
+  const [attempts, setAttempts] = useState(0);
 
   // Introduction dialogue
   const introDialogue = [
@@ -206,6 +208,8 @@ export function CompassGame({ levelId, onComplete }: CompassGameProps) {
           score: finalScore,
           time_spent: timer,
           last_updated: new Date().toISOString(),
+          mistakes,
+          attempts,
         })
 
         // Show completion popup

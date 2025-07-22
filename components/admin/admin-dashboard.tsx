@@ -32,7 +32,7 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="w-full min-h-screen bg-[#f5e9d0] overflow-y-auto py-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
       </motion.div>

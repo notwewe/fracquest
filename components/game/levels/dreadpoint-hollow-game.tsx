@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -202,6 +202,7 @@ export default function DreadpointHollowGame() {
   const [showCriticalWarning, setShowCriticalWarning] = useState(false);
   // Add state for fade-out effect
   const [mistakeFadeOut, setMistakeFadeOut] = useState(false);
+  const endGameCalled = useRef(false);
 
   // Victory dialogues
   const victoryDialogues = [
@@ -342,15 +343,19 @@ export default function DreadpointHollowGame() {
       if (dialogueIndex < victoryDialogues.length - 1) {
         setDialogueIndex(dialogueIndex + 1)
       } else {
+        // On final victory dialogue, log 500 points and end game
+        if (!endGameCalled.current) {
+          endGameCalled.current = true;
+          endGame(500);
+        }
         router.push("/student/game/level/11");
       }
     }
   }
 
-  const endGame = async () => {
+  const endGame = async (finalScore: number) => {
     setGameEnded(true)
     setIsLoading(true)
-
     try {
       const {
         data: { user },
@@ -367,7 +372,7 @@ export default function DreadpointHollowGame() {
 
         if (existingProgress) {
           // Update existing record only if new score is higher
-          const newScore = Math.max(existingProgress.score || 0, score)
+          const newScore = Math.max(existingProgress.score || 0, finalScore)
           const { error: updateError } = await supabase
             .from("student_progress")
             .update({
@@ -387,7 +392,7 @@ export default function DreadpointHollowGame() {
             student_id: user.id,
             waypoint_id: 10,
             completed: true,
-            score: score,
+            score: finalScore,
             last_updated: new Date().toISOString(),
           })
 
@@ -406,6 +411,31 @@ export default function DreadpointHollowGame() {
   // 2. When whiskersHealth reaches 0, set a random mocking dialogue and show the popup
   useEffect(() => {
     if (whiskersHealth === 0) {
+      // Increment attempts in student_progress
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: existingProgress } = await supabase
+            .from("student_progress")
+            .select("*")
+            .eq("student_id", user.id)
+            .eq("waypoint_id", 10)
+            .maybeSingle();
+          if (existingProgress) {
+            await supabase
+              .from("student_progress")
+              .update({ attempts: (existingProgress.attempts || 0) + 1 })
+              .eq("student_id", user.id)
+              .eq("waypoint_id", 10);
+          } else {
+            await supabase.from("student_progress").insert({
+              student_id: user.id,
+              waypoint_id: 10,
+              attempts: 1,
+            });
+          }
+        }
+      })();
       const random = Math.floor(Math.random() * mockingDialogues.length);
       setMockingDialogue(mockingDialogues[random]);
       setShowEerieGameOver(true);
@@ -468,7 +498,7 @@ export default function DreadpointHollowGame() {
             <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
               <Button
                 onClick={() => {
-                  endGame()
+                  endGame(score) // Pass current score to endGame
                   router.push("/student/game")
                 }}
                 className="font-pixel bg-yellow-600 hover:bg-yellow-700 text-white text-xl px-8 py-4"
