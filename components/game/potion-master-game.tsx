@@ -111,6 +111,16 @@ export function PotionMasterGame() {
             <div className="text-yellow-400 font-bold">Score: {score}</div>
           </div>
           
+          {/* Top Left Back Button */}
+          <div className="absolute top-0 left-0">
+            <a
+              href="/student/dashboard"
+              className="w-10 h-10 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+            >
+              ← 
+            </a>
+          </div>
+
           {/* Top Right Buttons */}
           <div className="absolute top-0 right-0 flex gap-2">
             {/* Reset Button */}
