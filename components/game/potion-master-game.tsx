@@ -111,14 +111,35 @@ export function PotionMasterGame() {
             <div className="text-yellow-400 font-bold">Score: {score}</div>
           </div>
           
-          {/* Help Button */}
-          <button
-            type="button"
-            onClick={() => setShowInstructions(true)}
-            className="absolute top-0 right-0 w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
-          >
-            ?
-          </button>
+          {/* Top Right Buttons */}
+          <div className="absolute top-0 right-0 flex gap-2">
+            {/* Reset Button */}
+            <button
+              type="button"
+              onClick={resetGame}
+              className="w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+            >
+              ↻
+            </button>
+            
+            {/* New Recipe Button */}
+            <button
+              type="button"
+              onClick={generateNewRecipe}
+              className="w-10 h-10 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+            >
+              📜
+            </button>
+            
+            {/* Help Button */}
+            <button
+              type="button"
+              onClick={() => setShowInstructions(true)}
+              className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+            >
+              ?
+            </button>
+          </div>
         </div>
 
       {/* Main Game Area */}
@@ -224,15 +245,7 @@ export function PotionMasterGame() {
         </div>
       </div>
 
-      {/* Control Buttons */}
-      <div className="flex justify-center gap-4 mt-8">
-        <Button onClick={resetGame} className="bg-red-600 hover:bg-red-700">
-          🔄 Reset Cauldron
-        </Button>
-        <Button onClick={generateNewRecipe} className="bg-green-600 hover:bg-green-700">
-          📜 New Recipe
-        </Button>
-      </div>
+
 
       {/* Game Status Overlays */}
       {gameStatus === "success" && (
