@@ -99,21 +99,23 @@ export function PotionMasterGame() {
   const fractionToString = (fraction: Fraction) => `${fraction.numerator}/${fraction.denominator}`
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4">
-      {/* Header with Score */}
-      <div className="text-center mb-6">
-        <div className="bg-purple-900/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-4 inline-block">
-          <h2 className="text-2xl font-bold text-white mb-2">🧪 Potion Master</h2>
-          <p className="text-purple-200 mb-2">Drag & Drop Fraction Game</p>
-          <div className="text-yellow-400 font-bold">Score: {score}</div>
+    <div className="w-full p-4">
+      {/* Content Container */}
+      <div>
+        {/* Header with Score */}
+        <div className="text-center mb-6">
+          <div className="bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-4 inline-block">
+            <h2 className="text-2xl font-bold text-white mb-2">🧪 Potion Master</h2>
+            <p className="text-purple-200 mb-2">Drag & Drop Fraction Game</p>
+            <div className="text-yellow-400 font-bold">Score: {score}</div>
+          </div>
         </div>
-      </div>
 
       {/* Main Game Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         {/* Left Panel - Magic Ladles */}
-        <div className="bg-purple-900/30 backdrop-blur-md border border-purple-500/30 rounded-lg p-6">
+        <div className="bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-lg p-6">
           <h3 className="text-xl font-bold text-white mb-4 text-center">🥄 Magic Ladles</h3>
           <div className="grid grid-cols-2 gap-3">
             {LADLE_FRACTIONS.map((fraction, index) => (
@@ -172,7 +174,7 @@ export function PotionMasterGame() {
         </div>
 
         {/* Right Panel - Ingredient Bowls */}
-        <div className="bg-purple-900/30 backdrop-blur-md border border-purple-500/30 rounded-lg p-6">
+        <div className="bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-lg p-6">
           <h3 className="text-xl font-bold text-white mb-4 text-center">🧪 Ingredients</h3>
           <div className="space-y-4">
             
@@ -247,14 +249,15 @@ export function PotionMasterGame() {
         </div>
       )}
 
-      {/* Instructions */}
-      <div className="mt-8 bg-purple-900/30 backdrop-blur-md border border-purple-500/30 rounded-lg p-4">
-        <h4 className="text-white font-bold mb-2">🎯 How to Play:</h4>
-        <div className="text-purple-200 space-y-1">
-          <p>1. 📖 Read the recipe scroll to see what fractions you need</p>
-          <p>2. 🥄 Drag a magic ladle with the correct fraction</p>
-          <p>3. 🎯 Drop it on the right ingredient bowl</p>
-          <p>4. 🏺 Complete the recipe to brew a perfect potion!</p>
+        {/* Instructions */}
+        <div className="mt-8 bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-4">
+          <h4 className="text-white font-bold mb-2">🎯 How to Play:</h4>
+          <div className="text-purple-200 space-y-1">
+            <p>1. 📖 Read the recipe scroll to see what fractions you need</p>
+            <p>2. 🥄 Drag a magic ladle with the correct fraction</p>
+            <p>3. 🎯 Drop it on the right ingredient bowl</p>
+            <p>4. 🏺 Complete the recipe to brew a perfect potion!</p>
+          </div>
         </div>
       </div>
     </div>
