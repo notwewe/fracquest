@@ -38,6 +38,7 @@ export function PotionMasterGame() {
   const [gameStatus, setGameStatus] = useState<"playing" | "success" | "error">("playing")
   const [score, setScore] = useState(0)
   const [draggedItem, setDraggedItem] = useState<DragItem | null>(null)
+  const [showInstructions, setShowInstructions] = useState(true)
 
   const generateNewRecipe = () => {
     const randomFraction1 = LADLE_FRACTIONS[Math.floor(Math.random() * LADLE_FRACTIONS.length)]
@@ -103,12 +104,21 @@ export function PotionMasterGame() {
       {/* Content Container */}
       <div>
         {/* Header with Score */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 relative">
           <div className="bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-4 inline-block">
             <h2 className="text-2xl font-bold text-white mb-2">🧪 Potion Master</h2>
             <p className="text-purple-200 mb-2">Drag & Drop Fraction Game</p>
             <div className="text-yellow-400 font-bold">Score: {score}</div>
           </div>
+          
+          {/* Help Button */}
+          <button
+            type="button"
+            onClick={() => setShowInstructions(true)}
+            className="absolute top-0 right-0 w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+          >
+            ?
+          </button>
         </div>
 
       {/* Main Game Area */}
@@ -249,16 +259,51 @@ export function PotionMasterGame() {
         </div>
       )}
 
-        {/* Instructions */}
-        <div className="mt-8 bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-4">
-          <h4 className="text-white font-bold mb-2">🎯 How to Play:</h4>
-          <div className="text-purple-200 space-y-1">
-            <p>1. 📖 Read the recipe scroll to see what fractions you need</p>
-            <p>2. 🥄 Drag a magic ladle with the correct fraction</p>
-            <p>3. 🎯 Drop it on the right ingredient bowl</p>
-            <p>4. 🏺 Complete the recipe to brew a perfect potion!</p>
+        {/* Instructions Modal */}
+        {showInstructions && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-gradient-to-br from-purple-800 to-indigo-900 border-4 border-purple-500 rounded-lg p-8 max-w-md mx-4 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h4 className="text-2xl font-bold text-white">🎯 How to Play</h4>
+                <button
+                  type="button"
+                  onClick={() => setShowInstructions(false)}
+                  className="w-8 h-8 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white font-bold transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="text-purple-200 space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">📖</span>
+                  <p>Read the recipe scroll to see what fractions you need</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🥄</span>
+                  <p>Drag a magic ladle with the correct fraction</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎯</span>
+                  <p>Drop it on the right ingredient bowl</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🏺</span>
+                  <p>Complete the recipe to brew a perfect potion!</p>
+                </div>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <Button 
+                  onClick={() => setShowInstructions(false)}
+                  className="bg-green-600 hover:bg-green-700 px-6"
+                >
+                  Got it! Let's Start Brewing! 🧪
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
