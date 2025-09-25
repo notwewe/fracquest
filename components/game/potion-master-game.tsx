@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 
 interface Fraction {
@@ -52,11 +53,11 @@ export function PotionMasterGame() {
     if (cauldronContents.length !== 2) return
 
     const hasCorrectIngredients = cauldronContents.some(content => 
-      content.ingredient === "pink" && 
+      content.ingredient === "purple" && 
       content.fraction.numerator === recipe.ingredient1.numerator && 
       content.fraction.denominator === recipe.ingredient1.denominator
     ) && cauldronContents.some(content => 
-      content.ingredient === "blue" && 
+      content.ingredient === "green" && 
       content.fraction.numerator === recipe.ingredient2.numerator && 
       content.fraction.denominator === recipe.ingredient2.denominator
     )
@@ -153,106 +154,138 @@ export function PotionMasterGame() {
         </div>
 
       {/* Main Game Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="flex flex-col items-center space-y-8">
         
-        {/* Left Panel - Magic Ladles */}
-        <div className="bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-lg p-6">
-          <h3 className="text-xl font-bold text-white mb-4 text-center">🥄 Magic Ladles</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {LADLE_FRACTIONS.map((fraction, index) => (
-              <div
-                key={index}
-                draggable
-                onDragStart={(e) => handleDragStart(e, fraction)}
-                className="bg-gradient-to-br from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 
-                         border-2 border-amber-700 rounded-lg p-4 text-center cursor-grab active:cursor-grabbing
-                         transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <div className="text-amber-900 font-bold text-lg">
-                  {fractionToString(fraction)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Top Section - Placeholder for moved ladles */}
 
-        {/* Center Panel - Cauldron & Recipe */}
-        <div className="space-y-6">
-          {/* Recipe Scroll */}
-          <div className="bg-gradient-to-br from-yellow-100 to-amber-100 border-4 border-amber-600 rounded-lg p-6 shadow-lg transform rotate-1">
-            <div className="text-center">
-              <h3 className="text-amber-800 font-bold text-xl mb-4">📜 Recipe Scroll</h3>
-              <div className="space-y-2">
-                <p className="text-amber-700 font-semibold">Strength Potion Recipe:</p>
-                <p className="text-pink-600 font-bold">
-                  • {fractionToString(recipe.ingredient1)} of Pink Powder ✨
-                </p>
-                <p className="text-blue-600 font-bold">
-                  • {fractionToString(recipe.ingredient2)} of Blue Crystals 💎
-                </p>
-              </div>
+        {/* Middle Section - Horizontal Layout with Ladles, Cauldron, and Recipe */}
+        <div className="flex items-center justify-center gap-8">
+          {/* Magic Ladles - Left side of cauldron */}
+          <div className="bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-lg p-4 w-fit">
+            <h3 className="text-lg font-bold text-white mb-3 text-center">🥄 Magic Ladles</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {LADLE_FRACTIONS.map((fraction, index) => (
+                <div
+                  key={index}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, fraction)}
+                  className="relative cursor-grab active:cursor-grabbing transition-all transform hover:scale-105 shadow-lg hover:shadow-xl w-12 h-12"
+                >
+                  <Image
+                    src="/potion-assets/ladle.png"
+                    alt="Magic Ladle"
+                    width={20}
+                    height={20}
+                    className="w-full h-auto"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-white font-bold text-xs drop-shadow-lg">
+                      {fractionToString(fraction)}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Cauldron */}
           <div className="flex flex-col items-center">
-            <div className="relative w-48 h-48 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full border-8 border-gray-600 shadow-2xl">
+            <div className="relative w-80 h-80">
+              <Image
+                src="/potion-assets/cauldron.png"
+                alt="Magic Cauldron"
+                width={320}
+                height={320}
+                className="w-full h-full object-contain"
+              />
               {/* Cauldron Contents */}
-              <div className="absolute inset-4 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 opacity-80 flex items-center justify-center">
-                <div className="text-center text-white text-sm">
+              <div className="absolute inset-10 flex items-center justify-center">
+                <div className="text-center text-white text-lg drop-shadow-lg">
                   {cauldronContents.length === 0 && "Empty Cauldron"}
                   {cauldronContents.map((content, index) => (
-                    <div key={index} className="mb-1">
-                      {fractionToString(content.fraction)} {content.ingredient === 'pink' ? '✨' : '💎'}
+                    <div key={index} className="mb-3 bg-black/50 rounded px-4 py-3">
+                      {fractionToString(content.fraction)} {content.ingredient === 'purple' ? '🟣' : content.ingredient === 'green' ? '🟢' : '�'}
                     </div>
                   ))}
                 </div>
               </div>
             </div>
             {/* Fire */}
-            <div className="mt-2 text-orange-500 text-2xl animate-pulse">🔥🔥🔥</div>
+            <div className="mt-4 text-orange-500 text-4xl animate-pulse">🔥🔥🔥</div>
+          </div>
+
+          {/* Recipe Scroll - Right side of cauldron */}
+          <div className="bg-gradient-to-br from-yellow-100 to-amber-100 border-4 border-amber-600 rounded-lg p-6 shadow-lg transform rotate-1 w-64">
+            <div className="text-center">
+              <h3 className="text-amber-800 font-bold text-xl mb-4">📜 Recipe Scroll</h3>
+              <div className="space-y-2">
+                <p className="text-amber-700 font-semibold">Strength Potion Recipe:</p>
+                <p className="text-purple-600 font-bold">
+                  • {fractionToString(recipe.ingredient1)} of Purple Power 🟣
+                </p>
+                <p className="text-green-600 font-bold">
+                  • {fractionToString(recipe.ingredient2)} of Emerald Mist 🟢
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Panel - Ingredient Bowls */}
-        <div className="bg-black/40 backdrop-blur-md border border-purple-500/30 rounded-lg p-6">
-          <h3 className="text-xl font-bold text-white mb-4 text-center">🧪 Ingredients</h3>
-          <div className="space-y-4">
-            
-            {/* Mystic Water Bowl (not used in current recipe) */}
-            <div className="bg-gradient-to-br from-cyan-400 to-blue-500 border-4 border-cyan-600 rounded-lg p-6 text-center shadow-lg">
-              <div className="text-cyan-100 text-3xl mb-2">💧</div>
-              <div className="text-cyan-100 font-bold">Mystic Water</div>
-              <div className="text-cyan-200 text-sm">(Not needed)</div>
-            </div>
+        {/* Bottom Section - Ingredient Bowls */}
+        <div className="flex justify-center gap-6">
 
-            {/* Blue Crystals Bowl */}
-            <div 
-              className="bg-gradient-to-br from-blue-400 to-blue-600 border-4 border-blue-700 rounded-lg p-6 text-center shadow-lg 
-                       hover:from-blue-300 hover:to-blue-500 transition-all cursor-pointer transform hover:scale-105
-                       border-dashed border-4"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 'blue')}
-            >
-              <div className="text-blue-100 text-3xl mb-2">💎</div>
-              <div className="text-blue-100 font-bold">Blue Crystals</div>
-              <div className="text-blue-200 text-sm">Drop ladle here!</div>
-            </div>
+          {/* Mystic Water Bowl (not used in current recipe) */}
+          <div className="bg-black/40 backdrop-blur-md border-4 border-cyan-600 rounded-lg p-4 text-center shadow-lg w-24">
+            <Image
+              src="/potion-assets/blue_potion.png"
+              alt="Mystic Water"
+              width={50}
+              height={65}
+              className="mx-auto mb-2"
+            />
+            <div className="text-cyan-100 font-bold text-xs">Mystic Water</div>
+            <div className="text-cyan-200 text-xs">(Not needed)</div>
+          </div>
 
-            {/* Pink Powder Bowl */}
-            <div 
-              className="bg-gradient-to-br from-pink-400 to-pink-600 border-4 border-pink-700 rounded-lg p-6 text-center shadow-lg 
-                       hover:from-pink-300 hover:to-pink-500 transition-all cursor-pointer transform hover:scale-105
-                       border-dashed border-4"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, 'pink')}
-            >
-              <div className="text-pink-100 text-3xl mb-2">✨</div>
-              <div className="text-pink-100 font-bold">Pink Powder</div>
-              <div className="text-pink-200 text-sm">Drop ladle here!</div>
-            </div>
+          {/* Emerald Mist Bowl */}
+          <div 
+            className="bg-black/40 backdrop-blur-md border-4 border-green-600 rounded-lg p-4 text-center shadow-lg w-24
+                     hover:bg-black/60 transition-all cursor-pointer transform hover:scale-105
+                     border-dashed border-4"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'green')}
+          >
+            <Image
+              src="/potion-assets/green_potion.png"
+              alt="Emerald Mist"
+              width={50}
+              height={65}
+              className="mx-auto mb-2"
+            />
+            <div className="text-green-100 font-bold text-xs">Emerald Mist</div>
+            <div className="text-green-200 text-xs">Drop ladle here!</div>
+          </div>
+
+          {/* Purple Power Bowl */}
+          <div 
+            className="bg-black/40 backdrop-blur-md border-4 border-purple-600 rounded-lg p-4 text-center shadow-lg w-24
+                     hover:bg-black/60 transition-all cursor-pointer transform hover:scale-105
+                     border-dashed border-4"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'purple')}
+          >
+            <Image
+              src="/potion-assets/purple_potion.png"
+              alt="Purple Power"
+              width={50}
+              height={65}
+              className="mx-auto mb-2"
+            />
+            <div className="text-purple-100 font-bold text-xs">Purple Power</div>
+            <div className="text-purple-200 text-xs">Drop ladle here!</div>
           </div>
         </div>
+
       </div>
 
 
