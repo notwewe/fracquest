@@ -17,6 +17,7 @@ interface Recipe {
 interface DragItem {
   fraction: Fraction
   type: 'ladle'
+  ingredient?: string
 }
 
 const LADLE_FRACTIONS: Fraction[] = [
@@ -84,12 +85,27 @@ export function PotionMasterGame() {
     e.dataTransfer.dropEffect = 'move'
   }
 
-  const handleDrop = (e: React.DragEvent, ingredientType: string) => {
+  const handleDrop = (e: React.DragEvent, target: string) => {
     e.preventDefault()
-    if (draggedItem && cauldronContents.length < 2) {
-      setCauldronContents(prev => [...prev, { ingredient: ingredientType, fraction: draggedItem.fraction }])
+    if (!draggedItem) return
+
+    if (target === 'cauldron') {
+      // Only allow dropping in cauldron if ladle has an ingredient
+      if (draggedItem.ingredient && cauldronContents.length < 2) {
+        setCauldronContents(prev => [...prev, { 
+          ingredient: draggedItem.ingredient!, 
+          fraction: draggedItem.fraction 
+        }])
+      }
     }
     setDraggedItem(null)
+  }
+
+  const handleIngredientHover = (e: React.DragEvent, ingredientType: string) => {
+    e.preventDefault()
+    if (draggedItem && !draggedItem.ingredient) {
+      setDraggedItem(prev => prev ? { ...prev, ingredient: ingredientType } : null)
+    }
   }
 
   const resetGame = () => {
@@ -202,7 +218,11 @@ export function PotionMasterGame() {
           {/* Cauldron */}
           <div className="flex-1 flex justify-center">
             <div className="flex flex-col items-center justify-center">
-              <div className="relative w-80 h-80">
+              <div 
+                className="relative w-80 h-80"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, 'cauldron')}
+              >
                 <Image
                   src="/potion-assets/cauldron.png"
                   alt="Magic Cauldron"
@@ -272,9 +292,11 @@ export function PotionMasterGame() {
           {/* Emerald Mist Bowl */}
           <div 
             className="p-4 text-center shadow-lg w-32
-                     hover:bg-black/20 transition-all cursor-pointer transform hover:scale-105 rounded-lg"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'green')}
+                     hover:bg-green-500/20 transition-all cursor-pointer transform hover:scale-105 rounded-lg"
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'green')
+            }}
           >
             <Image
               src="/potion-assets/green_potion.png"
@@ -284,15 +306,17 @@ export function PotionMasterGame() {
               className="mx-auto mb-2"
             />
             <div className="text-green-100 font-bold text-xs">Emerald Mist</div>
-            <div className="text-green-200 text-xs">Drop ladle here!</div>
+            <div className="text-green-200 text-xs">Hover ladle here!</div>
           </div>
 
           {/* Purple Power Bowl */}
           <div 
             className="p-4 text-center shadow-lg w-32
-                     hover:bg-black/20 transition-all cursor-pointer transform hover:scale-105 rounded-lg"
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, 'purple')}
+                     hover:bg-purple-500/20 transition-all cursor-pointer transform hover:scale-105 rounded-lg"
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'purple')
+            }}
           >
             <Image
               src="/potion-assets/purple_potion.png"
@@ -302,7 +326,7 @@ export function PotionMasterGame() {
               className="mx-auto mb-2"
             />
             <div className="text-purple-100 font-bold text-xs">Purple Power</div>
-            <div className="text-purple-200 text-xs">Drop ladle here!</div>
+            <div className="text-purple-200 text-xs">Hover ladle here!</div>
           </div>
         </div>
 
@@ -357,11 +381,11 @@ export function PotionMasterGame() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🥄</span>
-                  <p>Drag a magic ladle with the correct fraction</p>
+                  <p>Drag a magic ladle and hover it over an ingredient to collect it</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🎯</span>
-                  <p>Drop it on the right ingredient bowl</p>
+                  <p>Drop the ladle with ingredient into the cauldron</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🏺</span>
