@@ -227,6 +227,12 @@ export function PotionMasterGame() {
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-white font-bold text-sm drop-shadow-lg bg-black/50 rounded px-1">
                           {fractionToString(fraction)}
+                          {/* Show ingredient if picked up */}
+                          {draggedItem?.fraction === fraction && draggedItem.ingredient && (
+                            <div className="mt-1 text-xs">
+                              {draggedItem.ingredient === 'pink' ? '🌸' : draggedItem.ingredient === 'blue' ? '💎' : '💧'}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -359,8 +365,11 @@ export function PotionMasterGame() {
 
           {/* Blue Crystals Bowl */}
           <div 
-            className="p-4 text-center shadow-lg w-32
-                     hover:bg-blue-500/20 transition-all cursor-pointer transform hover:scale-105 rounded-lg"
+            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-2 border-dashed border-blue-400' : 
+              draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-2 border-solid border-blue-400' : 
+              'hover:bg-blue-500/10'
+            }`}
             onDragOver={(e) => {
               handleDragOver(e)
               handleIngredientHover(e, 'blue')
@@ -374,13 +383,18 @@ export function PotionMasterGame() {
               className="mx-auto mb-2"
             />
             <div className="text-blue-100 font-bold text-xs">Blue Crystals 💎</div>
-            <div className="text-blue-200 text-xs">Hover ladle to collect!</div>
+            <div className="text-blue-200 text-xs">
+              {draggedItem?.ingredient === 'blue' ? 'Collected! Drop in cauldron' : 'Hover ladle to collect!'}
+            </div>
           </div>
 
           {/* Pink Powder Bowl */}
           <div 
-            className="p-4 text-center shadow-lg w-32
-                     hover:bg-pink-500/20 transition-all cursor-pointer transform hover:scale-105 rounded-lg"
+            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-pink-500/20 border-2 border-dashed border-pink-400' : 
+              draggedItem?.ingredient === 'pink' ? 'bg-pink-500/30 border-2 border-solid border-pink-400' : 
+              'hover:bg-pink-500/10'
+            }`}
             onDragOver={(e) => {
               handleDragOver(e)
               handleIngredientHover(e, 'pink')
@@ -394,7 +408,9 @@ export function PotionMasterGame() {
               className="mx-auto mb-2"
             />
             <div className="text-pink-100 font-bold text-xs">Pink Powder 🌸</div>
-            <div className="text-pink-200 text-xs">Hover ladle to collect!</div>
+            <div className="text-pink-200 text-xs">
+              {draggedItem?.ingredient === 'pink' ? 'Collected! Drop in cauldron' : 'Hover ladle to collect!'}
+            </div>
           </div>
         </div>
 
