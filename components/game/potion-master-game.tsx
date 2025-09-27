@@ -145,10 +145,69 @@ export function PotionMasterGame() {
     if (target === 'cauldron') {
       // Allow dropping in cauldron if ladle has an ingredient
       if (draggedItem.ingredient && cauldronContents.length < 8) {
-        setCauldronContents(prev => [...prev, { 
-          ingredient: draggedItem.ingredient!, 
-          fraction: draggedItem.fraction 
-        }])
+        if (draggedItem.ingredient === 'water') {
+          // Mystic water subtracts from pink powder
+          const pinkItems = cauldronContents.filter(c => c.ingredient === 'pink')
+          if (pinkItems.length > 0) {
+            // Calculate current pink total
+            const calculateTotal = (items: typeof pinkItems) => {
+              if (items.length === 0) return { numerator: 0, denominator: 1 }
+              
+              const denominators = items.map(c => c.fraction.denominator)
+              const lcm = denominators.reduce((acc, val) => {
+                const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+                return (acc * val) / gcd(acc, val)
+              })
+              
+              const totalNumerator = items.reduce((sum, item) => {
+                return sum + (item.fraction.numerator * lcm / item.fraction.denominator)
+              }, 0)
+              
+              const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+              const commonDivisor = gcd(totalNumerator, lcm)
+              
+              return {
+                numerator: totalNumerator / commonDivisor,
+                denominator: lcm / commonDivisor
+              }
+            }
+
+            const pinkTotal = calculateTotal(pinkItems)
+            
+            // Subtract water fraction from pink total
+            const waterFraction = draggedItem.fraction
+            
+            // Find common denominator for subtraction
+            const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+            const lcm = (pinkTotal.denominator * waterFraction.denominator) / gcd(pinkTotal.denominator, waterFraction.denominator)
+            
+            const pinkNumerator = (pinkTotal.numerator * lcm) / pinkTotal.denominator
+            const waterNumerator = (waterFraction.numerator * lcm) / waterFraction.denominator
+            
+            const resultNumerator = Math.max(0, pinkNumerator - waterNumerator) // Don't go below 0
+            
+            // Simplify result
+            const commonDivisor = gcd(resultNumerator, lcm)
+            const finalFraction = {
+              numerator: resultNumerator / commonDivisor,
+              denominator: lcm / commonDivisor
+            }
+            
+            // Remove all pink items and add the result as a single item (if > 0)
+            const otherItems = cauldronContents.filter(c => c.ingredient !== 'pink')
+            if (finalFraction.numerator > 0) {
+              setCauldronContents([...otherItems, { ingredient: 'pink', fraction: finalFraction }])
+            } else {
+              setCauldronContents(otherItems)
+            }
+          }
+        } else {
+          // Regular ingredient addition
+          setCauldronContents(prev => [...prev, { 
+            ingredient: draggedItem.ingredient!, 
+            fraction: draggedItem.fraction 
+          }])
+        }
       }
     }
     setDraggedItem(null)
@@ -408,7 +467,17 @@ export function PotionMasterGame() {
         <div className="flex justify-center gap-8">
 
           {/* Water Bowl */}
-          <div className="p-4 text-center shadow-lg w-32">
+          <div 
+            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-cyan-500/20 border-2 border-dashed border-cyan-400' : 
+              draggedItem?.ingredient === 'water' ? 'bg-cyan-500/30 border-2 border-solid border-cyan-400' : 
+              'hover:bg-cyan-500/10'
+            }`}
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'water')
+            }}
+          >
             <Image
               src="/potion-assets/blue_potion.png"
               alt="Mystic Water"
@@ -417,7 +486,9 @@ export function PotionMasterGame() {
               className="mx-auto mb-2"
             />
             <div className="text-cyan-100 font-bold text-xs">Mystic Water 💧</div>
-            <div className="text-cyan-200 text-xs">(Not needed)</div>
+            <div className="text-cyan-200 text-xs">
+              {draggedItem?.ingredient === 'water' ? 'Collected! Drop to subtract' : 'Hover ladle to collect!'}
+            </div>
           </div>
 
           {/* Blue Crystals Bowl */}
@@ -537,6 +608,10 @@ export function PotionMasterGame() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl">🔢</span>
                 <p>Example: 1/4 + 1/4 = 1/2</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">💧</span>
+                <p>Use mystic water to subtract from pink powder if you make a mistake</p>
               </div>
             </div>
             
