@@ -28,10 +28,24 @@ const LADLE_FRACTIONS: Fraction[] = [
   { numerator: 1, denominator: 8 }
 ]
 
+// Possible target fractions that can be made by adding ladle fractions
+const TARGET_FRACTIONS: Fraction[] = [
+  { numerator: 1, denominator: 2 },    // 1/2
+  { numerator: 2, denominator: 3 },    // 1/3 + 1/3
+  { numerator: 3, denominator: 4 },    // 1/4 + 1/4 + 1/4
+  { numerator: 5, denominator: 6 },    // 1/6 + 1/6 + 1/6 + 1/6 + 1/6 or 1/2 + 1/3
+  { numerator: 7, denominator: 8 },    // 1/8 + 1/8 + ... (7 times)
+  { numerator: 5, denominator: 8 },    // 1/8 + 1/8 + 1/8 + 1/8 + 1/8 or 1/2 + 1/8
+  { numerator: 1, denominator: 1 },    // 1/2 + 1/2 or 1/3 + 1/3 + 1/3
+  { numerator: 3, denominator: 8 },    // 1/8 + 1/8 + 1/8 or 1/4 + 1/8
+  { numerator: 5, denominator: 12 },   // 1/3 + 1/12 or 1/4 + 1/6
+  { numerator: 11, denominator: 12 },  // More complex combinations
+]
+
 export function PotionMasterGame() {
   const [recipe, setRecipe] = useState<Recipe>({ 
-    pinkAmount: { numerator: 5, denominator: 6 }, 
-    blueAmount: { numerator: 3, denominator: 4 } 
+    pinkAmount: { numerator: 1, denominator: 2 }, 
+    blueAmount: { numerator: 1, denominator: 4 } 
   })
   const [cauldronContents, setCauldronContents] = useState<{ ingredient: string, fraction: Fraction }[]>([])
   const [gameStatus, setGameStatus] = useState<"playing" | "success" | "error">("playing")
@@ -40,12 +54,28 @@ export function PotionMasterGame() {
   const [showInstructions, setShowInstructions] = useState(true)
 
   const generateNewRecipe = () => {
-    const randomFraction1 = LADLE_FRACTIONS[Math.floor(Math.random() * LADLE_FRACTIONS.length)]
-    const randomFraction2 = LADLE_FRACTIONS[Math.floor(Math.random() * LADLE_FRACTIONS.length)]
-    setRecipe({ pinkAmount: randomFraction1, blueAmount: randomFraction2 })
+    const randomFraction1 = TARGET_FRACTIONS[Math.floor(Math.random() * TARGET_FRACTIONS.length)]
+    const randomFraction2 = TARGET_FRACTIONS[Math.floor(Math.random() * TARGET_FRACTIONS.length)]
+    
+    // Ensure the fractions are different for more variety
+    let attempts = 0
+    let fraction2 = randomFraction2
+    while (fraction2.numerator === randomFraction1.numerator && 
+           fraction2.denominator === randomFraction1.denominator && 
+           attempts < 10) {
+      fraction2 = TARGET_FRACTIONS[Math.floor(Math.random() * TARGET_FRACTIONS.length)]
+      attempts++
+    }
+    
+    setRecipe({ pinkAmount: randomFraction1, blueAmount: fraction2 })
     setCauldronContents([])
     setGameStatus("playing")
   }
+
+  // Initialize with random recipe on first load
+  useEffect(() => {
+    generateNewRecipe()
+  }, [])
 
   const checkRecipe = () => {
     const pinkContents = cauldronContents.filter(content => content.ingredient === 'pink')
@@ -273,41 +303,70 @@ export function PotionMasterGame() {
                     {cauldronContents.length === 0 && "Drop ingredients here!"}
                     {cauldronContents.length > 0 && (
                       <div className="max-h-40 overflow-y-auto">
-                        <div className="mb-2 text-sm">Contents:</div>
-                        {cauldronContents.map((content, index) => (
-                          <div key={index} className="mb-1 bg-black/50 rounded px-2 py-1 text-xs">
-                            {fractionToString(content.fraction)} {content.ingredient === 'pink' ? '🌸' : content.ingredient === 'blue' ? '💎' : '💧'}
-                          </div>
-                        ))}
-                        
-                        {/* Show current totals */}
-                        <div className="mt-3 pt-2 border-t border-white/20">
-                          <div className="text-xs text-gray-300">Current Totals:</div>
-                          {(() => {
-                            const pinkItems = cauldronContents.filter(c => c.ingredient === 'pink')
-                            const blueItems = cauldronContents.filter(c => c.ingredient === 'blue')
+                        {(() => {
+                          const pinkItems = cauldronContents.filter(c => c.ingredient === 'pink')
+                          const blueItems = cauldronContents.filter(c => c.ingredient === 'blue')
+                          
+                          const calculateTotal = (items: typeof pinkItems) => {
+                            if (items.length === 0) return { numerator: 0, denominator: 1 }
                             
-                            const calculateDisplayTotal = (items: typeof pinkItems) => {
-                              if (items.length === 0) return "0"
-                              return items.map(item => fractionToString(item.fraction)).join(" + ")
+                            // Find common denominator
+                            const denominators = items.map(c => c.fraction.denominator)
+                            const lcm = denominators.reduce((acc, val) => {
+                              const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+                              return (acc * val) / gcd(acc, val)
+                            })
+                            
+                            // Sum numerators with common denominator
+                            const totalNumerator = items.reduce((sum, item) => {
+                              return sum + (item.fraction.numerator * lcm / item.fraction.denominator)
+                            }, 0)
+                            
+                            // Simplify fraction
+                            const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+                            const commonDivisor = gcd(totalNumerator, lcm)
+                            
+                            return {
+                              numerator: totalNumerator / commonDivisor,
+                              denominator: lcm / commonDivisor
                             }
-                            
-                            return (
-                              <>
-                                {pinkItems.length > 0 && (
-                                  <div className="text-xs text-pink-300">
-                                    🌸 {calculateDisplayTotal(pinkItems)}
+                          }
+
+                          const pinkTotal = calculateTotal(pinkItems)
+                          const blueTotal = calculateTotal(blueItems)
+                          
+                          return (
+                            <div>
+                              <div className="mb-2 text-sm">Current Amounts:</div>
+                              
+                              {pinkItems.length > 0 && (
+                                <div className="mb-3 bg-pink-900/40 rounded px-3 py-2">
+                                  <div className="text-pink-300 font-bold text-base">
+                                    🌸 Pink Powder: {pinkTotal.denominator === 1 ? pinkTotal.numerator : fractionToString(pinkTotal)}
                                   </div>
-                                )}
-                                {blueItems.length > 0 && (
-                                  <div className="text-xs text-blue-300">
-                                    💎 {calculateDisplayTotal(blueItems)}
+                                  <div className="text-xs text-pink-200 mt-1">
+                                    ({pinkItems.map(item => fractionToString(item.fraction)).join(" + ")})
                                   </div>
-                                )}
-                              </>
-                            )
-                          })()}
-                        </div>
+                                </div>
+                              )}
+                              
+                              {blueItems.length > 0 && (
+                                <div className="mb-3 bg-blue-900/40 rounded px-3 py-2">
+                                  <div className="text-blue-300 font-bold text-base">
+                                    💎 Blue Crystals: {blueTotal.denominator === 1 ? blueTotal.numerator : fractionToString(blueTotal)}
+                                  </div>
+                                  <div className="text-xs text-blue-200 mt-1">
+                                    ({blueItems.map(item => fractionToString(item.fraction)).join(" + ")})
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {pinkItems.length === 0 && blueItems.length === 0 && (
+                                <div className="text-gray-400 text-sm">Drop ingredients to start mixing!</div>
+                              )}
+                            </div>
+                          )
+                        })()}
                       </div>
                     )}
                   </div>
@@ -337,9 +396,7 @@ export function PotionMasterGame() {
                     <p className="text-blue-600 font-bold">
                       Mix {fractionToString(recipe.blueAmount)} of Blue Crystals 💎
                     </p>
-                    <p className="text-amber-600 text-sm mt-3">
-                      Use the correct ladle to measure each ingredient!
-                    </p>
+                    
                   </div>
                 </div>
               </div>
