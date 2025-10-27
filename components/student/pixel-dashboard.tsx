@@ -250,6 +250,15 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
                 </button>
               )}
 
+              <Link href="/student/potion" className="w-2/5 mx-auto">
+                <button 
+                  type="button"
+                  className="bg-[#6B46C1] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#553C9A] transition-colors border-2 border-[#553C9A] outline-2 outline-[#4338CA] hover:outline-[#3730A3] shadow-lg"
+                >
+                  🧪 Potions
+                </button>
+              </Link>
+
               {/* Logout button - Moved up by reducing top margin */}
               <Link href="/auth/logout" className="w-1/5 mx-auto mt-3">
                 <button className="bg-[#8B3734] text-white font-blaka text-xl px-4 py-2 w-full rounded hover:bg-[#6d2b29] transition-colors border-2 border-[#6d2b29] outline-2 outline-[#4a1e1c] hover:outline-[#3b1815] shadow-lg">
