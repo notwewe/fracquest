@@ -386,7 +386,7 @@ export function PotionMasterGame() {
                 src="/dashboard/container.png"
                 alt="Magic Ladles Container"
                 width={500}
-                height={600}
+                height={800}
                 className="w-full h-auto transform rotate-90"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
@@ -402,9 +402,9 @@ export function PotionMasterGame() {
                       <Image
                         src="/potion-assets/ladle.png"
                         alt="Magic Ladle"
-                        width={32}
-                        height={32}
-                        className="w-full h-auto"
+                        width={30}
+                        height={20}
+                        className="w-auto h-full"
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-white font-bold text-sm drop-shadow-lg bg-black/50 rounded px-1">
@@ -594,7 +594,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/blue_potion.png"
+              src="/potion-assets/mystic_water.png"
               alt="Mystic Water"
               width={80}
               height={104}
@@ -619,7 +619,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/green_potion.png"
+              src="/potion-assets/blue_crystal.png"
               alt="Blue Crystals"
               width={80}
               height={104}
@@ -644,7 +644,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/green_potion.png"
+              src="/potion-assets/green_slime.png"
               alt="Green Blob"
               width={80}
               height={104}
@@ -669,7 +669,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/purple_potion.png"
+              src="/potion-assets/pink_powder.png"
               alt="Pink Powder"
               width={80}
               height={104}
