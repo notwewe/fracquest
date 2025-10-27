@@ -3,6 +3,23 @@
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { ArrowLeft, RotateCcw, Scroll, HelpCircle } from "lucide-react"
+
+// Add glow effects as CSS-in-JS styles
+const glowStyles = `
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(34, 211, 238, 0.3);
+  }
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3);
+  }
+  .glow-green {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.3);
+  }
+  .glow-pink {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3);
+  }
+`
 
 interface Fraction {
   numerator: number
@@ -322,104 +339,126 @@ export function PotionMasterGame() {
   const fractionToString = (fraction: Fraction) => `${fraction.numerator}/${fraction.denominator}`
 
   return (
-    <div className="w-full p-4">
+    <>
+      {/* Inject glow effect styles */}
+      <style jsx>{glowStyles}</style>
+      
+      <div className="relative h-screen w-full bg-cover bg-center bg-no-repeat overflow-hidden" 
+           style={{ backgroundImage: "url('/potion-assets/BG_Potion.png')" }}>
+        {/* Overlay for better contrast */}
+        <div className="absolute inset-0 bg-black/20"></div>
+      
       {/* Content Container */}
-      <div>
-        {/* Header with Score */}
-        <div className="text-center mb-6 relative">
-          <div className="bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-4 inline-block">
-            <h2 className="text-2xl font-bold text-white mb-2">🧪 Potion Master</h2>
-            <p className="text-purple-200 mb-2">Fraction Measuring Game</p>
-            <div className="text-yellow-400 font-bold">Score: {score}</div>
-          </div>
-          
-          {/* Top Left Back Button */}
-          <div className="absolute top-0 left-0">
-            <a
-              href="/student/dashboard"
-              className="w-10 h-10 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
-            >
-              ← 
-            </a>
+      <div className="relative z-10 w-full h-full p-6 flex flex-col">
+        {/* Top Navigation - Buttons and Title */}
+        <div className="relative flex items-center mb-3 w-full min-h-[60px]">
+          {/* Center Title and Score */}
+          <div className="flex justify-center w-full">
+            <div className="bg-black/70 backdrop-blur-md border-2 border-amber-600/50 rounded-xl p-3 shadow-2xl">
+              <h1 className="text-2xl font-pixel text-amber-200 mb-1 text-center tracking-wider">Potion Master</h1>
+              <p className="text-amber-100 text-sm font-pixel text-center mb-1">Fraction Measuring Game</p>
+              <div className="text-yellow-400 font-bold font-pixel text-lg text-center">Score: {score}</div>
+            </div>
           </div>
 
-          {/* Top Right Buttons */}
-          <div className="absolute top-0 right-0 flex gap-2">
-            {/* Reset Button */}
-            <button
-              type="button"
-              onClick={resetGame}
-              className="w-10 h-10 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+          {/* All Buttons - Right Side */}
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex gap-2">
+            {/* Exit Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-amber-600 hover:text-black hover:border-amber-600"
+              title="Exit Potion Master"
             >
-              ↻
-            </button>
+              <a href="/student/dashboard">
+                <ArrowLeft className="h-4 w-4" />
+              </a>
+            </Button>
+            {/* Reset Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={resetGame}
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-red-600 hover:text-white hover:border-red-600"
+              title="Reset Game"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
             
             {/* New Recipe Button */}
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="icon"
               onClick={generateNewRecipe}
-              className="w-10 h-10 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-green-600 hover:text-white hover:border-green-600"
+              title="New Recipe"
             >
-              📜
-            </button>
+              <Scroll className="h-4 w-4" />
+            </Button>
             
             {/* Help Button */}
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => setShowInstructions(true)}
-              className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white font-bold transition-colors shadow-lg"
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+              title="Instructions"
             >
-              ?
-            </button>
+              <HelpCircle className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
       {/* Main Game Area */}
-      <div className="flex flex-col items-center space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-start space-y-1 overflow-visible">
 
-        {/* Middle Section - Horizontal Layout with Ladles, Cauldron, and Recipe */}
-        <div className="flex items-center justify-center gap-8 w-full max-w-6xl">
+        {/* Middle Section - Dynamic Responsive Layout */}
+        <div className="flex items-stretch justify-center gap-2 w-full max-w-6xl min-h-0 flex-1">
           {/* Magic Ladles - Left side */}
-          <div className="flex-1 flex justify-center">
-            <div className="relative w-fit">
+          <div className="flex-shrink-0 flex justify-center items-center" style={{ minWidth: '340px', maxWidth: '440px' }}>
+            <div className="relative" style={{ width: '400px', height: '400px' }}>
               <Image
                 src="/dashboard/container.png"
                 alt="Magic Ladles Container"
-                width={500}
-                height={800}
-                className="w-full h-auto transform rotate-90"
+                width={900}
+                height={1080}
+                className="transform rotate-90 opacity-95"
+                style={{ width: '400px', height: '400px', objectFit: 'contain' }}
               />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                <h3 className="text-lg font-bold text-white mb-3 text-center">🥄 Magic Ladles</h3>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+                <h3 className="text-lg font-bold font-pixel text-amber-200 mb-4 text-center drop-shadow-lg">Magic Ladles</h3>
+                <div className="grid grid-cols-2 gap-3 max-w-xs">
                   {LADLE_FRACTIONS.map((fraction, index) => (
                     <div
                       key={index}
                       draggable
                       onDragStart={(e) => handleDragStart(e, fraction)}
-                      className="relative cursor-grab active:cursor-grabbing transition-all transform hover:scale-105 shadow-lg hover:shadow-xl w-16 h-16"
+                      className="relative cursor-grab active:cursor-grabbing transition-all transform hover:scale-110 shadow-lg hover:shadow-2xl w-16 h-16 flex items-center justify-center"
                     >
                       <Image
                         src="/potion-assets/ladle.png"
                         alt="Magic Ladle"
-                        width={30}
-                        height={20}
-                        className="w-auto h-full"
+                        width={48}
+                        height={48}
+                        className="w-full h-auto drop-shadow-lg"
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-white font-bold text-sm drop-shadow-lg bg-black/50 rounded px-1">
+                        <div className="text-white font-bold text-sm font-pixel drop-shadow-lg bg-black/70 rounded-lg px-1 py-0.5 border border-amber-600/50">
                           {fractionToString(fraction)}
-                          {/* Show ingredient if picked up */}
-                          {draggedItem?.fraction === fraction && draggedItem.ingredient && (
-                            <div className="mt-1 text-xs">
-                              {draggedItem.ingredient === 'pink' ? '🌸' : 
-                               draggedItem.ingredient === 'blue' ? '💎' : 
-                               draggedItem.ingredient === 'green' ? '🟢' :
-                               '💧'}
-                            </div>
-                          )}
                         </div>
                       </div>
+                      {/* Show ingredient emoji in the center of ladle bowl if picked up */}
+                      {draggedItem?.fraction === fraction && draggedItem.ingredient && (
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 pointer-events-none">
+                          <div className="text-base drop-shadow-lg">
+                            {draggedItem.ingredient === 'pink' ? '🌸' : 
+                             draggedItem.ingredient === 'blue' ? '💎' : 
+                             draggedItem.ingredient === 'green' ? '🟢' :
+                             '💧'}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -427,148 +466,169 @@ export function PotionMasterGame() {
             </div>
           </div>
 
-          {/* Cauldron with Target Fractions */}
-          <div className="flex-1 flex justify-center">
-            <div className="flex flex-col items-center justify-center">
-              <div 
-                className="relative w-80 h-80"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, 'cauldron')}
-              >
-                <Image
-                  src="/potion-assets/cauldron.png"
-                  alt="Magic Cauldron"
-                  width={320}
-                  height={320}
-                  className="w-full h-full object-contain"
-                />
-                
-                {/* Target Fractions Display */}
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 rounded-lg p-2">
-                  <div className="text-white text-sm text-center">
-                    <div>Target:</div>
-                    <div className="text-pink-300">🌸 {fractionToString(recipe.pinkAmount)}</div>
-                    <div className="text-blue-300">💎 {fractionToString(recipe.blueAmount)}</div>
-                  </div>
-                </div>
+          {/* Center Section - Cauldron with Target Above */}
+          <div className="flex-1 flex flex-col items-center justify-center min-w-0">
+            {/* Target Fractions Display - Positioned above cauldron */}
+            <div className="mb-4 bg-black/80 rounded-xl p-4 border-2 border-amber-600/50 shadow-xl">
+              <div className="text-amber-200 text-base text-center font-pixel">
+                <div className="text-amber-300 text-lg mb-2">Target Recipe</div>
+                <div className="text-pink-300 text-base mb-1">🌸 {fractionToString(recipe.pinkAmount)}</div>
+                <div className="text-blue-300 text-base">💎 {fractionToString(recipe.blueAmount)}</div>
+              </div>
+            </div>
 
-                {/* Cauldron Contents */}
-                <div className="absolute inset-10 flex items-center justify-center">
-                  <div className="text-center text-white text-lg drop-shadow-lg">
-                    {cauldronContents.length === 0 && "Drop ingredients here!"}
-                    {cauldronContents.length > 0 && (
-                      <div className="max-h-40 overflow-y-auto">
-                        {(() => {
-                          const pinkItems = cauldronContents.filter(c => c.ingredient === 'pink')
-                          const blueItems = cauldronContents.filter(c => c.ingredient === 'blue')
+            {/* Cauldron */}
+            <div 
+              className="relative w-80 h-80"
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, 'cauldron')}
+            >
+              <Image
+                src="/potion-assets/cauldron.png"
+                alt="Magic Cauldron"
+                width={320}
+                height={320}
+                className="w-full h-full object-contain drop-shadow-2xl"
+              />
+
+              {/* Cauldron Contents */}
+              <div className="absolute inset-10 flex items-center justify-center">
+                <div className="text-center text-white text-lg drop-shadow-lg">
+                  {cauldronContents.length === 0 && (
+                    <div className="bg-amber-800/80 border border-amber-600 rounded-lg p-3">
+                      <div className="text-amber-200 font-pixel font-bold text-sm mb-1">🧪 Brewing Cauldron</div>
+                      <div className="text-amber-300 font-pixel text-xs">Drag ingredients with ladles here!</div>
+                    </div>
+                  )}
+                  {cauldronContents.length > 0 && (
+                    <div className="max-h-40 overflow-y-auto">
+                      {(() => {
+                        const pinkItems = cauldronContents.filter(c => c.ingredient === 'pink')
+                        const blueItems = cauldronContents.filter(c => c.ingredient === 'blue')
+                        
+                        const calculateTotal = (items: typeof pinkItems) => {
+                          if (items.length === 0) return { numerator: 0, denominator: 1 }
                           
-                          const calculateTotal = (items: typeof pinkItems) => {
-                            if (items.length === 0) return { numerator: 0, denominator: 1 }
-                            
-                            // Find common denominator
-                            const denominators = items.map(c => c.fraction.denominator)
-                            const lcm = denominators.reduce((acc, val) => {
-                              const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
-                              return (acc * val) / gcd(acc, val)
-                            })
-                            
-                            // Sum numerators with common denominator
-                            const totalNumerator = items.reduce((sum, item) => {
-                              return sum + (item.fraction.numerator * lcm / item.fraction.denominator)
-                            }, 0)
-                            
-                            // Simplify fraction
+                          // Find common denominator
+                          const denominators = items.map(c => c.fraction.denominator)
+                          const lcm = denominators.reduce((acc, val) => {
                             const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
-                            const commonDivisor = gcd(totalNumerator, lcm)
-                            
-                            return {
-                              numerator: totalNumerator / commonDivisor,
-                              denominator: lcm / commonDivisor
-                            }
-                          }
-
-                          const pinkTotal = calculateTotal(pinkItems)
-                          const blueTotal = calculateTotal(blueItems)
+                            return (acc * val) / gcd(acc, val)
+                          })
                           
-                          return (
-                            <div>
-                              <div className="mb-2 text-sm">Current Amounts:</div>
-                              
-                              {pinkItems.length > 0 && (
-                                <div className="mb-3 bg-pink-900/40 rounded px-3 py-2">
-                                  <div className="text-pink-300 font-bold text-base">
+                          // Sum numerators with common denominator
+                          const totalNumerator = items.reduce((sum, item) => {
+                            return sum + (item.fraction.numerator * lcm / item.fraction.denominator)
+                          }, 0)
+                          
+                          // Simplify fraction
+                          const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+                          const commonDivisor = gcd(totalNumerator, lcm)
+                          
+                          return {
+                            numerator: totalNumerator / commonDivisor,
+                            denominator: lcm / commonDivisor
+                          }
+                        }
+
+                        const pinkTotal = calculateTotal(pinkItems)
+                        const blueTotal = calculateTotal(blueItems)
+                        
+                        return (
+                          <div className="w-full max-w-xs">
+                            {pinkItems.length > 0 && (
+                              <div className="mb-2 bg-pink-800 border border-pink-500 rounded p-2">
+                                <div className="text-center">
+                                  <div className="text-pink-200 font-pixel font-bold text-xs mb-1">
                                     🌸 Pink Powder: {pinkTotal.denominator === 1 ? pinkTotal.numerator : fractionToString(pinkTotal)}
                                   </div>
-                                  <div className="text-xs text-pink-200 mt-1">
+                                  <div className="text-xs text-pink-300 font-pixel">
                                     ({pinkItems.map(item => fractionToString(item.fraction)).join(" + ")})
                                   </div>
                                 </div>
-                              )}
-                              
-                              {blueItems.length > 0 && (
-                                <div className="mb-3 bg-blue-900/40 rounded px-3 py-2">
-                                  <div className="text-blue-300 font-bold text-base">
+                              </div>
+                            )}
+                            
+                            {blueItems.length > 0 && (
+                              <div className="mb-2 bg-blue-800 border border-blue-500 rounded p-2">
+                                <div className="text-center">
+                                  <div className="text-blue-200 font-pixel font-bold text-xs mb-1">
                                     💎 Blue Crystals: {blueTotal.denominator === 1 ? blueTotal.numerator : fractionToString(blueTotal)}
                                   </div>
-                                  <div className="text-xs text-blue-200 mt-1">
+                                  <div className="text-xs text-blue-300 font-pixel">
                                     ({blueItems.map(item => fractionToString(item.fraction)).join(" + ")})
                                   </div>
                                 </div>
-                              )}
-                              
-                              {pinkItems.length === 0 && blueItems.length === 0 && (
-                                <div className="text-gray-400 text-sm">Drop ingredients to start mixing!</div>
-                              )}
-                            </div>
-                          )
-                        })()}
-                      </div>
-                    )}
-                  </div>
+                              </div>
+                            )}
+                            
+                            {pinkItems.length === 0 && blueItems.length === 0 && (
+                              <div className="text-center bg-amber-800 border border-amber-600 rounded p-2">
+                                <div className="text-amber-200 text-xs font-pixel">Drop ingredients here!</div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Recipe Scroll - Right side */}
-          <div className="flex-1 flex justify-center">
-            <div className="relative w-96 h-fit flex items-center justify-center">
+          <div className="flex-shrink-0 flex justify-center items-center" style={{ minWidth: '340px', maxWidth: '440px' }}>
+            <div className="relative" style={{ width: '400px', height: '400px' }}>
               <Image
                 src="/dashboard/scroll.png"
                 alt="Recipe Scroll"
-                width={500}
-                height={600}
-                className="w-full h-auto transform -rotate-90"
+                width={380}
+                height={450}
+                className="transform -rotate-90 opacity-95"
+                style={{ width: '400px', height: '400px', objectFit: 'contain' }}
               />
-              <div className="absolute inset-0 flex items-center justify-center p-6">
-                <div className="text-center">
-                  <h3 className="text-amber-800 font-bold text-xl mb-4">📜 Recipe Scroll</h3>
-                  <div className="space-y-2">
+              <div className="absolute inset-0 flex items-center justify-center p-8">
+                <div className="text-center w-full flex flex-col items-center justify-center ml-3">
+                  <h3 className="text-amber-800 font-bold font-pixel text-base mb-3 drop-shadow-lg">Recipe Scroll</h3>
+                  <div className="space-y-2 flex flex-col items-center">
                     {questionType === "addition" ? (
                       <>
-                        <p className="text-amber-700 font-semibold">Magic Potion Recipe:</p>
-                        <p className="text-pink-600 font-bold">
-                          Mix {fractionToString(recipe.pinkAmount)} of Pink Powder 🌸
-                        </p>
-                        <p className="text-blue-600 font-bold">
-                          Mix {fractionToString(recipe.blueAmount)} of Blue Crystals 💎
-                        </p>
+                        <p className="text-amber-700 font-semibold font-pixel text-xs">Magic Potion Recipe:</p>
+                        <div className="bg-pink-100/80 rounded-lg p-1.5 border-2 border-pink-300">
+                          <p className="text-pink-700 font-bold font-pixel text-xs">
+                            Mix {fractionToString(recipe.pinkAmount)} of Pink Powder 🌸
+                          </p>
+                        </div>
+                        <div className="bg-blue-100/80 rounded-lg p-1.5 border-2 border-blue-300">
+                          <p className="text-blue-700 font-bold font-pixel text-xs">
+                            Mix {fractionToString(recipe.blueAmount)} of Blue Crystals 💎
+                          </p>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <p className="text-amber-700 font-semibold">⚗️ Dilution Challenge:</p>
-                        <p className="text-red-600 font-bold text-sm mb-2">
-                          Too much in the cauldron!
-                        </p>
-                        <p className="text-pink-600 font-bold">
-                          Target: {fractionToString(recipe.pinkAmount)} Pink Powder 🌸
-                        </p>
-                        <p className="text-blue-600 font-bold">
-                          Target: {fractionToString(recipe.blueAmount)} Blue Crystals 💎
-                        </p>
-                        <p className="text-amber-600 text-xs mt-2">
-                          Use diluters to reach exact amounts!
-                        </p>
+                        <p className="text-amber-700 font-semibold font-pixel text-sm">Dilution Challenge:</p>
+                        <div className="bg-red-100/80 rounded-lg p-2 border-2 border-red-300">
+                          <p className="text-red-700 font-bold font-pixel text-xs mb-1">
+                            Too much in the cauldron!
+                          </p>
+                        </div>
+                        <div className="bg-pink-100/80 rounded-lg p-2 border-2 border-pink-300">
+                          <p className="text-pink-700 font-bold font-pixel text-xs">
+                            Target: {fractionToString(recipe.pinkAmount)} Pink Powder 🌸
+                          </p>
+                        </div>
+                        <div className="bg-blue-100/80 rounded-lg p-2 border-2 border-blue-300">
+                          <p className="text-blue-700 font-bold font-pixel text-xs">
+                            Target: {fractionToString(recipe.blueAmount)} Blue Crystals 💎
+                          </p>
+                        </div>
+                        <div className="bg-amber-100/80 rounded-lg p-1.5 border border-amber-400">
+                          <p className="text-amber-700 text-xs font-pixel">
+                            Use diluters to reach exact amounts!
+                          </p>
+                        </div>
                       </>
                     )}
                   </div>
@@ -579,14 +639,15 @@ export function PotionMasterGame() {
         </div>
 
         {/* Bottom Section - Ingredient Bowls */}
-        <div className="flex justify-center gap-6">
+        <div className="flex justify-center gap-4 mt-4">
+          <h3 className="sr-only">Ingredient Collection Area</h3>
 
           {/* Water Bowl */}
           <div 
-            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
-              draggedItem && !draggedItem.ingredient ? 'hover:bg-cyan-500/20 border-2 border-dashed border-cyan-400' : 
-              draggedItem?.ingredient === 'water' ? 'bg-cyan-500/30 border-2 border-solid border-cyan-400' : 
-              'hover:bg-cyan-500/10'
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-cyan-500/20 border-dashed border-cyan-400 glow-cyan' : 
+              draggedItem?.ingredient === 'water' ? 'bg-cyan-500/30 border-solid border-cyan-400 glow-cyan' : 
+              'border-cyan-600/30 bg-black/50 backdrop-blur-md hover:bg-cyan-500/10'
             }`}
             onDragOver={(e) => {
               handleDragOver(e)
@@ -596,22 +657,20 @@ export function PotionMasterGame() {
             <Image
               src="/potion-assets/mystic_water.png"
               alt="Mystic Water"
-              width={80}
-              height={104}
-              className="mx-auto mb-2"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
             />
-            <div className="text-cyan-100 font-bold text-xs">Mystic Water 💧</div>
-            <div className="text-cyan-200 text-xs">
-              {draggedItem?.ingredient === 'water' ? 'Collected! Drop to subtract' : 'Hover ladle to collect!'}
-            </div>
+            <div className="text-cyan-100 font-bold font-pixel text-xs">Mystic Water</div>
+            <div className="text-cyan-200 text-lg">💧</div>
           </div>
 
           {/* Blue Crystals Bowl */}
           <div 
-            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
-              draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-2 border-dashed border-blue-400' : 
-              draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-2 border-solid border-blue-400' : 
-              'hover:bg-blue-500/10'
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-dashed border-blue-400 glow-blue' : 
+              draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-solid border-blue-400 glow-blue' : 
+              'border-blue-600/30 bg-black/50 backdrop-blur-md hover:bg-blue-500/10'
             }`}
             onDragOver={(e) => {
               handleDragOver(e)
@@ -621,22 +680,20 @@ export function PotionMasterGame() {
             <Image
               src="/potion-assets/blue_crystal.png"
               alt="Blue Crystals"
-              width={80}
-              height={104}
-              className="mx-auto mb-2"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
             />
-            <div className="text-blue-100 font-bold text-xs">Blue Crystals 💎</div>
-            <div className="text-blue-200 text-xs">
-              {draggedItem?.ingredient === 'blue' ? 'Collected! Drop in cauldron' : 'Hover ladle to collect!'}
-            </div>
+            <div className="text-blue-100 font-bold font-pixel text-xs">Blue Crystal</div>
+            <div className="text-blue-200 text-lg">💎</div>
           </div>
 
           {/* Green Blob Bowl */}
           <div 
-            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
-              draggedItem && !draggedItem.ingredient ? 'hover:bg-green-500/20 border-2 border-dashed border-green-400' : 
-              draggedItem?.ingredient === 'green' ? 'bg-green-500/30 border-2 border-solid border-green-400' : 
-              'hover:bg-green-500/10'
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-green-500/20 border-dashed border-green-400 glow-green' : 
+              draggedItem?.ingredient === 'green' ? 'bg-green-500/30 border-solid border-green-400 glow-green' : 
+              'border-green-600/30 bg-black/50 backdrop-blur-md hover:bg-green-500/10'
             }`}
             onDragOver={(e) => {
               handleDragOver(e)
@@ -646,22 +703,20 @@ export function PotionMasterGame() {
             <Image
               src="/potion-assets/green_slime.png"
               alt="Green Blob"
-              width={80}
-              height={104}
-              className="mx-auto mb-2"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
             />
-            <div className="text-green-100 font-bold text-xs">Green Blob 🟢</div>
-            <div className="text-green-200 text-xs">
-              {draggedItem?.ingredient === 'green' ? 'Collected! Drop to subtract' : 'Hover ladle to collect!'}
-            </div>
+            <div className="text-green-100 font-bold font-pixel text-xs">Green Blob</div>
+            <div className="text-green-200 text-lg">🟢</div>
           </div>
 
           {/* Pink Powder Bowl */}
           <div 
-            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
-              draggedItem && !draggedItem.ingredient ? 'hover:bg-pink-500/20 border-2 border-dashed border-pink-400' : 
-              draggedItem?.ingredient === 'pink' ? 'bg-pink-500/30 border-2 border-solid border-pink-400' : 
-              'hover:bg-pink-500/10'
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-pink-500/20 border-dashed border-pink-400 glow-pink' : 
+              draggedItem?.ingredient === 'pink' ? 'bg-pink-500/30 border-solid border-pink-400 glow-pink' : 
+              'border-pink-600/30 bg-black/50 backdrop-blur-md hover:bg-pink-500/10'
             }`}
             onDragOver={(e) => {
               handleDragOver(e)
@@ -671,14 +726,12 @@ export function PotionMasterGame() {
             <Image
               src="/potion-assets/pink_powder.png"
               alt="Pink Powder"
-              width={80}
-              height={104}
-              className="mx-auto mb-2"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
             />
-            <div className="text-pink-100 font-bold text-xs">Pink Powder 🌸</div>
-            <div className="text-pink-200 text-xs">
-              {draggedItem?.ingredient === 'pink' ? 'Collected! Drop in cauldron' : 'Hover ladle to collect!'}
-            </div>
+            <div className="text-pink-100 font-bold font-pixel text-xs">Pink Powder</div>
+            <div className="text-pink-200 text-lg">🌸</div>
           </div>
         </div>
 
@@ -686,24 +739,31 @@ export function PotionMasterGame() {
 
       {/* Game Status Overlays */}
       {gameStatus === "success" && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-green-600 text-white p-8 rounded-lg text-center shadow-2xl">
-            <p className="text-3xl font-bold mb-4">🎉 Perfect Potion!</p>
-            <p className="text-xl mb-4">You measured the fractions correctly! +10 Points!</p>
-            <Button onClick={generateNewRecipe} className="bg-green-700 hover:bg-green-800">
-              Brew Another Potion
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-12 rounded-2xl text-center shadow-2xl border-4 border-green-400">
+            <p className="text-5xl font-pixel font-bold mb-6 text-green-100 drop-shadow-lg">🎉 Perfect Potion!</p>
+            <p className="text-2xl font-pixel mb-6 text-green-200">You measured the fractions correctly!</p>
+            <p className="text-xl font-pixel mb-8 text-yellow-300">+10 Points! 🏆</p>
+            <Button 
+              onClick={generateNewRecipe} 
+              className="font-pixel bg-green-800 hover:bg-green-900 text-white px-8 py-4 text-xl rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            >
+              Brew Another Potion 🧪
             </Button>
           </div>
         </div>
       )}
       
       {gameStatus === "error" && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-red-600 text-white p-8 rounded-lg text-center shadow-2xl">
-            <p className="text-3xl font-bold mb-4">❌ Wrong Measurements!</p>
-            <p className="text-lg mb-4">Check the recipe and use the correct ladle sizes</p>
-            <Button onClick={resetGame} className="bg-red-700 hover:bg-red-800">
-              Try Again
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-red-600 to-red-700 text-white p-12 rounded-2xl text-center shadow-2xl border-4 border-red-400">
+            <p className="text-5xl font-pixel font-bold mb-6 text-red-100 drop-shadow-lg">❌ Wrong Measurements!</p>
+            <p className="text-xl font-pixel mb-8 text-red-200">Check the recipe and use the correct ladle sizes</p>
+            <Button 
+              onClick={resetGame} 
+              className="font-pixel bg-red-800 hover:bg-red-900 text-white px-8 py-4 text-xl rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            >
+              Try Again 🔄
             </Button>
           </div>
         </div>
@@ -711,66 +771,74 @@ export function PotionMasterGame() {
 
       {/* Instructions Modal */}
       {showInstructions && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-purple-800 to-indigo-900 border-4 border-purple-500 rounded-lg p-8 max-w-md mx-4 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h4 className="text-2xl font-bold text-white">🎯 How to Play</h4>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+          <div className="bg-gradient-to-br from-purple-900 to-indigo-900 border-4 border-amber-600 rounded-2xl p-4 max-w-4xl w-full h-fit shadow-2xl">
+            <div className="flex justify-between items-start mb-4">
+              <h4 className="text-2xl font-pixel font-bold text-amber-200 drop-shadow-lg">🎯 How to Play Potion Master</h4>
               <button
                 type="button"
                 onClick={() => setShowInstructions(false)}
-                className="w-8 h-8 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white font-bold transition-colors"
+                className="w-8 h-8 bg-red-600 hover:bg-red-700 rounded-xl flex items-center justify-center text-white font-bold transition-all hover:scale-110 text-lg shadow-lg"
+                title="Close Instructions"
               >
                 ×
               </button>
             </div>
             
-            <div className="text-purple-200 space-y-3">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">📜</span>
-                <p>Read the recipe scroll to see what fractions you need</p>
+            <div className="text-amber-100 grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">📜</span>
+                <p className="font-pixel leading-snug flex-1">Read the recipe scroll to see what fractions you need</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🥄</span>
-                <p>Pick the ladle with the exact fraction you need</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🥄</span>
+                <p className="font-pixel leading-snug flex-1">Pick the ladle with the exact fraction you need</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🌸💎</span>
-                <p>Hover the ladle over an ingredient to collect it</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🌸💎</span>
+                <p className="font-pixel leading-snug flex-1">Hover the ladle over an ingredient to collect it</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🏺</span>
-                <p>Drop the measured ingredient into the cauldron</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🏺</span>
+                <p className="font-pixel leading-snug flex-1">Drop the measured ingredient into the cauldron</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">➕</span>
-                <p>Use multiple ladles to add fractions together</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">➕</span>
+                <p className="font-pixel leading-snug flex-1">Use multiple ladles to add fractions together</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🔢</span>
-                <p>Example: 1/4 + 1/4 = 1/2</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🔢</span>
+                <p className="font-pixel leading-snug flex-1"><span className="text-yellow-300">Example:</span> 1/4 + 1/4 = 1/2</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">💧</span>
-                <p>Use mystic water to subtract from pink powder if you make a mistake</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">💧</span>
+                <p className="font-pixel leading-snug flex-1">Use mystic water to subtract from pink powder if you make a mistake</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🟢</span>
-                <p>Use green blob to subtract from blue crystals if you make a mistake</p>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🟢</span>
+                <p className="font-pixel leading-snug flex-1">Use green blob to subtract from blue crystals if you make a mistake</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">⚗️</span>
-                <p><strong>Dilution Challenges:</strong> Sometimes the cauldron starts with too much!</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🎯</span>
-                <p>Use diluters to reduce excess ingredients to match the target exactly</p>
+              
+              {/* Dilution Challenge Section - Spans both columns */}
+              <div className="col-span-2 border-t-2 border-amber-600 pt-3 mt-2">
+                <div className="flex items-start gap-3 bg-yellow-900/30 rounded-lg p-2 mb-2">
+                  <span className="text-lg flex-shrink-0 w-6 text-center">⚗️</span>
+                  <div className="flex-1">
+                    <p className="font-pixel font-bold text-yellow-300 mb-1">Dilution Challenges:</p>
+                    <p className="font-pixel text-yellow-200">Sometimes the cauldron starts with too much!</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                  <span className="text-lg flex-shrink-0 w-6 text-center">🎯</span>
+                  <p className="font-pixel leading-snug flex-1">Use diluters to reduce excess ingredients to match the target exactly</p>
+                </div>
               </div>
             </div>
             
-            <div className="mt-6 text-center">
+            <div className="mt-4 text-center">
               <Button 
                 onClick={() => setShowInstructions(false)}
-                className="bg-green-600 hover:bg-green-700 px-6"
+                className="font-pixel bg-green-600 hover:bg-green-700 text-white px-8 py-2 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
               >
                 Got it! Let's Start Measuring! 🧪
               </Button>
@@ -780,5 +848,6 @@ export function PotionMasterGame() {
       )}
       </div>
     </div>
+    </>
   )
 }

@@ -22,7 +22,7 @@ export default async function StudentPotion() {
 
   return (
     <div 
-      className="relative min-h-screen bg-cover bg-center bg-no-repeat p-4"
+      className="relative h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
       style={{
         backgroundImage: "url('/potion-assets/BG_Potion.png')"
       }}
@@ -30,16 +30,7 @@ export default async function StudentPotion() {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/20"></div>
       
-      <div className="relative z-10 max-w-7xl mx-auto">
-        <div className="bg-black/50 backdrop-blur-md border border-purple-500/30 rounded-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2 text-center">
-            🧪 Potion Master
-          </h1>
-          <p className="text-purple-200 text-center">
-            Welcome to Potion Master, {profile.username}! Use fractions to brew the perfect magical potions.
-          </p>
-        </div>
-
+      <div className="relative z-10 h-full">
         <PotionMasterGame />
       </div>
     </div>
