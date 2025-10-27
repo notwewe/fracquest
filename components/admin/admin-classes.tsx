@@ -99,7 +99,7 @@ export function AdminClasses() {
     }
 
     fetchClasses()
-  }, [supabase])
+  }, [])
 
   const handleEditClass = async () => {
     if (!editClass) return

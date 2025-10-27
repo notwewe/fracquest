@@ -101,7 +101,7 @@ export function WorldMapClean() {
     }
 
     fetchData()
-  }, [supabase])
+  }, [])
 
   const getSectionName = (sectionId: number): string => {
     const names = {

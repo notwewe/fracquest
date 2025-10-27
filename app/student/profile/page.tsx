@@ -98,7 +98,7 @@ export default function StudentProfilePage() {
     }
 
     fetchProfile()
-  }, [router, supabase, showJoinClass])
+  }, [router, showJoinClass])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

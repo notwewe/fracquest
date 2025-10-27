@@ -112,7 +112,7 @@ export function AdminUsers() {
     }
 
     fetchUsers()
-  }, [supabase])
+  }, [])
 
   const handleRoleChange = (newRoleId: string) => {
     if (!editUser) return

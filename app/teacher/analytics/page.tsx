@@ -179,7 +179,7 @@ export default function OverallAnalyticsPage() {
       }
     }
     fetchOverallAnalytics()
-  }, [router, supabase])
+  }, [router])
 
   if (isLoading) {
     return (

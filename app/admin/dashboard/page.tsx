@@ -97,7 +97,7 @@ export default function AdminDashboard() {
     }
 
     checkAdminAndLoadStats()
-  }, [router, supabase])
+  }, [router])
 
   if (isLoading) {
     return (

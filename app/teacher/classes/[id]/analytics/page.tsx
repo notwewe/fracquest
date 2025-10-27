@@ -219,7 +219,7 @@ export default function ClassAnalyticsPage({ params }: { params: Promise<{ id: s
       }
     }
     fetchClassAnalytics()
-  }, [router, supabase, classId])
+  }, [router, classId])
 
   if (isLoading) {
     return (

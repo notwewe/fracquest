@@ -20,7 +20,7 @@ export default function SimpleLogoutPage() {
     }
 
     handleLogout()
-  }, [router, supabase.auth])
+  }, [router])
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

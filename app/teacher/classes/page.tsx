@@ -50,7 +50,7 @@ export default function TeacherClassesPage() {
       }
     }
     fetchClasses()
-  }, [router, supabase])
+  }, [router])
 
   if (isLoading) {
     return (

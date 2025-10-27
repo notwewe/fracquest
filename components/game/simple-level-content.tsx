@@ -86,7 +86,7 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
     }
 
     loadProgress()
-  }, [levelId, supabase])
+  }, [levelId])
 
   // Save progress whenever the current line changes (only if not completed)
   useEffect(() => {
@@ -120,7 +120,7 @@ export function SimpleLevelContent({ levelId, dialogue, onComplete, levelName = 
     if (currentLine > 0 && !isCompleted) {
       saveProgress()
     }
-  }, [currentLine, isCompleted, levelId, supabase, isSaving])
+  }, [currentLine, isCompleted, levelId, isSaving])
 
   // This function determines if the current line is a wrong answer response that should be skipped
   const shouldSkipLine = (lineIndex: number) => {

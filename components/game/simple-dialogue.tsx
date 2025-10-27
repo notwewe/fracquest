@@ -54,7 +54,7 @@ export function SimpleDialogue({ levelId, dialogue }: SimpleDialogueProps) {
     }
 
     loadProgress()
-  }, [levelId, supabase])
+  }, [levelId])
 
   // Save progress when current line changes
   useEffect(() => {
@@ -81,7 +81,7 @@ export function SimpleDialogue({ levelId, dialogue }: SimpleDialogueProps) {
     if (currentLine > 0) {
       saveProgress()
     }
-  }, [currentLine, dialogue.length, levelId, supabase])
+  }, [currentLine, dialogue.length, levelId])
 
   // Add keyboard navigation
   useEffect(() => {

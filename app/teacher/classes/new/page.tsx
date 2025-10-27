@@ -55,7 +55,7 @@ export default function NewClassPage() {
       }
     }
     fetchUser()
-  }, [supabase, router])
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

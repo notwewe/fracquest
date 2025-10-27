@@ -140,7 +140,7 @@ export default function TeacherDashboard() {
       }
     }
     fetchDashboardData()
-  }, [router, supabase])
+  }, [router])
 
   if (isLoading) {
     return (

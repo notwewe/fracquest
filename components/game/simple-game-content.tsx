@@ -99,7 +99,7 @@ export function SimpleGameContent({
     }
 
     checkCompletion()
-  }, [waypointId, supabase])
+  }, [waypointId])
 
   // Simulate game progress
   useEffect(() => {

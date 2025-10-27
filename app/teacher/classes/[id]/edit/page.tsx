@@ -83,7 +83,7 @@ export default function EditClassPage() {
       }
     }
     fetchClassDetails()
-  }, [classId, router, supabase])
+  }, [classId, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

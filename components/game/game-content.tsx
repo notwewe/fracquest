@@ -46,7 +46,7 @@ export function GameContent({ waypoint }: GameContentProps) {
     }
 
     loadProgress()
-  }, [waypoint.id, supabase])
+  }, [waypoint.id])
 
   if (isLoading) {
     return (
