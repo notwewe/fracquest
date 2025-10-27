@@ -119,9 +119,7 @@ export function PotionMasterGame() {
     if (pinkMatch && blueMatch && pinkContents.length > 0 && blueContents.length > 0) {
       setGameStatus("success")
       setScore(prev => prev + 10)
-    } else if (cauldronContents.length >= 8) { // Limit total attempts
-      setGameStatus("error")
-    }
+    } 
   }
 
   useEffect(() => {
@@ -144,7 +142,7 @@ export function PotionMasterGame() {
 
     if (target === 'cauldron') {
       // Allow dropping in cauldron if ladle has an ingredient
-      if (draggedItem.ingredient && cauldronContents.length < 8) {
+      if (draggedItem.ingredient) {
         if (draggedItem.ingredient === 'water') {
           // Mystic water subtracts from pink powder
           const pinkItems = cauldronContents.filter(c => c.ingredient === 'pink')
