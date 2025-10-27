@@ -655,7 +655,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/blue_potion.png"
+              src="/potion-assets/mystic_water.png"
               alt="Mystic Water"
               width={64}
               height={82}
@@ -678,7 +678,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/green_potion.png"
+              src="/potion-assets/blue_crystal.png"
               alt="Blue Crystals"
               width={64}
               height={82}
@@ -701,7 +701,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/green_potion.png"
+              src="/potion-assets/green_slime.png"
               alt="Green Blob"
               width={64}
               height={82}
@@ -724,7 +724,7 @@ export function PotionMasterGame() {
             }}
           >
             <Image
-              src="/potion-assets/purple_potion.png"
+              src="/potion-assets/pink_powder.png"
               alt="Pink Powder"
               width={64}
               height={82}
