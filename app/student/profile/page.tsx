@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft } from "lucide-react"
+import { Loader2, Save, Trophy, BookOpen, UserPlus, ArrowLeft, Crown } from "lucide-react"
 import { JoinClassForm } from "@/components/student/join-class-form"
 import Image from "next/image"
 
@@ -236,6 +236,19 @@ export default function StudentProfilePage() {
         >
           Profile
         </h1>
+
+        {/* Leaderboard Button */}
+        {isEnrolled && (
+          <Link href="/student/leaderboard" className="mb-3">
+            <button 
+              className="bg-[#6B46C1] hover:bg-[#553C9A] text-white font-blaka text-2xl px-6 py-3 rounded-lg transition-colors border-2 border-[#553C9A] outline-2 outline-[#4338CA] shadow-lg flex items-center gap-2"
+              style={{ fontFamily: "var(--font-blaka)" }}
+            >
+              <Crown className="h-6 w-6" />
+              View Leaderboard
+            </button>
+          </Link>
+        )}
 
         {!isEnrolled && (
           <Alert className="mb-1 bg-amber-100 border-amber-300 max-w-2xl">
