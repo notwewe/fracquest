@@ -24,8 +24,11 @@ const LADLE_FRACTIONS: Fraction[] = [
   { numerator: 1, denominator: 2 },
   { numerator: 1, denominator: 3 },
   { numerator: 1, denominator: 4 },
+  { numerator: 1, denominator: 5 },
   { numerator: 1, denominator: 6 },
-  { numerator: 1, denominator: 8 }
+  { numerator: 1, denominator: 7 },
+  { numerator: 1, denominator: 8 },
+  { numerator: 1, denominator: 9 }
 ]
 
 // Possible target fractions that can be made by adding ladle fractions
@@ -52,6 +55,7 @@ export function PotionMasterGame() {
   const [score, setScore] = useState(0)
   const [draggedItem, setDraggedItem] = useState<DragItem | null>(null)
   const [showInstructions, setShowInstructions] = useState(true)
+  const [questionType, setQuestionType] = useState<"addition" | "subtraction">("addition")
 
   const generateNewRecipe = () => {
     const randomFraction1 = TARGET_FRACTIONS[Math.floor(Math.random() * TARGET_FRACTIONS.length)]
@@ -67,8 +71,43 @@ export function PotionMasterGame() {
       attempts++
     }
     
+    // 30% chance for subtraction question, 70% for addition
+    const isSubtractionQuestion = Math.random() < 0.3
+    setQuestionType(isSubtractionQuestion ? "subtraction" : "addition")
+    
     setRecipe({ pinkAmount: randomFraction1, blueAmount: fraction2 })
-    setCauldronContents([])
+    
+    if (isSubtractionQuestion) {
+      // For subtraction questions, start with excess ingredients in the cauldron
+      const generateExcessFraction = (target: Fraction) => {
+        // Create a fraction that's larger than the target
+        const possibleExcess = LADLE_FRACTIONS.filter(f => 
+          (f.numerator / f.denominator) > (target.numerator / target.denominator)
+        )
+        
+        if (possibleExcess.length > 0) {
+          return possibleExcess[Math.floor(Math.random() * possibleExcess.length)]
+        } else {
+          // If no single ladle is larger, add the target + a small fraction
+          const smallFraction = LADLE_FRACTIONS[Math.floor(Math.random() * 3)] // Use 1/2, 1/3, or 1/4
+          return {
+            numerator: target.numerator + smallFraction.numerator,
+            denominator: target.denominator === smallFraction.denominator ? target.denominator : target.denominator * smallFraction.denominator
+          }
+        }
+      }
+      
+      const excessPink = generateExcessFraction(randomFraction1)
+      const excessBlue = generateExcessFraction(fraction2)
+      
+      setCauldronContents([
+        { ingredient: 'pink', fraction: excessPink },
+        { ingredient: 'blue', fraction: excessBlue }
+      ])
+    } else {
+      setCauldronContents([])
+    }
+    
     setGameStatus("playing")
   }
 
@@ -199,6 +238,62 @@ export function PotionMasterGame() {
               setCauldronContents(otherItems)
             }
           }
+        } else if (draggedItem.ingredient === 'green') {
+          // Green blob subtracts from blue crystals
+          const blueItems = cauldronContents.filter(c => c.ingredient === 'blue')
+          if (blueItems.length > 0) {
+            // Calculate current blue total
+            const calculateTotal = (items: typeof blueItems) => {
+              if (items.length === 0) return { numerator: 0, denominator: 1 }
+              
+              const denominators = items.map(c => c.fraction.denominator)
+              const lcm = denominators.reduce((acc, val) => {
+                const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+                return (acc * val) / gcd(acc, val)
+              })
+              
+              const totalNumerator = items.reduce((sum, item) => {
+                return sum + (item.fraction.numerator * lcm / item.fraction.denominator)
+              }, 0)
+              
+              const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+              const commonDivisor = gcd(totalNumerator, lcm)
+              
+              return {
+                numerator: totalNumerator / commonDivisor,
+                denominator: lcm / commonDivisor
+              }
+            }
+
+            const blueTotal = calculateTotal(blueItems)
+            
+            // Subtract green blob fraction from blue total
+            const greenFraction = draggedItem.fraction
+            
+            // Find common denominator for subtraction
+            const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b)
+            const lcm = (blueTotal.denominator * greenFraction.denominator) / gcd(blueTotal.denominator, greenFraction.denominator)
+            
+            const blueNumerator = (blueTotal.numerator * lcm) / blueTotal.denominator
+            const greenNumerator = (greenFraction.numerator * lcm) / greenFraction.denominator
+            
+            const resultNumerator = Math.max(0, blueNumerator - greenNumerator) // Don't go below 0
+            
+            // Simplify result
+            const commonDivisor = gcd(resultNumerator, lcm)
+            const finalFraction = {
+              numerator: resultNumerator / commonDivisor,
+              denominator: lcm / commonDivisor
+            }
+            
+            // Remove all blue items and add the result as a single item (if > 0)
+            const otherItems = cauldronContents.filter(c => c.ingredient !== 'blue')
+            if (finalFraction.numerator > 0) {
+              setCauldronContents([...otherItems, { ingredient: 'blue', fraction: finalFraction }])
+            } else {
+              setCauldronContents(otherItems)
+            }
+          }
         } else {
           // Regular ingredient addition
           setCauldronContents(prev => [...prev, { 
@@ -296,7 +391,7 @@ export function PotionMasterGame() {
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
                 <h3 className="text-lg font-bold text-white mb-3 text-center">🥄 Magic Ladles</h3>
-                <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {LADLE_FRACTIONS.map((fraction, index) => (
                     <div
                       key={index}
@@ -317,7 +412,10 @@ export function PotionMasterGame() {
                           {/* Show ingredient if picked up */}
                           {draggedItem?.fraction === fraction && draggedItem.ingredient && (
                             <div className="mt-1 text-xs">
-                              {draggedItem.ingredient === 'pink' ? '🌸' : draggedItem.ingredient === 'blue' ? '💎' : '💧'}
+                              {draggedItem.ingredient === 'pink' ? '🌸' : 
+                               draggedItem.ingredient === 'blue' ? '💎' : 
+                               draggedItem.ingredient === 'green' ? '🟢' :
+                               '💧'}
                             </div>
                           )}
                         </div>
@@ -446,14 +544,33 @@ export function PotionMasterGame() {
                 <div className="text-center">
                   <h3 className="text-amber-800 font-bold text-xl mb-4">📜 Recipe Scroll</h3>
                   <div className="space-y-2">
-                    <p className="text-amber-700 font-semibold">Magic Potion Recipe:</p>
-                    <p className="text-pink-600 font-bold">
-                      Mix {fractionToString(recipe.pinkAmount)} of Pink Powder 🌸
-                    </p>
-                    <p className="text-blue-600 font-bold">
-                      Mix {fractionToString(recipe.blueAmount)} of Blue Crystals 💎
-                    </p>
-                    
+                    {questionType === "addition" ? (
+                      <>
+                        <p className="text-amber-700 font-semibold">Magic Potion Recipe:</p>
+                        <p className="text-pink-600 font-bold">
+                          Mix {fractionToString(recipe.pinkAmount)} of Pink Powder 🌸
+                        </p>
+                        <p className="text-blue-600 font-bold">
+                          Mix {fractionToString(recipe.blueAmount)} of Blue Crystals 💎
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-amber-700 font-semibold">⚗️ Dilution Challenge:</p>
+                        <p className="text-red-600 font-bold text-sm mb-2">
+                          Too much in the cauldron!
+                        </p>
+                        <p className="text-pink-600 font-bold">
+                          Target: {fractionToString(recipe.pinkAmount)} Pink Powder 🌸
+                        </p>
+                        <p className="text-blue-600 font-bold">
+                          Target: {fractionToString(recipe.blueAmount)} Blue Crystals 💎
+                        </p>
+                        <p className="text-amber-600 text-xs mt-2">
+                          Use diluters to reach exact amounts!
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -462,7 +579,7 @@ export function PotionMasterGame() {
         </div>
 
         {/* Bottom Section - Ingredient Bowls */}
-        <div className="flex justify-center gap-8">
+        <div className="flex justify-center gap-6">
 
           {/* Water Bowl */}
           <div 
@@ -511,6 +628,31 @@ export function PotionMasterGame() {
             <div className="text-blue-100 font-bold text-xs">Blue Crystals 💎</div>
             <div className="text-blue-200 text-xs">
               {draggedItem?.ingredient === 'blue' ? 'Collected! Drop in cauldron' : 'Hover ladle to collect!'}
+            </div>
+          </div>
+
+          {/* Green Blob Bowl */}
+          <div 
+            className={`p-4 text-center shadow-lg w-32 rounded-lg transition-all cursor-pointer transform hover:scale-105 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-green-500/20 border-2 border-dashed border-green-400' : 
+              draggedItem?.ingredient === 'green' ? 'bg-green-500/30 border-2 border-solid border-green-400' : 
+              'hover:bg-green-500/10'
+            }`}
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'green')
+            }}
+          >
+            <Image
+              src="/potion-assets/green_potion.png"
+              alt="Green Blob"
+              width={80}
+              height={104}
+              className="mx-auto mb-2"
+            />
+            <div className="text-green-100 font-bold text-xs">Green Blob 🟢</div>
+            <div className="text-green-200 text-xs">
+              {draggedItem?.ingredient === 'green' ? 'Collected! Drop to subtract' : 'Hover ladle to collect!'}
             </div>
           </div>
 
@@ -610,6 +752,18 @@ export function PotionMasterGame() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl">💧</span>
                 <p>Use mystic water to subtract from pink powder if you make a mistake</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🟢</span>
+                <p>Use green blob to subtract from blue crystals if you make a mistake</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚗️</span>
+                <p><strong>Dilution Challenges:</strong> Sometimes the cauldron starts with too much!</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎯</span>
+                <p>Use diluters to reduce excess ingredients to match the target exactly</p>
               </div>
             </div>
             
