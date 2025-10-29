@@ -106,10 +106,10 @@ profiles:student_id (
     >
       {/* Back Arrow */}
       <div className="absolute top-8 left-8 z-20">
-        <Link href="/student/dashboard" className="block">
+        <Link href="/student/profile" className="block">
           <Image
             src="/backarrow.png"
-            alt="Back to Dashboard"
+            alt="Back to Profile"
             width={48}
             height={48}
             className="hover:opacity-80 transition-opacity"

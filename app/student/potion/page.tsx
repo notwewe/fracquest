@@ -22,7 +22,7 @@ export default async function StudentPotion() {
 
   return (
     <div 
-      className="relative h-screen bg-cover bg-center bg-no-repeat overflow-hidden"
+      className="relative min-h-screen bg-cover bg-center bg-no-repeat p-4"
       style={{
         backgroundImage: "url('/potion-assets/BG_Potion.png')"
       }}
@@ -30,7 +30,7 @@ export default async function StudentPotion() {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/20"></div>
       
-      <div className="relative z-10 h-full">
+      <div className="relative z-10 max-w-7xl mx-auto">
         <PotionMasterGame />
       </div>
     </div>

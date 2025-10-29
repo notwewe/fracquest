@@ -198,68 +198,39 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
             )}
 
             {/* Navigation Buttons - With larger text */}
-            <div className="flex flex-col items-center gap-3 w-full drop-shadow-lg">
+            <div className="flex flex-col items-center gap-4 w-full drop-shadow-lg">
+              {/* Game Mode Button - Links to potion game */}
+              <Link href="/student/potion" className="w-2/5 mx-auto">
+                <button className="bg-[#16A34A] text-white font-blaka text-3xl px-6 py-4 w-full rounded hover:bg-[#15803D] transition-colors border-2 border-[#15803D] outline-2 outline-[#166534] hover:outline-[#14532D] shadow-lg">
+                   GAME MODE
+                </button>
+
+              </Link>
+
+              {/* Story Mode Button - Links to play/game map (requires class enrollment) */}
               {isEnrolled ? (
                 <Link href="/student/game" className="w-2/5 mx-auto">
-                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
-                    Play
+                  <button className="bg-[#4d3e3a] text-white font-blaka text-3xl px-6 py-4 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
+                    STORY MODE
                   </button>
                 </Link>
               ) : (
                 <button
-                  onClick={() => handleUnenrolledClick("play the game")}
-                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
+                  onClick={() => handleUnenrolledClick("play story mode")}
+                  className="bg-[#4d3e3a] text-white font-blaka text-3xl px-6 py-4 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
                 >
-                  Play
+                  STORY MODE
                 </button>
               )}
 
-              {/* {isEnrolled ? (
-                <Link href="/student/practice" className="w-2/5 mx-auto">
-                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
-                    Practice
-                  </button>
-                </Link>
-              ) : (
-                <button
-                  onClick={() => handleUnenrolledClick("practice")}
-                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
-                >
-                  Practice
-                </button>
-              )} */}
-
+              {/* Profile Button */}
               <Link href="/student/profile" className="w-2/5 mx-auto">
-                <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
-                  Profile
-                </button>
-              </Link>
-
-              {isEnrolled ? (
-                <Link href="/student/leaderboard" className="w-2/5 mx-auto">
-                  <button className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
-                    Leaderboards
+              <button className="bg-[#4d3e3a] text-white font-blaka text-3xl px-6 py-4 w-full rounded hover:bg-[#3b302c] transition-colors border-2 border-[#3b302c] outline-2 outline-[#2a201e] hover:outline-[#1f1614] shadow-lg">
+                    Profile
                   </button>
-                </Link>
-              ) : (
-                <button
-                  onClick={() => handleUnenrolledClick("view the leaderboard")}
-                  className="bg-[#4d3e3a] text-white font-blaka text-2xl px-4 py-3 w-2/5 mx-auto rounded opacity-70 border-2 border-[#3b302c] outline-2 outline-[#2a201e] shadow-lg"
-                >
-                  Leaderboards
-                </button>
-              )}
-
-              <Link href="/student/potion" className="w-2/5 mx-auto">
-                <button 
-                  type="button"
-                  className="bg-[#6B46C1] text-white font-blaka text-2xl px-4 py-3 w-full rounded hover:bg-[#553C9A] transition-colors border-2 border-[#553C9A] outline-2 outline-[#4338CA] hover:outline-[#3730A3] shadow-lg"
-                >
-                  🧪 Potions
-                </button>
               </Link>
 
-              {/* Logout button - Moved up by reducing top margin */}
+              {/* Logout button */}
               <Link href="/auth/logout" className="w-1/5 mx-auto mt-3">
                 <button className="bg-[#8B3734] text-white font-blaka text-xl px-4 py-2 w-full rounded hover:bg-[#6d2b29] transition-colors border-2 border-[#6d2b29] outline-2 outline-[#4a1e1c] hover:outline-[#3b1815] shadow-lg">
                   Logout
