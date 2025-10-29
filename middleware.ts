@@ -44,13 +44,20 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          const allCookies = request.cookies.getAll()
+          console.log(`🍪 [${pathname}] Cookies:`, allCookies.length)
+          allCookies.forEach(c => {
+            console.log(`   - ${c.name}: ${c.value.substring(0, 30)}...`)
+          })
+          return allCookies
         },
         setAll(cookiesToSet) {
+          console.log(`📝 [${pathname}] Setting ${cookiesToSet.length} cookies`)
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          cookiesToSet.forEach(({ name, value, options }) => 
+          cookiesToSet.forEach(({ name, value, options }) => {
+            console.log(`   + ${name} (maxAge: ${options?.maxAge})`)
             res.cookies.set(name, value, options)
-          )
+          })
         },
       },
     }
@@ -59,7 +66,10 @@ export async function middleware(request: NextRequest) {
   // Validate session with the server
   const {
     data: { user },
+    error
   } = await supabase.auth.getUser()
+
+  console.log(`🔐 [${pathname}] Auth:`, user ? `✅ ${user.id.substring(0, 8)}` : `❌ No user`, error ? `Error: ${error.message}` : '')
 
   // If there's no user, redirect to login (except for auth pages)
   if (!user) {

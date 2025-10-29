@@ -75,6 +75,9 @@ export function PixelBookLogin() {
 
       console.log("🔄 Redirecting to:", redirectUrl)
       
+      // Wait a moment to ensure cookies are fully set
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
       // CRITICAL FIX: Use window.location.assign() instead of href or router.push()
       // This ensures cookies are sent with the next request
       window.location.assign(redirectUrl)
