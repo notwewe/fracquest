@@ -40,8 +40,5 @@ export default async function StudentDashboard() {
     }
   }
 
-  console.log("Class data:", studentClass) // Debug log
-  console.log("Class name:", className) // Debug log
-
   return <PixelDashboard username={profile.username || "Student"} isEnrolled={isEnrolled} className={className} />
 }

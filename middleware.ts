@@ -38,10 +38,39 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  // For protected routes, just let them through
-  // The individual pages will handle auth checks using localStorage
-  // This avoids cookie sync issues between middleware and client
-  console.log(`✅ Allowing access to ${pathname} (auth check delegated to page)`)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) => 
+            res.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Validate session with the server
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // If there's no user, redirect to login (except for auth pages)
+  if (!user) {
+    if (pathname.startsWith("/auth/")) {
+      return res
+    }
+    const loginUrl = new URL("/auth/login", request.url)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // User is authenticated - allow access
   return res
 }
 

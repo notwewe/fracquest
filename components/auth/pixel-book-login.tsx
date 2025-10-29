@@ -75,9 +75,9 @@ export function PixelBookLogin() {
 
       console.log("🔄 Redirecting to:", redirectUrl)
       
-      // Use router.push for client-side navigation
-      // Since we're using localStorage, this will work reliably
-      router.push(redirectUrl)
+      // CRITICAL FIX: Use window.location.assign() instead of href or router.push()
+      // This ensures cookies are sent with the next request
+      window.location.assign(redirectUrl)
       
     } catch (error: any) {
       console.error("❌ Login error:", error)
