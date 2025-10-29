@@ -43,6 +43,20 @@ export function PixelBookLogin() {
       console.log("✅ Server-side login successful")
       console.log("🔄 Redirecting to:", result.redirectUrl)
       
+      // CRITICAL: Wait for cookies to be fully set in the browser
+      // The server sent Set-Cookie headers, but the browser needs time to process them
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      // Verify session is accessible client-side before redirecting
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log("🔐 Client-side session check:", session ? "EXISTS" : "MISSING")
+      
+      if (!session) {
+        console.warn("⚠️ Session not found after login, trying full page reload...")
+        window.location.href = result.redirectUrl
+        return
+      }
+      
       // Use Next.js router for navigation (preserves cookies better)
       router.push(result.redirectUrl)
       

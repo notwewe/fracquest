@@ -8,8 +8,8 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
-    // Create response object that we'll add cookies to
-    const response = NextResponse.json({ success: false })
+    // We'll collect the cookies to set
+    let responseCookies: Array<{ name: string; value: string; options: any }> = []
     
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,11 +20,8 @@ export async function POST(request: NextRequest) {
             return request.cookies.getAll()
           },
           setAll(cookiesToSet) {
-            // Set cookies on both the request and response
-            cookiesToSet.forEach(({ name, value, options }) => {
-              request.cookies.set(name, value)
-              response.cookies.set(name, value, options)
-            })
+            // Store cookies to set on the response later
+            responseCookies = cookiesToSet
           },
         },
       }
@@ -45,6 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Login successful for user:', data.user.id)
+    console.log('🍪 Setting', responseCookies.length, 'cookies')
 
     // Get user profile to determine redirect
     const { data: profileData } = await supabase
@@ -74,14 +72,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Return success response with cookies already set
-    return NextResponse.json({ 
+    // Create response and set all cookies
+    const response = NextResponse.json({ 
       success: true, 
       redirectUrl,
       user: data.user 
-    }, {
-      headers: response.headers, // Include the cookies we set
     })
+
+    // Apply all cookies to the response
+    responseCookies.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, options)
+    })
+
+    return response
   } catch (error: any) {
     console.error('Login API error:', error)
     return NextResponse.json(
