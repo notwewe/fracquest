@@ -56,24 +56,11 @@ export async function middleware(request: NextRequest) {
 
   // Refresh session if expired - this is important for cookie-based auth
   const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // Try to refresh the session if it exists but there's an error
-  if (sessionError && !session) {
-    const { data } = await supabase.auth.refreshSession()
-    if (!data.session) {
-      if (pathname.startsWith("/auth/")) {
-        return res
-      }
-      const loginUrl = new URL("/auth/login", request.url)
-      return NextResponse.redirect(loginUrl)
-    }
-  }
-
-  // If there's still no session after refresh attempt
-  if (!session) {
+  // If there's no user after checking
+  if (!user) {
     if (pathname.startsWith("/auth/")) {
       return res
     }
@@ -85,7 +72,7 @@ export async function middleware(request: NextRequest) {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role_id, is_active") // Select is_active
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .single()
 
   // If profile doesn't exist or there's an error, redirect to login
