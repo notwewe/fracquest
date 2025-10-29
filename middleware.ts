@@ -45,6 +45,9 @@ export async function middleware(request: NextRequest) {
         getAll() {
           const cookies = request.cookies.getAll()
           console.log(`🍪 Middleware cookies for ${pathname}:`, cookies.length, "cookies")
+          cookies.forEach(cookie => {
+            console.log(`  - ${cookie.name}: ${cookie.value.substring(0, 50)}...`)
+          })
           return cookies
         },
         setAll(cookiesToSet) {

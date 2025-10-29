@@ -23,42 +23,61 @@ export function PixelBookLogin() {
     setError(null)
 
     try {
-      // Use server-side login via API route
-      // This ensures cookies are set properly on the server
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include', // Important: include cookies
+      // Use client-side login with proper error handling
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Login failed')
+      if (error) {
+        throw error
       }
 
-      console.log("✅ Server-side login successful")
-      console.log("🔄 Redirecting to:", result.redirectUrl)
-      
-      // CRITICAL: Wait for cookies to be fully set in the browser
-      // The server sent Set-Cookie headers, but the browser needs time to process them
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Verify session is accessible client-side before redirecting
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log("🔐 Client-side session check:", session ? "EXISTS" : "MISSING")
-      
-      if (!session) {
-        console.warn("⚠️ Session not found after login, trying full page reload...")
-        window.location.href = result.redirectUrl
-        return
+      if (!data.user) {
+        throw new Error('No user returned from login')
       }
+
+      console.log("✅ Login successful, user ID:", data.user.id)
       
-      // Use Next.js router for navigation (preserves cookies better)
-      router.push(result.redirectUrl)
+      // Get user profile to determine redirect
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("role_id")
+        .eq("id", data.user.id)
+        .single()
+
+      if (profileError) {
+        console.error("Profile retrieval error:", profileError)
+        throw new Error("Error retrieving user profile")
+      }
+
+      // Determine redirect URL
+      let redirectUrl = '/student/dashboard'
+
+      if (profileData) {
+        if (profileData.role_id === 1) {
+          // Student - check if they've seen intro
+          const { data: storyData } = await supabase
+            .from('story_progress')
+            .select('has_seen_intro')
+            .eq('student_id', data.user.id)
+            .maybeSingle()
+
+          redirectUrl = storyData?.has_seen_intro
+            ? '/student/dashboard'
+            : '/student/story'
+        } else if (profileData.role_id === 2) {
+          redirectUrl = '/teacher/dashboard'
+        } else if (profileData.role_id === 3) {
+          redirectUrl = '/admin/dashboard'
+        }
+      }
+
+      console.log("🔄 Redirecting to:", redirectUrl)
+      
+      // Force a full page reload to ensure cookies are properly set
+      // This is more reliable than router.push() for auth flows
+      window.location.href = redirectUrl
       
     } catch (error: any) {
       console.error("❌ Login error:", error)
