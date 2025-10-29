@@ -8,8 +8,13 @@ let supabaseClient: ReturnType<typeof createClientComponentClient<Database>> | n
 export const createClient = () => {
   if (!supabaseClient) {
     supabaseClient = createClientComponentClient<Database>({
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      cookieOptions: {
+        name: 'sb-auth-token',
+        domain: typeof window !== 'undefined' ? window.location.hostname : undefined,
+        path: '/',
+        sameSite: 'lax',
+        secure: true,
+      }
     })
   }
   return supabaseClient
