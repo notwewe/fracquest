@@ -3,14 +3,17 @@
 
 "use client"
 
-import { useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { motion } from "framer-motion"
+import { User, LogOut, Settings } from "lucide-react"
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

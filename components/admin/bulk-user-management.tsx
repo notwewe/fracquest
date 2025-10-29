@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/lib/supabase/client"
 import type { Database } from "@/lib/database.types"
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
 
@@ -21,7 +21,7 @@ export function BulkUserManagement() {
   })
   const [showResults, setShowResults] = useState(false)
 
-  const supabase = createClientComponentClient<Database>()
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
