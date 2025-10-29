@@ -53,10 +53,19 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           console.log(`📝 [${pathname}] Setting ${cookiesToSet.length} cookies`)
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           cookiesToSet.forEach(({ name, value, options }) => {
-            console.log(`   + ${name} (maxAge: ${options?.maxAge})`)
-            res.cookies.set(name, value, options)
+            // Ensure cookies work in production by setting explicit options
+            const cookieOptions = {
+              ...options,
+              httpOnly: options?.httpOnly ?? true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax' as const,
+              path: '/',
+            }
+            
+            console.log(`   + ${name} (maxAge: ${options?.maxAge}, secure: ${cookieOptions.secure})`)
+            request.cookies.set(name, value)
+            res.cookies.set(name, value, cookieOptions)
           })
         },
       },
