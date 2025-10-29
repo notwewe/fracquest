@@ -22,8 +22,11 @@ export async function middleware(request: NextRequest) {
   if (
     pathname === "/" ||
     pathname === "/auth/login" ||
+    pathname === "/auth/register" ||
+    pathname === "/auth/select-role" ||
     pathname === "/auth/select-role-register" ||
     pathname === "/auth/register-redirect-test" ||
+    pathname === "/auth/callback" ||
     pathname === "/api/auth/callback"
   ) {
     return res
@@ -31,6 +34,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createMiddlewareClient({ req: request, res })
 
+  // Refresh session if expired
   const {
     data: { session },
   } = await supabase.auth.getSession()
