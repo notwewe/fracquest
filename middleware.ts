@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
+import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
   const res = NextResponse.next({
@@ -36,9 +36,25 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
-  const supabase = createMiddlewareClient({ req: request, res })
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) => 
+            res.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
 
-  // Refresh session - critical for keeping auth state in sync
+  // Refresh session if expired - this is important for cookie-based auth
   const {
     data: { session },
     error: sessionError,
