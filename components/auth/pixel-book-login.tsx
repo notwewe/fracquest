@@ -33,14 +33,24 @@ export function PixelBookLogin() {
       }
 
       if (data.user) {
-        // Debug: Check if session was created
-        const { data: sessionCheck } = await supabase.auth.getSession()
-        console.log("Session after login:", sessionCheck)
-        console.log("User:", data.user.id)
+        console.log("✅ Login successful, user ID:", data.user.id)
         
-        // IMPORTANT: Wait for cookies to be fully written
-        // This prevents race conditions with middleware
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Check if session was created
+        const { data: sessionCheck } = await supabase.auth.getSession()
+        console.log("📦 Session check:", sessionCheck?.session ? "EXISTS" : "MISSING")
+        
+        if (sessionCheck?.session) {
+          console.log("🔑 Access token exists:", !!sessionCheck.session.access_token)
+          console.log("🔑 Refresh token exists:", !!sessionCheck.session.refresh_token)
+        }
+        
+        // IMPORTANT: Wait longer for cookies to be fully written
+        console.log("⏳ Waiting for cookies to sync...")
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Verify session again before redirecting
+        const { data: sessionRecheck } = await supabase.auth.getSession()
+        console.log("🔄 Session recheck:", sessionRecheck?.session ? "STILL EXISTS" : "LOST")
         
         // Get user profile
         const { data: profileData, error: profileError } = await supabase

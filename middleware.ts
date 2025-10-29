@@ -42,7 +42,9 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          const cookies = request.cookies.getAll()
+          console.log(`🍪 Middleware cookies for ${pathname}:`, cookies.length, "cookies")
+          return cookies
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
@@ -60,16 +62,21 @@ export async function middleware(request: NextRequest) {
     error: userError
   } = await supabase.auth.getUser()
 
+  console.log(`🔐 Middleware check for ${pathname}:`, user ? `User ${user.id}` : "No user", userError ? `Error: ${userError.message}` : "")
+
+  console.log(`🔐 Middleware check for ${pathname}:`, user ? `User ${user.id}` : "No user", userError ? `Error: ${userError.message}` : "")
+
   // If there's no user, redirect to login (except for auth pages)
   if (!user) {
     if (pathname.startsWith("/auth/")) {
       return res
     }
-    console.log("No user found in middleware, redirecting to login")
+    console.log("❌ No user found in middleware, redirecting to login")
     const loginUrl = new URL("/auth/login", request.url)
     return NextResponse.redirect(loginUrl)
   }
 
+  console.log("✅ User authenticated, allowing access")
   // User is authenticated - just allow access
   // Role-based checks are now handled by the individual pages for simplicity
   return res
