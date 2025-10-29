@@ -64,17 +64,17 @@ export function PixelBookLogin() {
               .maybeSingle()
 
             if (storyData && storyData.has_seen_intro) {
-              router.push("/student/dashboard")
+              window.location.href = "/student/dashboard"
             } else {
-              router.push("/student/story")
+              window.location.href = "/student/story"
             }
           } else if (profileData.role_id === 2) {
             // Teacher
-            router.push("/teacher/dashboard")
+            window.location.href = "/teacher/dashboard"
           }
         } else {
           // No profile found, redirect to role selection
-          router.push("/auth/select-role")
+          window.location.href = "/auth/select-role"
         }
       }
     } catch (error: any) {
