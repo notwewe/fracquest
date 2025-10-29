@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { ConversionGame } from "./levels/conversion-game"
+import ConversionGame from "./levels/conversion-game"
 import { CompassGame } from "./levels/compass-game"
 
 type GameContentProps = {
