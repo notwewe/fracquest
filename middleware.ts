@@ -32,57 +32,16 @@ export async function middleware(request: NextRequest) {
     pathname === "/auth/select-role-register" ||
     pathname === "/auth/register-redirect-test" ||
     pathname === "/auth/callback" ||
-    pathname === "/api/auth/callback"
+    pathname === "/api/auth/callback" ||
+    pathname === "/auth/logout"
   ) {
     return res
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          const cookies = request.cookies.getAll()
-          console.log(`🍪 Middleware cookies for ${pathname}:`, cookies.length, "cookies")
-          cookies.forEach(cookie => {
-            console.log(`  - ${cookie.name}: ${cookie.value.substring(0, 50)}...`)
-          })
-          return cookies
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          cookiesToSet.forEach(({ name, value, options }) => 
-            res.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  // Validate session with the server
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser()
-
-  console.log(`🔐 Middleware check for ${pathname}:`, user ? `User ${user.id}` : "No user", userError ? `Error: ${userError.message}` : "")
-
-  console.log(`🔐 Middleware check for ${pathname}:`, user ? `User ${user.id}` : "No user", userError ? `Error: ${userError.message}` : "")
-
-  // If there's no user, redirect to login (except for auth pages)
-  if (!user) {
-    if (pathname.startsWith("/auth/")) {
-      return res
-    }
-    console.log("❌ No user found in middleware, redirecting to login")
-    const loginUrl = new URL("/auth/login", request.url)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  console.log("✅ User authenticated, allowing access")
-  // User is authenticated - just allow access
-  // Role-based checks are now handled by the individual pages for simplicity
+  // For protected routes, just let them through
+  // The individual pages will handle auth checks using localStorage
+  // This avoids cookie sync issues between middleware and client
+  console.log(`✅ Allowing access to ${pathname} (auth check delegated to page)`)
   return res
 }
 

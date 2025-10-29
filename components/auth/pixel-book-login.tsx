@@ -75,9 +75,9 @@ export function PixelBookLogin() {
 
       console.log("🔄 Redirecting to:", redirectUrl)
       
-      // Force a full page reload to ensure cookies are properly set
-      // This is more reliable than router.push() for auth flows
-      window.location.href = redirectUrl
+      // Use router.push for client-side navigation
+      // Since we're using localStorage, this will work reliably
+      router.push(redirectUrl)
       
     } catch (error: any) {
       console.error("❌ Login error:", error)
