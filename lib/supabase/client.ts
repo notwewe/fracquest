@@ -7,15 +7,7 @@ let supabaseClient: ReturnType<typeof createClientComponentClient<Database>> | n
 // Create a single supabase client for the entire client-side application
 export const createClient = () => {
   if (!supabaseClient) {
-    supabaseClient = createClientComponentClient<Database>({
-      cookieOptions: {
-        name: 'sb-auth-token',
-        domain: typeof window !== 'undefined' ? window.location.hostname : undefined,
-        path: '/',
-        sameSite: 'lax',
-        secure: true,
-      }
-    })
+    supabaseClient = createClientComponentClient<Database>()
   }
   return supabaseClient
 }
