@@ -38,6 +38,10 @@ export function PixelBookLogin() {
         console.log("Session after login:", sessionCheck)
         console.log("User:", data.user.id)
         
+        // IMPORTANT: Wait for cookies to be fully written
+        // This prevents race conditions with middleware
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
         // Get user profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")

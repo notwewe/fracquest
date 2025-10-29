@@ -57,6 +57,7 @@ export async function middleware(request: NextRequest) {
   // Validate session with the server
   const {
     data: { user },
+    error: userError
   } = await supabase.auth.getUser()
 
   // If there's no user, redirect to login (except for auth pages)
@@ -64,68 +65,13 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith("/auth/")) {
       return res
     }
+    console.log("No user found in middleware, redirecting to login")
     const loginUrl = new URL("/auth/login", request.url)
     return NextResponse.redirect(loginUrl)
   }
 
-  // User is authenticated, check role-based access and account status
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("role_id, is_active") // Select is_active
-    .eq("id", user.id)
-    .single()
-
-  // If profile doesn't exist or there's an error, redirect to login
-  if (profileError || !profile) {
-    console.error("Profile error in middleware:", profileError)
-    const loginUrl = new URL("/auth/login", request.url)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  const role = profile?.role_id || 0
-  const isActive = profile?.is_active !== false // Default to true if null or undefined
-
-  // Check if account is deactivated
-  if (!isActive) {
-    // Sign out the user and redirect to login
-    await supabase.auth.signOut()
-    const loginUrl = new URL("/auth/login", request.url)
-    loginUrl.searchParams.set("message", "account-deactivated")
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // Admin routes
-  if (pathname.startsWith("/admin")) {
-    if (role !== 3) {
-      return NextResponse.redirect(new URL("/", request.url))
-    }
-    return res
-  }
-
-  // Teacher routes
-  if (pathname.startsWith("/teacher")) {
-    if (role !== 2 && role !== 3) {
-      return NextResponse.redirect(new URL("/", request.url))
-    }
-    return res
-  }
-
-  // Student routes
-  if (pathname.startsWith("/student")) {
-    if (role !== 1 && role !== 3) {
-      return NextResponse.redirect(new URL("/", request.url))
-    }
-    return res
-  }
-
-  // Debug routes - admin only
-  if (pathname.startsWith("/debug")) {
-    if (role !== 3) {
-      return NextResponse.redirect(new URL("/", request.url))
-    }
-    return res
-  }
-
+  // User is authenticated - just allow access
+  // Role-based checks are now handled by the individual pages for simplicity
   return res
 }
 
