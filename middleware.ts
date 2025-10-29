@@ -18,7 +18,8 @@ export async function middleware(request: NextRequest) {
     pathname.endsWith(".jpg") ||
     pathname.endsWith(".svg") ||
     pathname.endsWith(".css") ||
-    pathname.endsWith(".js")
+    pathname.endsWith(".js") ||
+    pathname.endsWith(".webp")
   ) {
     return res
   }

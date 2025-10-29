@@ -23,77 +23,32 @@ export function PixelBookLogin() {
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Use server-side login via API route
+      // This ensures cookies are set properly on the server
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include', // Important: include cookies
       })
 
-      if (error) {
-        throw error
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Login failed')
       }
 
-      if (data.user) {
-        console.log("✅ Login successful, user ID:", data.user.id)
-        
-        // Check if session was created
-        const { data: sessionCheck } = await supabase.auth.getSession()
-        console.log("📦 Session check:", sessionCheck?.session ? "EXISTS" : "MISSING")
-        
-        if (sessionCheck?.session) {
-          console.log("🔑 Access token exists:", !!sessionCheck.session.access_token)
-          console.log("🔑 Refresh token exists:", !!sessionCheck.session.refresh_token)
-        }
-        
-        // IMPORTANT: Wait longer for cookies to be fully written
-        console.log("⏳ Waiting for cookies to sync...")
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Verify session again before redirecting
-        const { data: sessionRecheck } = await supabase.auth.getSession()
-        console.log("🔄 Session recheck:", sessionRecheck?.session ? "STILL EXISTS" : "LOST")
-        
-        // Get user profile
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("role_id")
-          .eq("id", data.user.id)
-          .maybeSingle()
-
-        if (profileError) {
-          console.error("Profile retrieval error:", profileError)
-          setError("Error retrieving user profile. Please try again.")
-          setIsLoading(false)
-          return
-        }
-
-        // If profile exists, redirect based on role
-        if (profileData && profileData.role_id) {
-          if (profileData.role_id === 1) {
-            // Student
-            // Check if student has seen intro story
-            const { data: storyData } = await supabase
-              .from("story_progress")
-              .select("has_seen_intro")
-              .eq("student_id", data.user.id)
-              .maybeSingle()
-
-            if (storyData && storyData.has_seen_intro) {
-              window.location.href = "/student/dashboard"
-            } else {
-              window.location.href = "/student/story"
-            }
-          } else if (profileData.role_id === 2) {
-            // Teacher
-            window.location.href = "/teacher/dashboard"
-          }
-        } else {
-          // No profile found, redirect to role selection
-          window.location.href = "/auth/select-role"
-        }
-      }
+      console.log("✅ Server-side login successful")
+      console.log("🔄 Redirecting to:", result.redirectUrl)
+      
+      // Use Next.js router for navigation (preserves cookies better)
+      router.push(result.redirectUrl)
+      
     } catch (error: any) {
+      console.error("❌ Login error:", error)
       setError(error.message || "An error occurred during login")
-    } finally {
       setIsLoading(false)
     }
   }
