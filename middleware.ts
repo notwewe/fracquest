@@ -54,12 +54,12 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - this is important for cookie-based auth
+  // Validate session with the server
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // If there's no user after checking
+  // If there's no user, redirect to login (except for auth pages)
   if (!user) {
     if (pathname.startsWith("/auth/")) {
       return res
