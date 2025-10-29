@@ -33,6 +33,11 @@ export function PixelBookLogin() {
       }
 
       if (data.user) {
+        // Debug: Check if session was created
+        const { data: sessionCheck } = await supabase.auth.getSession()
+        console.log("Session after login:", sessionCheck)
+        console.log("User:", data.user.id)
+        
         // Get user profile
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
