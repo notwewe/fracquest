@@ -179,6 +179,53 @@ export interface Database {
           updated_at?: string
         }
       }
+      potion_game_progress: {
+        Row: {
+          id: number
+          student_id: string
+          has_seen_tutorial: boolean
+          total_score: number
+          potions_brewed: number
+          perfect_potions: number
+          failed_attempts: number
+          highest_streak: number
+          current_streak: number
+          total_time_played: number
+          last_played_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          student_id: string
+          has_seen_tutorial?: boolean
+          total_score?: number
+          potions_brewed?: number
+          perfect_potions?: number
+          failed_attempts?: number
+          highest_streak?: number
+          current_streak?: number
+          total_time_played?: number
+          last_played_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          student_id?: string
+          has_seen_tutorial?: boolean
+          total_score?: number
+          potions_brewed?: number
+          perfect_potions?: number
+          failed_attempts?: number
+          highest_streak?: number
+          current_streak?: number
+          total_time_played?: number
+          last_played_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       waypoints: {
         Row: {
           id: number

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, RotateCcw, Scroll, HelpCircle } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 
 // Add glow effects as CSS-in-JS styles
 const glowStyles = `
@@ -87,123 +86,6 @@ export function PotionMasterGame() {
   const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0)
   const [tutorialMode, setTutorialMode] = useState(true)
   const [interactiveTutorialRecipe, setInteractiveTutorialRecipe] = useState<Recipe | null>(null)
-  const [hideDialogueForInteraction, setHideDialogueForInteraction] = useState(false)
-  const [isLoadingTutorialStatus, setIsLoadingTutorialStatus] = useState(true)
-  const [potionsBrewedCount, setPotionsBrewedCount] = useState(0)
-  const [currentStreak, setCurrentStreak] = useState(0)
-  const [gameStartTime, setGameStartTime] = useState<number>(Date.now())
-
-  // Initialize or load player's potion game progress
-  useEffect(() => {
-    const initializeProgress = async () => {
-      const supabase = createClient()
-      
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        setIsLoadingTutorialStatus(false)
-        return
-      }
-
-      // Check if user has potion game progress
-      const { data: progressData, error } = await supabase
-        .from("potion_game_progress")
-        .select("*")
-        .eq("student_id", user.id)
-        .single()
-
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 is "no rows returned" - it's ok if user doesn't have progress yet
-        console.error("Error checking potion game progress:", error)
-      }
-
-      if (progressData) {
-        // Load existing progress
-        setScore(progressData.total_score || 0)
-        setPotionsBrewedCount(progressData.potions_brewed || 0)
-        setCurrentStreak(progressData.current_streak || 0)
-        
-        if (progressData.has_seen_tutorial) {
-          // User has seen the tutorial, skip it
-          setTutorialMode(false)
-          setShowInstructions(false)
-        }
-      } else {
-        // Create new progress record for user
-        const { error: insertError } = await supabase
-          .from("potion_game_progress")
-          .insert({
-            student_id: user.id,
-            has_seen_tutorial: false,
-            total_score: 0,
-            potions_brewed: 0,
-            perfect_potions: 0,
-            failed_attempts: 0,
-            highest_streak: 0,
-            current_streak: 0,
-            total_time_played: 0
-          })
-
-        if (insertError) {
-          console.error("Error creating potion game progress:", insertError)
-        }
-      }
-
-      setIsLoadingTutorialStatus(false)
-      setGameStartTime(Date.now())
-    }
-
-    initializeProgress()
-  }, [])
-
-  // Update player progress in database
-  const updateProgress = async (updates: {
-    total_score?: number
-    potions_brewed?: number
-    perfect_potions?: number
-    failed_attempts?: number
-    current_streak?: number
-    highest_streak?: number
-  }) => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) return
-
-    // Calculate time played (in seconds)
-    const timePlayedSeconds = Math.floor((Date.now() - gameStartTime) / 1000)
-
-    const { error } = await supabase
-      .from("potion_game_progress")
-      .update({
-        ...updates,
-        last_played_at: new Date().toISOString(),
-        total_time_played: timePlayedSeconds
-      })
-      .eq("student_id", user.id)
-
-    if (error) {
-      console.error("Error updating potion game progress:", error)
-    }
-  }
-
-  // Mark tutorial as seen when user completes it
-  const markTutorialAsSeen = async () => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) return
-
-    const { error } = await supabase
-      .from("potion_game_progress")
-      .update({ has_seen_tutorial: true })
-      .eq("student_id", user.id)
-
-    if (error) {
-      console.error("Error updating tutorial status:", error)
-    }
-  }
 
   // Tutorial dialogue lines
   const instructionDialogues = [
@@ -226,7 +108,6 @@ export function PotionMasterGame() {
       }
       setInteractiveTutorialRecipe(null)
       setCauldronContents([])
-      setHideDialogueForInteraction(false)
     } else if (currentDialogueIndex === 4 && interactiveTutorialRecipe) {
       // Subtraction tutorial - check if recipe is complete
       if (!checkTutorialRecipe()) {
@@ -234,7 +115,6 @@ export function PotionMasterGame() {
       }
       setInteractiveTutorialRecipe(null)
       setCauldronContents([])
-      setHideDialogueForInteraction(false)
     }
 
     if (currentDialogueIndex < instructionDialogues.length - 1) {
@@ -249,7 +129,6 @@ export function PotionMasterGame() {
         })
         setCauldronContents([])
         setGameStatus("playing")
-        // Don't hide dialogue yet - wait for user to click "Try it yourself"
       } else if (currentDialogueIndex === 3) {
         // Dialogue 4: Subtraction tutorial - using 1/2 and 1/3
         setInteractiveTutorialRecipe({
@@ -262,14 +141,12 @@ export function PotionMasterGame() {
           { ingredient: 'blue', fraction: simplifyFraction({ numerator: 2, denominator: 3 }) }
         ])
         setGameStatus("playing")
-        // Don't hide dialogue yet - wait for user to click "Try it yourself"
       }
     } else {
       // Tutorial completed, start the game
       setShowInstructions(false)
       setTutorialMode(false)
       setInteractiveTutorialRecipe(null)
-      markTutorialAsSeen() // Mark tutorial as seen in database
       generateNewRecipe()
     }
   }
@@ -443,25 +320,7 @@ export function PotionMasterGame() {
 
     if (pinkMatch && blueMatch && pinkContents.length > 0 && blueContents.length > 0) {
       setGameStatus("success")
-      const newScore = score + 10
-      setScore(newScore)
-      
-      // Update streak
-      const newStreak = currentStreak + 1
-      setCurrentStreak(newStreak)
-      
-      // Update potions brewed count
-      const newPotionsBrewedCount = potionsBrewedCount + 1
-      setPotionsBrewedCount(newPotionsBrewedCount)
-      
-      // Update progress in database
-      updateProgress({
-        total_score: newScore,
-        potions_brewed: newPotionsBrewedCount,
-        perfect_potions: newPotionsBrewedCount, // All completed potions are perfect
-        current_streak: newStreak,
-        highest_streak: newStreak // Will be calculated properly in the backend
-      })
+      setScore(prev => prev + 10)
     } 
   }
 
@@ -623,38 +482,14 @@ export function PotionMasterGame() {
     setCauldronContents([])
     setGameStatus("playing")
     setDraggedItem(null)
-    
-    // Reset streak on failure
-    setCurrentStreak(0)
-    
-    // Update failed attempts in database
-    updateProgress({
-      failed_attempts: 1, // Increment by 1
-      current_streak: 0
-    })
   }
 
   const fractionToString = (fraction: Fraction) => `${fraction.numerator}/${fraction.denominator}`
 
-  // Get current recipe (either interactive tutorial or main game)
-  const currentRecipe = interactiveTutorialRecipe || recipe
-
-  // Show loading state while checking tutorial status
-  if (isLoadingTutorialStatus) {
-    return (
-      <div className="relative h-screen w-full bg-cover bg-center bg-no-repeat overflow-hidden flex items-center justify-center" 
-           style={{ backgroundImage: "url('/potion-assets/BG_Potion.png')" }}>
-        <div className="bg-gray-900 bg-opacity-95 border-4 border-amber-800 rounded-lg p-8 text-center">
-          <p className="text-xl font-pixel text-amber-100">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <>
       {/* Inject glow effect styles */}
-      <style dangerouslySetInnerHTML={{ __html: glowStyles }} />
+      <style jsx>{glowStyles}</style>
       
       <div className="relative h-screen w-full bg-cover bg-center bg-no-repeat overflow-hidden" 
            style={{ backgroundImage: "url('/potion-assets/BG_Potion.png')" }}>
@@ -663,95 +498,65 @@ export function PotionMasterGame() {
       
       {/* Content Container */}
       <div className="relative z-10 w-full h-full p-6 flex flex-col">
-        {/* Top Navigation - Only show when not in tutorial mode */}
-        {!tutorialMode && (
-          <div className="relative flex items-center mb-3 w-full min-h-[60px]">
-            {/* Center Title and Score */}
-            <div className="flex justify-center w-full gap-4">
-              {/* Main Game Info */}
-              <div className="bg-black/70 backdrop-blur-md border-2 border-amber-600/50 rounded-xl p-3 shadow-2xl">
-                <h1 className="text-2xl font-pixel text-amber-200 mb-1 text-center tracking-wider">Potion Master</h1>
-                <p className="text-amber-100 text-sm font-pixel text-center mb-1">Fraction Measuring Game</p>
-                <div className="text-yellow-400 font-bold font-pixel text-lg text-center">Score: {score}</div>
-              </div>
-
-              {/* Streak Counter */}
-              <div className="bg-black/70 backdrop-blur-md border-2 border-amber-600/50 rounded-xl p-3 shadow-2xl flex flex-col items-center justify-center min-w-[140px]">
-                <div className="text-amber-200 text-sm font-pixel mb-1">🔥 Streak</div>
-                <div className={`font-pixel text-3xl font-bold transition-all ${
-                  currentStreak >= 5 ? 'text-orange-400 animate-pulse' : 
-                  currentStreak >= 3 ? 'text-yellow-400' : 
-                  'text-amber-100'
-                }`}>
-                  {currentStreak}
-                </div>
-                {currentStreak >= 3 && (
-                  <div className="text-xs font-pixel text-green-400 mt-1">On Fire!</div>
-                )}
-              </div>
-
-              {/* Potions Brewed Counter */}
-              <div className="bg-black/70 backdrop-blur-md border-2 border-amber-600/50 rounded-xl p-3 shadow-2xl flex flex-col items-center justify-center min-w-[140px]">
-                <div className="text-amber-200 text-sm font-pixel mb-1">🧪 Brewed</div>
-                <div className="font-pixel text-3xl font-bold text-green-400">
-                  {potionsBrewedCount}
-                </div>
-              </div>
-            </div>
-
-            {/* All Buttons - Right Side */}
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex gap-2">
-              {/* Exit Button */}
-              <Button
-                variant="outline"
-                size="icon"
-                asChild
-                className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-amber-600 hover:text-black hover:border-amber-600"
-                title="Exit Potion Master"
-              >
-                <a href="/student/dashboard">
-                  <ArrowLeft className="h-4 w-4" />
-                </a>
-              </Button>
-              {/* Reset Button */}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={resetGame}
-                className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-red-600 hover:text-white hover:border-red-600"
-                title="Reset Game"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-              
-              {/* New Recipe Button */}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={generateNewRecipe}
-                className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-green-600 hover:text-white hover:border-green-600"
-                title="New Recipe"
-              >
-                <Scroll className="h-4 w-4" />
-              </Button>
-              
-              {/* Help Button */}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  setShowInstructions(true)
-                  setTutorialMode(true)
-                  setCurrentDialogueIndex(0)
-                }}
-                className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-blue-600 hover:text-white hover:border-blue-600"
-                title="Instructions"
-              >
-                <HelpCircle className="h-4 w-4" />
-              </Button>
+        {/* Top Navigation - Buttons and Title */}
+        <div className="relative flex items-center mb-3 w-full min-h-[60px]">
+          {/* Center Title and Score */}
+          <div className="flex justify-center w-full">
+            <div className="bg-black/70 backdrop-blur-md border-2 border-amber-600/50 rounded-xl p-3 shadow-2xl">
+              <h1 className="text-2xl font-pixel text-amber-200 mb-1 text-center tracking-wider">Potion Master</h1>
+              <p className="text-amber-100 text-sm font-pixel text-center mb-1">Fraction Measuring Game</p>
+              <div className="text-yellow-400 font-bold font-pixel text-lg text-center">Score: {score}</div>
             </div>
           </div>
-        )}
+
+          {/* All Buttons - Right Side */}
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex gap-2">
+            {/* Exit Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-amber-600 hover:text-black hover:border-amber-600"
+              title="Exit Potion Master"
+            >
+              <a href="/student/dashboard">
+                <ArrowLeft className="h-4 w-4" />
+              </a>
+            </Button>
+            {/* Reset Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={resetGame}
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-red-600 hover:text-white hover:border-red-600"
+              title="Reset Game"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+            
+            {/* New Recipe Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={generateNewRecipe}
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-green-600 hover:text-white hover:border-green-600"
+              title="New Recipe"
+            >
+              <Scroll className="h-4 w-4" />
+            </Button>
+            
+            {/* Help Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowInstructions(true)}
+              className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-blue-600 hover:text-white hover:border-blue-600"
+              title="Instructions"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
       {/* Main Game Area */}
       <div className="flex-1 flex flex-col items-center justify-start space-y-1 overflow-visible">
@@ -785,7 +590,6 @@ export function PotionMasterGame() {
                         width={48}
                         height={48}
                         className="w-full h-auto drop-shadow-lg"
-                        style={{ transform: 'rotate(18deg)' }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-white font-bold text-sm font-pixel drop-shadow-lg bg-black/70 rounded-lg px-1 py-0.5 border border-amber-600/50">
@@ -816,8 +620,8 @@ export function PotionMasterGame() {
             <div className="mb-4 bg-black/80 rounded-xl p-4 border-2 border-amber-600/50 shadow-xl">
               <div className="text-amber-200 text-base text-center font-pixel">
                 <div className="text-amber-300 text-lg mb-2">Target Recipe</div>
-                <div className="text-pink-300 text-base mb-1">🌸 {fractionToString(currentRecipe.pinkAmount)}</div>
-                <div className="text-blue-300 text-base">💎 {fractionToString(currentRecipe.blueAmount)}</div>
+                <div className="text-pink-300 text-base mb-1">🌸 {fractionToString(recipe.pinkAmount)}</div>
+                <div className="text-blue-300 text-base">💎 {fractionToString(recipe.blueAmount)}</div>
               </div>
             </div>
 
@@ -840,7 +644,7 @@ export function PotionMasterGame() {
                 <div className="text-center text-white text-lg drop-shadow-lg">
                   {cauldronContents.length === 0 && (
                     <div className="bg-amber-800/80 border border-amber-600 rounded-lg p-3">
-                      <div className="text-amber-200 font-pixel font-bold text-sm mb-1">Brewing Cauldron</div>
+                      <div className="text-amber-200 font-pixel font-bold text-sm mb-1">🧪 Brewing Cauldron</div>
                       <div className="text-amber-300 font-pixel text-xs">Drag ingredients with ladles here!</div>
                     </div>
                   )}
@@ -941,12 +745,12 @@ export function PotionMasterGame() {
                         <p className="text-amber-700 font-semibold font-pixel text-xs">Magic Potion Recipe:</p>
                         <div className="bg-pink-100/80 rounded-lg p-1.5 border-2 border-pink-300">
                           <p className="text-pink-700 font-bold font-pixel text-xs">
-                            Mix {fractionToString(currentRecipe.pinkAmount)} of Pink Powder 🌸
+                            Mix {fractionToString(recipe.pinkAmount)} of Pink Powder 🌸
                           </p>
                         </div>
                         <div className="bg-blue-100/80 rounded-lg p-1.5 border-2 border-blue-300">
                           <p className="text-blue-700 font-bold font-pixel text-xs">
-                            Mix {fractionToString(currentRecipe.blueAmount)} of Blue Crystals 💎
+                            Mix {fractionToString(recipe.blueAmount)} of Blue Crystals 💎
                           </p>
                         </div>
                       </>
@@ -960,12 +764,12 @@ export function PotionMasterGame() {
                         </div>
                         <div className="bg-pink-100/80 rounded-lg p-2 border-2 border-pink-300">
                           <p className="text-pink-700 font-bold font-pixel text-xs">
-                            Target: {fractionToString(currentRecipe.pinkAmount)} Pink Powder 🌸
+                            Target: {fractionToString(recipe.pinkAmount)} Pink Powder 🌸
                           </p>
                         </div>
                         <div className="bg-blue-100/80 rounded-lg p-2 border-2 border-blue-300">
                           <p className="text-blue-700 font-bold font-pixel text-xs">
-                            Target: {fractionToString(currentRecipe.blueAmount)} Blue Crystals 💎
+                            Target: {fractionToString(recipe.blueAmount)} Blue Crystals 💎
                           </p>
                         </div>
                         <div className="bg-amber-100/80 rounded-lg p-1.5 border border-amber-400">
@@ -983,132 +787,114 @@ export function PotionMasterGame() {
         </div>
 
         {/* Bottom Section - Ingredient Bowls */}
-        {(currentDialogueIndex >= 2 || !tutorialMode) && (
-          <div className="flex justify-center gap-4 mt-4">
-            <h3 className="sr-only">Ingredient Collection Area</h3>
+        <div className="flex justify-center gap-4 mt-4">
+          <h3 className="sr-only">Ingredient Collection Area</h3>
 
-            {/* Water Bowl */}
-            <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
-                draggedItem && !draggedItem.ingredient ? 'hover:bg-cyan-500/20 border-dashed border-cyan-400 glow-cyan' : 
-                draggedItem?.ingredient === 'water' ? 'bg-cyan-500/30 border-solid border-cyan-400 glow-cyan' : 
-                'border-cyan-600/30 bg-black/50 backdrop-blur-md hover:bg-cyan-500/10'
-              }`}
-              onDragOver={(e) => {
-                handleDragOver(e)
-                handleIngredientHover(e, 'water')
-              }}
-            >
-              <Image
-                src="/potion-assets/mystic_water.png"
-                alt="Mystic Water"
-                width={64}
-                height={82}
-                className="mx-auto mb-2 drop-shadow-lg"
-              />
-              <div className="text-cyan-100 font-bold font-pixel text-xs">Mystic Water</div>
-              <div className="text-cyan-200 text-lg">💧</div>
-            </div>
-
-            {/* Blue Crystals Bowl */}
-            <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
-                draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-dashed border-blue-400 glow-blue' : 
-                draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-solid border-blue-400 glow-blue' : 
-                'border-blue-600/30 bg-black/50 backdrop-blur-md hover:bg-blue-500/10'
-              }`}
-              onDragOver={(e) => {
-                handleDragOver(e)
-                handleIngredientHover(e, 'blue')
-              }}
-            >
-              <Image
-                src="/potion-assets/blue_crystal.png"
-                alt="Blue Crystals"
-                width={64}
-                height={82}
-                className="mx-auto mb-2 drop-shadow-lg"
-              />
-              <div className="text-blue-100 font-bold font-pixel text-xs">Blue Crystal</div>
-              <div className="text-blue-200 text-lg">💎</div>
-            </div>
-
-            {/* Green Blob Bowl */}
-            <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
-                draggedItem && !draggedItem.ingredient ? 'hover:bg-green-500/20 border-dashed border-green-400 glow-green' : 
-                draggedItem?.ingredient === 'green' ? 'bg-green-500/30 border-solid border-green-400 glow-green' : 
-                'border-green-600/30 bg-black/50 backdrop-blur-md hover:bg-green-500/10'
-              }`}
-              onDragOver={(e) => {
-                handleDragOver(e)
-                handleIngredientHover(e, 'green')
-              }}
-            >
-              <Image
-                src="/potion-assets/green_slime.png"
-                alt="Green Blob"
-                width={64}
-                height={82}
-                className="mx-auto mb-2 drop-shadow-lg"
-              />
-              <div className="text-green-100 font-bold font-pixel text-xs">Green</div>
-              <div className="text-green-100 font-bold font-pixel text-xs">Blob</div>
-              <div className="text-green-200 text-lg">🟢</div>
-            </div>
-
-            {/* Pink Powder Bowl */}
-            <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
-                draggedItem && !draggedItem.ingredient ? 'hover:bg-pink-500/20 border-dashed border-pink-400 glow-pink' : 
-                draggedItem?.ingredient === 'pink' ? 'bg-pink-500/30 border-solid border-pink-400 glow-pink' : 
-                'border-pink-600/30 bg-black/50 backdrop-blur-md hover:bg-pink-500/10'
-              }`}
-              onDragOver={(e) => {
-                handleDragOver(e)
-                handleIngredientHover(e, 'pink')
-              }}
-            >
-              <Image
-                src="/potion-assets/pink_powder.png"
-                alt="Pink Powder"
-                width={64}
-                height={82}
-                className="mx-auto mb-2 drop-shadow-lg"
-              />
-              <div className="text-pink-100 font-bold font-pixel text-xs">Pink</div>
-              <div className="text-pink-100 font-bold font-pixel text-xs">Powder</div>
-              <div className="text-pink-200 text-lg">🌸</div>
-            </div>
+          {/* Water Bowl */}
+          <div 
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-cyan-500/20 border-dashed border-cyan-400 glow-cyan' : 
+              draggedItem?.ingredient === 'water' ? 'bg-cyan-500/30 border-solid border-cyan-400 glow-cyan' : 
+              'border-cyan-600/30 bg-black/50 backdrop-blur-md hover:bg-cyan-500/10'
+            }`}
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'water')
+            }}
+          >
+            <Image
+              src="/potion-assets/mystic_water.png"
+              alt="Mystic Water"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
+            />
+            <div className="text-cyan-100 font-bold font-pixel text-xs">Mystic Water</div>
+            <div className="text-cyan-200 text-lg">💧</div>
           </div>
-        )}
+
+          {/* Blue Crystals Bowl */}
+          <div 
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-dashed border-blue-400 glow-blue' : 
+              draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-solid border-blue-400 glow-blue' : 
+              'border-blue-600/30 bg-black/50 backdrop-blur-md hover:bg-blue-500/10'
+            }`}
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'blue')
+            }}
+          >
+            <Image
+              src="/potion-assets/blue_crystal.png"
+              alt="Blue Crystals"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
+            />
+            <div className="text-blue-100 font-bold font-pixel text-xs">Blue Crystal</div>
+            <div className="text-blue-200 text-lg">💎</div>
+          </div>
+
+          {/* Green Blob Bowl */}
+          <div 
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-green-500/20 border-dashed border-green-400 glow-green' : 
+              draggedItem?.ingredient === 'green' ? 'bg-green-500/30 border-solid border-green-400 glow-green' : 
+              'border-green-600/30 bg-black/50 backdrop-blur-md hover:bg-green-500/10'
+            }`}
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'green')
+            }}
+          >
+            <Image
+              src="/potion-assets/green_slime.png"
+              alt="Green Blob"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
+            />
+            <div className="text-green-100 font-bold font-pixel text-xs">Green Blob</div>
+            <div className="text-green-200 text-lg">🟢</div>
+          </div>
+
+          {/* Pink Powder Bowl */}
+          <div 
+            className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              draggedItem && !draggedItem.ingredient ? 'hover:bg-pink-500/20 border-dashed border-pink-400 glow-pink' : 
+              draggedItem?.ingredient === 'pink' ? 'bg-pink-500/30 border-solid border-pink-400 glow-pink' : 
+              'border-pink-600/30 bg-black/50 backdrop-blur-md hover:bg-pink-500/10'
+            }`}
+            onDragOver={(e) => {
+              handleDragOver(e)
+              handleIngredientHover(e, 'pink')
+            }}
+          >
+            <Image
+              src="/potion-assets/pink_powder.png"
+              alt="Pink Powder"
+              width={64}
+              height={82}
+              className="mx-auto mb-2 drop-shadow-lg"
+            />
+            <div className="text-pink-100 font-bold font-pixel text-xs">Pink Powder</div>
+            <div className="text-pink-200 text-lg">🌸</div>
+          </div>
+        </div>
 
       </div>
 
       {/* Game Status Overlays */}
-      {!tutorialMode && gameStatus === "success" && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-300">
-          <div className="relative bg-gray-900 bg-opacity-95 border-4 border-amber-800 rounded-lg p-12 text-center shadow-2xl max-w-lg animate-in zoom-in-95 duration-500">
-            {/* Success icon */}
-            <div className="mb-4 text-8xl">🎉</div>
-            
-            {/* Title */}
-            <p className="text-6xl font-pixel font-bold mb-6 text-yellow-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              Perfect Potion!
-            </p>
-            
-            {/* Success message */}
-            <p className="text-xl font-pixel mb-6 text-amber-100">You measured the fractions correctly!</p>
-            
-            {/* Score display */}
-            <div className="bg-amber-900/40 rounded-lg px-6 py-3 mb-8 inline-block border-2 border-amber-700">
-              <p className="text-2xl font-pixel font-bold text-yellow-400">+10 Points! 🏆</p>
-            </div>
-            
-            {/* Button */}
+      {gameStatus === "success" && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-12 rounded-2xl text-center shadow-2xl border-4 border-green-400">
+            <p className="text-5xl font-pixel font-bold mb-6 text-green-100 drop-shadow-lg">🎉 Perfect Potion!</p>
+            <p className="text-2xl font-pixel mb-6 text-green-200">You measured the fractions correctly!</p>
+            <p className="text-xl font-pixel mb-8 text-yellow-300">+10 Points! 🏆</p>
             <Button 
               onClick={generateNewRecipe} 
-              className="font-pixel bg-amber-800 hover:bg-amber-700 text-white px-10 py-5 text-xl rounded-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 border-2 border-amber-600 active:scale-95"
+              className="font-pixel bg-green-800 hover:bg-green-900 text-white px-8 py-4 text-xl rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
               Brew Another Potion 🧪
             </Button>
@@ -1116,7 +902,7 @@ export function PotionMasterGame() {
         </div>
       )}
       
-      {!tutorialMode && gameStatus === "error" && (
+      {gameStatus === "error" && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-gradient-to-br from-red-600 to-red-700 text-white p-12 rounded-2xl text-center shadow-2xl border-4 border-red-400">
             <p className="text-5xl font-pixel font-bold mb-6 text-red-100 drop-shadow-lg">❌ Wrong Measurements!</p>
@@ -1131,87 +917,81 @@ export function PotionMasterGame() {
         </div>
       )}
 
-      {/* Tutorial Success Overlay */}
-      {interactiveTutorialRecipe && gameStatus === "success" && (
-        <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 cursor-pointer animate-in fade-in duration-300"
-          onClick={() => {
-            setHideDialogueForInteraction(false)
-            handleDialogueProgress()
-          }}
-        >
-          <div className="relative bg-gray-900 bg-opacity-95 border-4 border-amber-800 rounded-lg p-10 text-center shadow-2xl max-w-md animate-in zoom-in-95 duration-500">
-            {/* Success icon */}
-            <div className="mb-4 text-7xl">🎉</div>
+      {/* Instructions Modal */}
+      {showInstructions && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2">
+          <div className="bg-gradient-to-br from-purple-900 to-indigo-900 border-4 border-amber-600 rounded-2xl p-4 max-w-4xl w-full h-fit shadow-2xl">
+            <div className="flex justify-between items-start mb-4">
+              <h4 className="text-2xl font-pixel font-bold text-amber-200 drop-shadow-lg">🎯 How to Play Potion Master</h4>
+              <button
+                type="button"
+                onClick={() => setShowInstructions(false)}
+                className="w-8 h-8 bg-red-600 hover:bg-red-700 rounded-xl flex items-center justify-center text-white font-bold transition-all hover:scale-110 text-lg shadow-lg"
+                title="Close Instructions"
+              >
+                ×
+              </button>
+            </div>
             
-            {/* Title */}
-            <p className="text-5xl font-pixel font-bold mb-6 text-yellow-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              Perfect!
-            </p>
+            <div className="text-amber-100 grid grid-cols-2 gap-3 text-sm">
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">📜</span>
+                <p className="font-pixel leading-snug flex-1">Read the recipe scroll to see what fractions you need</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🥄</span>
+                <p className="font-pixel leading-snug flex-1">Pick the ladle with the exact fraction you need</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🌸💎</span>
+                <p className="font-pixel leading-snug flex-1">Hover the ladle over an ingredient to collect it</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🏺</span>
+                <p className="font-pixel leading-snug flex-1">Drop the measured ingredient into the cauldron</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">➕</span>
+                <p className="font-pixel leading-snug flex-1">Use multiple ladles to add fractions together</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🔢</span>
+                <p className="font-pixel leading-snug flex-1"><span className="text-yellow-300">Example:</span> 1/4 + 1/4 = 1/2</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">💧</span>
+                <p className="font-pixel leading-snug flex-1">Use mystic water to subtract from pink powder if you make a mistake</p>
+              </div>
+              <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                <span className="text-lg flex-shrink-0 w-6 text-center">🟢</span>
+                <p className="font-pixel leading-snug flex-1">Use green blob to subtract from blue crystals if you make a mistake</p>
+              </div>
+              
+              {/* Dilution Challenge Section - Spans both columns */}
+              <div className="col-span-2 border-t-2 border-amber-600 pt-3 mt-2">
+                <div className="flex items-start gap-3 bg-yellow-900/30 rounded-lg p-2 mb-2">
+                  <span className="text-lg flex-shrink-0 w-6 text-center">⚗️</span>
+                  <div className="flex-1">
+                    <p className="font-pixel font-bold text-yellow-300 mb-1">Dilution Challenges:</p>
+                    <p className="font-pixel text-yellow-200">Sometimes the cauldron starts with too much!</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 bg-black/30 rounded-lg p-2">
+                  <span className="text-lg flex-shrink-0 w-6 text-center">🎯</span>
+                  <p className="font-pixel leading-snug flex-1">Use diluters to reduce excess ingredients to match the target exactly</p>
+                </div>
+              </div>
+            </div>
             
-            {/* Description */}
-            <p className="text-xl font-pixel mb-6 text-amber-100">You got the recipe right!</p>
-            
-            {/* Click indicator */}
-            <div className="mt-4 bg-amber-900/40 rounded-lg px-4 py-2 inline-block border-2 border-amber-700">
-              <p className="text-sm font-pixel text-amber-300">Click anywhere to continue</p>
+            <div className="mt-4 text-center">
+              <Button 
+                onClick={() => setShowInstructions(false)}
+                className="font-pixel bg-green-600 hover:bg-green-700 text-white px-8 py-2 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+              >
+                Got it! Let's Start Measuring! 🧪
+              </Button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Tutorial Dialogue Modal with Squeaks */}
-      {tutorialMode && showInstructions && (
-        <div className="fixed inset-0 z-50 pointer-events-none">
-          {/* Squeaks character image - always visible during tutorial */}
-          <img
-            src="/game characters/Squeaks.png"
-            alt="Squeaks"
-            style={{
-              imageRendering: "pixelated",
-              filter: "drop-shadow(0 0 12px #000)",
-              transform: "scaleX(-1)",
-              left: "12%",
-              bottom: "1%",
-              position: "absolute",
-              width: "200px",
-              height: "200px",
-              zIndex: 51
-            }}
-            className="pointer-events-none"
-          />
-          
-          {/* Dialogue box - hide during interaction */}
-          {!hideDialogueForInteraction && (
-            <div 
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 bg-opacity-90 border-4 border-amber-800 rounded-lg p-4 w-full max-w-2xl mx-auto z-50 cursor-pointer pointer-events-auto" 
-              onClick={() => {
-                // If it's an interactive tutorial and user hasn't started yet, hide the dialogue
-                if (interactiveTutorialRecipe && !checkTutorialRecipe()) {
-                  setHideDialogueForInteraction(true)
-                } else {
-                  handleDialogueProgress()
-                }
-              }}
-            >
-              <div className="text-amber-300 font-pixel text-base mb-1">Squeaks</div>
-              <div className="text-white font-pixel text-base mb-2 whitespace-pre-wrap">
-                {instructionDialogues[currentDialogueIndex]}
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="text-amber-400 text-xs">
-                  {currentDialogueIndex + 1} / {instructionDialogues.length}
-                </div>
-                {checkTutorialRecipe() ? (
-                  <div className="text-green-400 text-xs">Great! Click to continue</div>
-                ) : interactiveTutorialRecipe ? (
-                  <div className="text-amber-400 text-xs">Try it yourself!</div>
-                ) : (
-                  <div className="text-amber-400 text-xs">▼ Click to continue</div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
       </div>
