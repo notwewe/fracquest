@@ -3,7 +3,11 @@ import type { NextRequest } from "next/server"
 import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 
 export async function middleware(request: NextRequest) {
-  const res = NextResponse.next()
+  const res = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
   const pathname = request.nextUrl.pathname
 
   if (
@@ -34,24 +38,46 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createMiddlewareClient({ req: request, res })
 
-  // Refresh session if expired
+  // Refresh session - critical for keeping auth state in sync
   const {
     data: { session },
+    error: sessionError,
   } = await supabase.auth.getSession()
 
+  // Try to refresh the session if it exists but there's an error
+  if (sessionError && !session) {
+    const { data } = await supabase.auth.refreshSession()
+    if (!data.session) {
+      if (pathname.startsWith("/auth/")) {
+        return res
+      }
+      const loginUrl = new URL("/auth/login", request.url)
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  // If there's still no session after refresh attempt
   if (!session) {
     if (pathname.startsWith("/auth/")) {
       return res
     }
-    return NextResponse.redirect(new URL("/auth/login", request.url))
+    const loginUrl = new URL("/auth/login", request.url)
+    return NextResponse.redirect(loginUrl)
   }
 
   // User is authenticated, check role-based access and account status
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role_id, is_active") // Select is_active
     .eq("id", session.user.id)
     .single()
+
+  // If profile doesn't exist or there's an error, redirect to login
+  if (profileError || !profile) {
+    console.error("Profile error in middleware:", profileError)
+    const loginUrl = new URL("/auth/login", request.url)
+    return NextResponse.redirect(loginUrl)
+  }
 
   const role = profile?.role_id || 0
   const isActive = profile?.is_active !== false // Default to true if null or undefined
