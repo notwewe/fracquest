@@ -190,6 +190,7 @@ export interface Database {
           failed_attempts: number
           highest_streak: number
           current_streak: number
+          highest_score: number
           total_time_played: number
           last_played_at: string | null
           created_at: string
@@ -205,6 +206,7 @@ export interface Database {
           failed_attempts?: number
           highest_streak?: number
           current_streak?: number
+          highest_score?: number
           total_time_played?: number
           last_played_at?: string | null
           created_at?: string
@@ -220,6 +222,7 @@ export interface Database {
           failed_attempts?: number
           highest_streak?: number
           current_streak?: number
+          highest_score?: number
           total_time_played?: number
           last_played_at?: string | null
           created_at?: string

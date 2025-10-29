@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, RotateCcw, Scroll, HelpCircle } from "lucide-react"
+import { ArrowLeft, RotateCcw, Scroll, HelpCircle, Crown } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { PotionLeaderboardModal } from "@/components/game/potion-leaderboard-modal"
 
 // Add glow effects as CSS-in-JS styles
 const glowStyles = `
@@ -92,6 +93,9 @@ export function PotionMasterGame() {
   const [potionsBrewedCount, setPotionsBrewedCount] = useState(0)
   const [currentStreak, setCurrentStreak] = useState(0)
   const [gameStartTime, setGameStartTime] = useState<number>(Date.now())
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [highScore, setHighScore] = useState(0)
+  const [longestStreak, setLongestStreak] = useState(0)
 
   // Initialize or load player's potion game progress
   useEffect(() => {
@@ -119,10 +123,14 @@ export function PotionMasterGame() {
       }
 
       if (progressData) {
-        // Load existing progress
-        setScore(progressData.total_score || 0)
-        setPotionsBrewedCount(progressData.potions_brewed || 0)
-        setCurrentStreak(progressData.current_streak || 0)
+        // Load high scores only (not current session stats)
+        setHighScore(progressData.highest_score || 0)
+        setLongestStreak(progressData.highest_streak || 0)
+        
+        // Reset current session stats
+        setScore(0)
+        setPotionsBrewedCount(0)
+        setCurrentStreak(0)
         
         if (progressData.has_seen_tutorial) {
           // User has seen the tutorial, skip it
@@ -142,6 +150,7 @@ export function PotionMasterGame() {
             failed_attempts: 0,
             highest_streak: 0,
             current_streak: 0,
+            highest_score: 0,
             total_time_played: 0
           })
 
@@ -165,6 +174,7 @@ export function PotionMasterGame() {
     failed_attempts?: number
     current_streak?: number
     highest_streak?: number
+    highest_score?: number
   }) => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -174,14 +184,17 @@ export function PotionMasterGame() {
     // Calculate time played (in seconds)
     const timePlayedSeconds = Math.floor((Date.now() - gameStartTime) / 1000)
 
+    // Use upsert to handle both insert and update cases
     const { error } = await supabase
       .from("potion_game_progress")
-      .update({
+      .upsert({
+        student_id: user.id,
         ...updates,
         last_played_at: new Date().toISOString(),
         total_time_played: timePlayedSeconds
+      }, {
+        onConflict: 'student_id'
       })
-      .eq("student_id", user.id)
 
     if (error) {
       console.error("Error updating potion game progress:", error)
@@ -454,13 +467,25 @@ export function PotionMasterGame() {
       const newPotionsBrewedCount = potionsBrewedCount + 1
       setPotionsBrewedCount(newPotionsBrewedCount)
       
+      // Check if this is a new high score or longest streak
+      const newHighScore = Math.max(newScore, highScore)
+      const newLongestStreak = Math.max(newStreak, longestStreak)
+      
+      if (newHighScore > highScore) {
+        setHighScore(newHighScore)
+      }
+      if (newLongestStreak > longestStreak) {
+        setLongestStreak(newLongestStreak)
+      }
+      
       // Update progress in database
       updateProgress({
         total_score: newScore,
         potions_brewed: newPotionsBrewedCount,
         perfect_potions: newPotionsBrewedCount, // All completed potions are perfect
         current_streak: newStreak,
-        highest_streak: newStreak // Will be calculated properly in the backend
+        highest_streak: newLongestStreak,
+        highest_score: newHighScore
       })
     } 
   }
@@ -666,6 +691,25 @@ export function PotionMasterGame() {
         {/* Top Navigation - Only show when not in tutorial mode */}
         {!tutorialMode && (
           <div className="relative flex items-center mb-3 w-full min-h-[60px]">
+            {/* Left Side - High Scores */}
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 flex gap-2">
+              {/* High Score */}
+              <div className="bg-black/70 backdrop-blur-md border-2 border-purple-600/50 rounded-xl p-3 shadow-2xl flex flex-col items-center justify-center min-w-[140px]">
+                <div className="text-purple-300 text-sm font-pixel mb-1">👑 High Score</div>
+                <div className="font-pixel text-2xl font-bold text-purple-400">
+                  {highScore}
+                </div>
+              </div>
+
+              {/* Longest Streak */}
+              <div className="bg-black/70 backdrop-blur-md border-2 border-pink-600/50 rounded-xl p-3 shadow-2xl flex flex-col items-center justify-center min-w-[140px]">
+                <div className="text-pink-300 text-sm font-pixel mb-1">🏆 Best Streak</div>
+                <div className="font-pixel text-2xl font-bold text-pink-400">
+                  {longestStreak}
+                </div>
+              </div>
+            </div>
+
             {/* Center Title and Score */}
             <div className="flex justify-center w-full gap-4">
               {/* Main Game Info */}
@@ -748,6 +792,17 @@ export function PotionMasterGame() {
                 title="Instructions"
               >
                 <HelpCircle className="h-4 w-4" />
+              </Button>
+              
+              {/* Leaderboard Button */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowLeaderboard(true)}
+                className="font-pixel border-amber-600 text-amber-200 bg-black/50 hover:bg-purple-600 hover:text-white hover:border-purple-600"
+                title="View Leaderboard"
+              >
+                <Crown className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -968,11 +1023,6 @@ export function PotionMasterGame() {
                             Target: {fractionToString(currentRecipe.blueAmount)} Blue Crystals 💎
                           </p>
                         </div>
-                        <div className="bg-amber-100/80 rounded-lg p-1.5 border border-amber-400">
-                          <p className="text-amber-700 text-xs font-pixel">
-                            Use diluters to reach exact amounts!
-                          </p>
-                        </div>
                       </>
                     )}
                   </div>
@@ -984,12 +1034,12 @@ export function PotionMasterGame() {
 
         {/* Bottom Section - Ingredient Bowls */}
         {(currentDialogueIndex >= 2 || !tutorialMode) && (
-          <div className="flex justify-center gap-4 mt-4">
+          <div className="flex justify-center gap-14 mt-4">
             <h3 className="sr-only">Ingredient Collection Area</h3>
 
-            {/* Water Bowl */}
+            {/* Water Bowl - Diluter */}
             <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 relative ${
                 draggedItem && !draggedItem.ingredient ? 'hover:bg-cyan-500/20 border-dashed border-cyan-400 glow-cyan' : 
                 draggedItem?.ingredient === 'water' ? 'bg-cyan-500/30 border-solid border-cyan-400 glow-cyan' : 
                 'border-cyan-600/30 bg-black/50 backdrop-blur-md hover:bg-cyan-500/10'
@@ -999,6 +1049,10 @@ export function PotionMasterGame() {
                 handleIngredientHover(e, 'water')
               }}
             >
+              {/* Diluter Tag */}
+              <div className="absolute top-3 left-3 bg-red-600 text-white font-pixel px-1 py-0.5 rounded shadow-lg border border-red-800 z-10 transform -rotate-[35deg] origin-center -translate-x-1/2 -translate-y-1/2">
+                <div className="text-[9px] leading-tight">Diluter</div>
+              </div>
               <Image
                 src="/potion-assets/mystic_water.png"
                 alt="Mystic Water"
@@ -1006,36 +1060,14 @@ export function PotionMasterGame() {
                 height={82}
                 className="mx-auto mb-2 drop-shadow-lg"
               />
-              <div className="text-cyan-100 font-bold font-pixel text-xs">Mystic Water</div>
+              <div className="text-cyan-100 font-bold font-pixel text-xs">Mystic</div>
+              <div className="text-cyan-100 font-bold font-pixel text-xs">Water</div>
               <div className="text-cyan-200 text-lg">💧</div>
             </div>
 
-            {/* Blue Crystals Bowl */}
+            {/* Green Blob Bowl - Diluter */}
             <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
-                draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-dashed border-blue-400 glow-blue' : 
-                draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-solid border-blue-400 glow-blue' : 
-                'border-blue-600/30 bg-black/50 backdrop-blur-md hover:bg-blue-500/10'
-              }`}
-              onDragOver={(e) => {
-                handleDragOver(e)
-                handleIngredientHover(e, 'blue')
-              }}
-            >
-              <Image
-                src="/potion-assets/blue_crystal.png"
-                alt="Blue Crystals"
-                width={64}
-                height={82}
-                className="mx-auto mb-2 drop-shadow-lg"
-              />
-              <div className="text-blue-100 font-bold font-pixel text-xs">Blue Crystal</div>
-              <div className="text-blue-200 text-lg">💎</div>
-            </div>
-
-            {/* Green Blob Bowl */}
-            <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 relative ${
                 draggedItem && !draggedItem.ingredient ? 'hover:bg-green-500/20 border-dashed border-green-400 glow-green' : 
                 draggedItem?.ingredient === 'green' ? 'bg-green-500/30 border-solid border-green-400 glow-green' : 
                 'border-green-600/30 bg-black/50 backdrop-blur-md hover:bg-green-500/10'
@@ -1045,6 +1077,10 @@ export function PotionMasterGame() {
                 handleIngredientHover(e, 'green')
               }}
             >
+              {/* Diluter Tag */}
+              <div className="absolute top-3 left-3 bg-red-600 text-white font-pixel px-1 py-0.5 rounded shadow-lg border border-red-800 z-10 transform -rotate-[35deg] origin-center -translate-x-1/2 -translate-y-1/2">
+                <div className="text-[9px] leading-tight">Diluter</div>
+              </div>
               <Image
                 src="/potion-assets/green_slime.png"
                 alt="Green Blob"
@@ -1057,9 +1093,9 @@ export function PotionMasterGame() {
               <div className="text-green-200 text-lg">🟢</div>
             </div>
 
-            {/* Pink Powder Bowl */}
+            {/* Pink Powder Bowl - Concentrate */}
             <div 
-              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 ${
+              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 relative ${
                 draggedItem && !draggedItem.ingredient ? 'hover:bg-pink-500/20 border-dashed border-pink-400 glow-pink' : 
                 draggedItem?.ingredient === 'pink' ? 'bg-pink-500/30 border-solid border-pink-400 glow-pink' : 
                 'border-pink-600/30 bg-black/50 backdrop-blur-md hover:bg-pink-500/10'
@@ -1069,6 +1105,10 @@ export function PotionMasterGame() {
                 handleIngredientHover(e, 'pink')
               }}
             >
+              {/* Concentrate Tag */}
+              <div className="absolute top-3 left-3 bg-green-600 text-white font-pixel px-1 py-0.5 rounded shadow-lg border border-green-800 z-10 transform -rotate-[35deg] origin-center -translate-x-1/2 -translate-y-1/2">
+                <div className="text-[9px] leading-tight">Concentrate</div>
+              </div>
               <Image
                 src="/potion-assets/pink_powder.png"
                 alt="Pink Powder"
@@ -1079,6 +1119,34 @@ export function PotionMasterGame() {
               <div className="text-pink-100 font-bold font-pixel text-xs">Pink</div>
               <div className="text-pink-100 font-bold font-pixel text-xs">Powder</div>
               <div className="text-pink-200 text-lg">🌸</div>
+            </div>
+
+            {/* Blue Crystals Bowl - Concentrate */}
+            <div 
+              className={`p-4 text-center shadow-2xl w-32 rounded-xl transition-all cursor-pointer transform hover:scale-110 border-2 relative ${
+                draggedItem && !draggedItem.ingredient ? 'hover:bg-blue-500/20 border-dashed border-blue-400 glow-blue' : 
+                draggedItem?.ingredient === 'blue' ? 'bg-blue-500/30 border-solid border-blue-400 glow-blue' : 
+                'border-blue-600/30 bg-black/50 backdrop-blur-md hover:bg-blue-500/10'
+              }`}
+              onDragOver={(e) => {
+                handleDragOver(e)
+                handleIngredientHover(e, 'blue')
+              }}
+            >
+              {/* Concentrate Tag */}
+              <div className="absolute top-3 left-3 bg-green-600 text-white font-pixel px-1 py-0.5 rounded shadow-lg border border-green-800 z-10 transform -rotate-[35deg] origin-center -translate-x-1/2 -translate-y-1/2">
+                <div className="text-[9px] leading-tight">Concentrate</div>
+              </div>
+              <Image
+                src="/potion-assets/blue_crystal.png"
+                alt="Blue Crystals"
+                width={64}
+                height={82}
+                className="mx-auto mb-2 drop-shadow-lg"
+              />
+              <div className="text-blue-100 font-bold font-pixel text-xs">Blue</div>
+              <div className="text-blue-100 font-bold font-pixel text-xs">Crystal</div>
+              <div className="text-blue-200 text-lg">💎</div>
             </div>
           </div>
         )}
@@ -1215,6 +1283,12 @@ export function PotionMasterGame() {
         </div>
       )}
       </div>
+      
+      {/* Leaderboard Modal */}
+      <PotionLeaderboardModal 
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+      />
     </div>
     </>
   )
