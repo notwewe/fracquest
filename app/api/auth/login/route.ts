@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -9,23 +8,23 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
-    const cookieStore = cookies()
+    // Create response object that we'll add cookies to
+    const response = NextResponse.json({ success: false })
+    
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           getAll() {
-            return cookieStore.getAll()
+            return request.cookies.getAll()
           },
           setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              )
-            } catch (error) {
-              console.error('Error setting cookies:', error)
-            }
+            // Set cookies on both the request and response
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, options)
+            })
           },
         },
       }
@@ -44,6 +43,8 @@ export async function POST(request: NextRequest) {
     if (!data.user) {
       return NextResponse.json({ error: 'No user returned' }, { status: 400 })
     }
+
+    console.log('✅ Login successful for user:', data.user.id)
 
     // Get user profile to determine redirect
     const { data: profileData } = await supabase
@@ -73,10 +74,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Return success response with cookies already set
     return NextResponse.json({ 
       success: true, 
       redirectUrl,
       user: data.user 
+    }, {
+      headers: response.headers, // Include the cookies we set
     })
   } catch (error: any) {
     console.error('Login API error:', error)
