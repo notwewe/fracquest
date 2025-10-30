@@ -230,8 +230,8 @@ export function PixelDashboard({ username, isEnrolled, className }: PixelDashboa
                   </button>
               </Link>
 
-              {/* Logout button */}
-              <Link href="/auth/logout" className="w-1/5 mx-auto mt-3">
+              {/* Logout button - CRITICAL: prefetch=false to prevent auto-logout */}
+              <Link href="/auth/logout" prefetch={false} className="w-1/5 mx-auto mt-3">
                 <button className="bg-[#8B3734] text-white font-blaka text-xl px-4 py-2 w-full rounded hover:bg-[#6d2b29] transition-colors border-2 border-[#6d2b29] outline-2 outline-[#4a1e1c] hover:outline-[#3b1815] shadow-lg">
                   Logout
                 </button>

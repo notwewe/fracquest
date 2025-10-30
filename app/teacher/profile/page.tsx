@@ -415,7 +415,7 @@ export default function TeacherProfilePage() {
                   variant="outline"
                   className="border-[#a0522d] text-[#8B4513] hover:bg-[#e5d9c0] hover:text-[#8B4513] font-semibold"
                 >
-                  <Link href="/auth/logout">
+                  <Link href="/auth/logout" prefetch={false}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </Link>

@@ -131,7 +131,7 @@ export function StudentDashboardClient({ username, isEnrolled, className }: Stud
 
       <div className="mt-8 text-center">
         <Button asChild variant="outline" className="border-amber-600 text-amber-700">
-          <Link href="/auth/logout">Logout</Link>
+          <Link href="/auth/logout" prefetch={false}>Logout</Link>
         </Button>
       </div>
     </div>
