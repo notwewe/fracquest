@@ -175,7 +175,7 @@ export default async function GamePage({ searchParams }: { searchParams: { [key:
             </Link>
           </div>
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-6xl text-center mb-8 font-[Blaka] text-white drop-shadow-lg" style={{ WebkitTextStroke: '2px black' }}>
+            <h1 className="text-6xl text-center mb-8 font-blaka text-white drop-shadow-lg" style={{ WebkitTextStroke: '2px black' }}>
               Welcome To The World Of Numeria!
             </h1>
             <div className="bg-gradient-to-br from-red-900 to-red-950 border-4 border-red-800 rounded-xl p-4 shadow-lg">

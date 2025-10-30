@@ -122,8 +122,11 @@ export function PotionLeaderboardModal({ isOpen, onClose }: PotionLeaderboardMod
           <Button
             variant="ghost"
             size="icon"
-            onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:bg-amber-800/50"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
+            className="absolute top-4 right-4 text-white hover:bg-amber-800/50 z-10"
           >
             <X className="h-6 w-6" />
           </Button>
