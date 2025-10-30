@@ -23,64 +23,23 @@ export function PixelBookLogin() {
     setError(null)
 
     try {
-      // Use client-side login with proper error handling
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Use Supabase's built-in OAuth-style flow with redirect
+      // This is more reliable in production than setting cookies client-side
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
       if (error) {
         throw error
       }
 
-      if (!data.user) {
-        throw new Error('No user returned from login')
-      }
-
-      console.log("✅ Login successful, user ID:", data.user.id)
-      
-      // Get user profile to determine redirect
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("role_id")
-        .eq("id", data.user.id)
-        .single()
-
-      if (profileError) {
-        console.error("Profile retrieval error:", profileError)
-        throw new Error("Error retrieving user profile")
-      }
-
-      // Determine redirect URL
-      let redirectUrl = '/student/dashboard'
-
-      if (profileData) {
-        if (profileData.role_id === 1) {
-          // Student - check if they've seen intro
-          const { data: storyData } = await supabase
-            .from('story_progress')
-            .select('has_seen_intro')
-            .eq('student_id', data.user.id)
-            .maybeSingle()
-
-          redirectUrl = storyData?.has_seen_intro
-            ? '/student/dashboard'
-            : '/student/story'
-        } else if (profileData.role_id === 2) {
-          redirectUrl = '/teacher/dashboard'
-        } else if (profileData.role_id === 3) {
-          redirectUrl = '/admin/dashboard'
-        }
-      }
-
-      console.log("🔄 Redirecting to:", redirectUrl)
-      
-      // Wait a moment to ensure cookies are fully set
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      // CRITICAL FIX: Use window.location.assign() instead of href or router.push()
-      // This ensures cookies are sent with the next request
-      window.location.assign(redirectUrl)
+      // After successful login, do a hard reload to ensure cookies are set
+      // The callback route will handle the redirect to the appropriate dashboard
+      window.location.href = "/student/dashboard"
       
     } catch (error: any) {
       console.error("❌ Login error:", error)
