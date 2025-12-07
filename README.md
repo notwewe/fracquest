@@ -19,9 +19,25 @@ Here're some of the project's best features:
 
 <h2>💻 Tech Stack</h2>
 
-*   Frontend: HTML, CSS, TailwindCSS, TSX
-*   Backend / Database: Supabase, PostgreSQL
-*   Framework / Deployment: Vercel
+Frontend Framework
+*   Next.js: 15.2.4
+*   React: ^19.0.0
+*   React DOM: ^19.0.0
+*   TypeScript: ^5
+  
+Styling
+*   TailwindCSS: ^3.4.1
+*   tailwindcss-animate: ^1.0.7
+*   PostCSS: ^8
+  
+Backend / Database
+*   Supabase:
+*   @supabase/ssr: ^0.6.1
+*   @supabase/supabase-js: ^2.49.4
+  
+Deployment
+*   Vercel
+
 
 <br>
 <h2>🛠️ Installation Steps:</h2>
