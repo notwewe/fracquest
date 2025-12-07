@@ -48,9 +48,9 @@ export function PotionLeaderboardModal({ isOpen, onClose }: PotionLeaderboardMod
       // Get all potion game progress (global)
       const { data: potionProgress, error: fetchError } = await supabase
         .from("potion_game_progress")
-        .select("student_id, highest_score, potions_brewed")
-        .gt("highest_score", 0)
-        .order("highest_score", { ascending: false })
+        .select("student_id, total_score, potions_brewed")
+        .gt("total_score", 0)
+        .order("total_score", { ascending: false })
         .limit(100) // Get top 100 to calculate rank if user is outside top 10
 
       if (fetchError) {
@@ -79,7 +79,7 @@ export function PotionLeaderboardModal({ isOpen, onClose }: PotionLeaderboardMod
         return {
           id: progress.student_id,
           username: usernameMap.get(progress.student_id) || "Unknown",
-          totalScore: progress.highest_score || 0,
+          totalScore: progress.total_score || 0,
           potionsBrewedCount: progress.potions_brewed || 0,
           isCurrentUser: progress.student_id === user.id,
         }
