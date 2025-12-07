@@ -18,8 +18,8 @@ Here're some of the project's best features:
 <br>
 
 <h2>💻 Tech Stack</h2>
-
 Frontend Framework
+
 *   Next.js: 15.2.4
 *   React: ^19.0.0
 *   React DOM: ^19.0.0
@@ -42,28 +42,142 @@ Deployment
 <br>
 <h2>🛠️ Installation Steps:</h2>
 
-<p>1. Clone the repository</p>
+---
 
-```
-git clone https://github.com/notwewe/fracquest.git
+# FracQuest Deployment Guide
+
+This guide provides step-by-step instructions for setting up, running, and deploying **FracQuest**, including the backend (Supabase) and frontend (Next.js).
+
+---
+
+## Prerequisites
+
+Before getting started, ensure you have:
+
+* **Node.js** 18.x or higher
+* **pnpm** package manager (`npm install -g pnpm`)
+* **Supabase account**
+* **Vercel account** (recommended) or any Node.js hosting platform
+
+---
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory and add:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-<p>2. Navigate to project folder</p>
+---
 
-```
-cd fracquest
+## Backend (Supabase)
+
+### 1. Create a Supabase Project
+
+* Go to [Supabase](https://supabase.com) and create a new project
+* Note your **project URL** and **anon key** from Settings → API
+
+### 2. Set Up Database Schema
+
+* Navigate to the **SQL Editor** in your Supabase dashboard
+* Run the migration files located in `/supabase/migrations/` **in order**
+
+### 3. Configure Authentication
+
+* Go to Authentication → Settings in Supabase Dashboard
+* Configure preferred auth providers (Email, Google, etc.)
+* Set up redirect URLs for your production domain
+
+### 4. Set Up Row Level Security (RLS)
+
+* Ensure **RLS policies** are enabled for all tables
+* Review and apply policies from migration files
+
+---
+
+## Frontend (Next.js)
+
+### Local Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
 ```
 
-<p>3. Install dependencies</p>
+---
 
-```
-npm install
+### Deploy to Vercel (Recommended)
+
+1. **Connect Repository**
+
+```bash
+git push origin main
 ```
 
-<p>4. Run app</p>
+2. **Import to Vercel**
 
+* Go to [Vercel](https://vercel.com)
+* Click **New Project** and import your repository
+* Vercel will auto-detect Next.js configuration
+
+3. **Configure Environment Variables**
+   In **Vercel project settings → Environment Variables**, add:
+
+| Variable                        | Value                     |
+| ------------------------------- | ------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon key    |
+
+4. **Deploy**
+
+* Click **Deploy**
+* Subsequent pushes to `main` automatically trigger deployments
+
+---
+
+### Deploy to Other Platforms
+
+#### Docker
+
+```dockerfile
+FROM node:18-alpine AS builder
+WORKDIR /app
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm build
+
+FROM node:18-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+EXPOSE 3000
+CMD ["node", "server.js"]
 ```
-npm run dev
+
+#### Manual Deployment
+
+```bash
+# Build the application
+pnpm build
+
+# The output will be in the .next folder
+# Upload to your hosting provider and run:
+pnpm start
 ```
 
 <br>
