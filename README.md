@@ -56,22 +56,22 @@ npm run dev
 <table>
   <thead>
     <tr>
-      <th>Username</th>
       <th>Email</th>
+      <th>Password</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>testuser1</td>
       <td>test1@example.com</td>
+      <td>password123</td>
     </tr>
     <tr>
-      <td>testuser2</td>
       <td>test2@example.com</td>
+      <td>password123</td>
     </tr>
     <tr>
-      <td>testuser3</td>
       <td>test3@example.com</td>
+      <td>password123</td>
     </tr>
   </tbody>
 </table>
