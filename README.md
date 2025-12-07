@@ -53,9 +53,27 @@ npm run dev
 <br>
 
 <h2>Dummy/Test Accounts</h2>
-|   Username   |   Email                                       |
-| ------------ | --------------------------------------------- |
-| testuser1    | [test1@example.com](mailto:test1@example.com) |
-| testuser2    | [test2@example.com](mailto:test2@example.com) |
-| testuser3    | [test3@example.com](mailto:test3@example.com) |
+<table>
+  <thead>
+    <tr>
+      <th>Username</th>
+      <th>Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>testuser1</td>
+      <td>test1@example.com</td>
+    </tr>
+    <tr>
+      <td>testuser2</td>
+      <td>test2@example.com</td>
+    </tr>
+    <tr>
+      <td>testuser3</td>
+      <td>test3@example.com</td>
+    </tr>
+  </tbody>
+</table>
+
 
