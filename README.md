@@ -5,10 +5,6 @@
 <h2>🚀 Demo</h2>
 
 [https://fracquest.vercel.app/auth/login](https://fracquest.vercel.app/auth/login)
-<br>
-<h2>Project Screenshots:</h2>
-
-<img src="https://ibb.co/Gvxz01yx" alt="project-screenshot" width="400" height="400/">
 
 <br>
 <h2>🧐 Features</h2>
