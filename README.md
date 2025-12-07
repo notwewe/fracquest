@@ -49,3 +49,13 @@ npm install
 ```
 npm run dev
 ```
+
+<br>
+
+<h2>Dummy/Test Accounts</h2>
+|   Username   |   Email                                       |
+| ------------ | --------------------------------------------- |
+| testuser1    | [test1@example.com](mailto:test1@example.com) |
+| testuser2    | [test2@example.com](mailto:test2@example.com) |
+| testuser3    | [test3@example.com](mailto:test3@example.com) |
+
