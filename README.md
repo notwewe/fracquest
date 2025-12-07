@@ -183,6 +183,7 @@ pnpm start
 <br>
 
 <h2>Dummy/Test Accounts</h2>
+<p>Student Role</p>
 <table>
   <thead>
     <tr>
@@ -201,6 +202,26 @@ pnpm start
     </tr>
     <tr>
       <td>test3@example.com</td>
+      <td>password123</td>
+    </tr>
+    <tr>
+      <td>teacher@example.com</td>
+      <td>password123</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Teacher Role</p>
+<table>
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Password</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>teacher@example.com</td>
       <td>password123</td>
     </tr>
   </tbody>
