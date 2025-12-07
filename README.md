@@ -16,6 +16,14 @@ Here're some of the project's best features:
 *   Game Mode - Interactive game that allow learners to practice applying the Least Common Denominator (LCD) and other fraction operations.
 *   Leaderboards & Progress Tracking - Tracks individual performance and learning progress.
 <br>
+
+<h2>💻 Tech Stack</h2>
+
+*   Frontend: HTML, CSS, TailwindCSS, TSX
+*   Backend / Database: Supabase, PostgreSQL
+*   Framework / Deployment: Vercel
+
+<br>
 <h2>🛠️ Installation Steps:</h2>
 
 <p>1. Clone the repository</p>
